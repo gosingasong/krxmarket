@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "generated_at": "2026-05-20T22:43:01.184117+00:00",
+  "generated_at": "2026-05-20T22:51:48.176547+00:00",
   "latest_date": "2026-05-22",
   "dates": [
     {
@@ -11,7 +11,7 @@
           "file": "liquidity.json",
           "report": "liquidity",
           "status": "ok",
-          "generated_at": "2026-05-21T07:43:00.703558+09:00",
+          "generated_at": "2026-05-21T07:51:47.702143+09:00",
           "summary": {
             "upper_count": 30,
             "lower_count": 30,
@@ -24,7 +24,7 @@
           "file": "nxt_market.json",
           "report": "nxt_market",
           "status": "ok",
-          "generated_at": "2026-05-21T07:43:01.180669+09:00",
+          "generated_at": "2026-05-21T07:51:48.173100+09:00",
           "summary": {
             "status": "ok"
           }
@@ -52,7 +52,7 @@
           "file": "krx_alert.json",
           "report": "krx_alert",
           "status": "ok",
-          "generated_at": "2026-05-21T07:42:35.169239+09:00",
+          "generated_at": "2026-05-21T07:51:24.276567+09:00",
           "summary": {
             "release_count": 3,
             "designation_count": 2,
@@ -65,7 +65,7 @@
           "file": "liquidity.json",
           "report": "liquidity",
           "status": "ok",
-          "generated_at": "2026-05-21T07:43:00.703558+09:00",
+          "generated_at": "2026-05-21T07:51:47.702143+09:00",
           "summary": {
             "upper_count": 30,
             "lower_count": 30,
@@ -78,7 +78,7 @@
           "file": "nxt_market.json",
           "report": "nxt_market",
           "status": "ok",
-          "generated_at": "2026-05-21T07:43:01.180669+09:00",
+          "generated_at": "2026-05-21T07:51:48.173100+09:00",
           "summary": {
             "status": "ok"
           }
@@ -131,7 +131,7 @@
           "file": "krx_alert.json",
           "report": "krx_alert",
           "status": "ok",
-          "generated_at": "2026-05-21T07:42:35.169239+09:00",
+          "generated_at": "2026-05-21T07:51:24.276567+09:00",
           "summary": {
             "release_count": 3,
             "designation_count": 2,
