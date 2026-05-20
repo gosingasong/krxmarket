@@ -1,8 +1,36 @@
 {
   "schema_version": 1,
-  "generated_at": "2026-05-20T22:39:23.070147+00:00",
-  "latest_date": "2026-05-21",
+  "generated_at": "2026-05-20T22:43:01.184117+00:00",
+  "latest_date": "2026-05-22",
   "dates": [
+    {
+      "date": "2026-05-22",
+      "manifest": "2026-05-22/manifest.json",
+      "reports": {
+        "liquidity": {
+          "file": "liquidity.json",
+          "report": "liquidity",
+          "status": "ok",
+          "generated_at": "2026-05-21T07:43:00.703558+09:00",
+          "summary": {
+            "upper_count": 30,
+            "lower_count": 30,
+            "latest_credit_date": "2026-05-19",
+            "latest_liquidity_date": "2026-05-19",
+            "status": "ok"
+          }
+        },
+        "nxt_market": {
+          "file": "nxt_market.json",
+          "report": "nxt_market",
+          "status": "ok",
+          "generated_at": "2026-05-21T07:43:01.180669+09:00",
+          "summary": {
+            "status": "ok"
+          }
+        }
+      }
+    },
     {
       "date": "2026-05-21",
       "manifest": "2026-05-21/manifest.json",
@@ -24,7 +52,7 @@
           "file": "krx_alert.json",
           "report": "krx_alert",
           "status": "ok",
-          "generated_at": "2026-05-20T23:04:31.416052+09:00",
+          "generated_at": "2026-05-21T07:42:35.169239+09:00",
           "summary": {
             "release_count": 3,
             "designation_count": 2,
@@ -37,7 +65,7 @@
           "file": "liquidity.json",
           "report": "liquidity",
           "status": "ok",
-          "generated_at": "2026-05-20T22:46:42.996420+09:00",
+          "generated_at": "2026-05-21T07:43:00.703558+09:00",
           "summary": {
             "upper_count": 30,
             "lower_count": 30,
@@ -50,7 +78,7 @@
           "file": "nxt_market.json",
           "report": "nxt_market",
           "status": "ok",
-          "generated_at": "2026-05-20T22:46:43.725523+09:00",
+          "generated_at": "2026-05-21T07:43:01.180669+09:00",
           "summary": {
             "status": "ok"
           }
@@ -103,7 +131,7 @@
           "file": "krx_alert.json",
           "report": "krx_alert",
           "status": "ok",
-          "generated_at": "2026-05-20T23:04:31.416052+09:00",
+          "generated_at": "2026-05-21T07:42:35.169239+09:00",
           "summary": {
             "release_count": 3,
             "designation_count": 2,
