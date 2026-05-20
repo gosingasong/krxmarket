@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "generated_at": "2026-05-20T04:56:09.507225+00:00",
+  "generated_at": "2026-05-20T05:38:49.388862+00:00",
   "latest_date": "2026-05-20",
   "dates": [
     {
@@ -34,12 +34,12 @@
           "file": "krx_alert.json",
           "report": "krx_alert",
           "status": "ok",
-          "generated_at": "2026-05-20T13:55:55.885419+09:00",
+          "generated_at": "2026-05-20T14:38:49.386540+09:00",
           "summary": {
-            "release_count": 2,
-            "designation_count": 0,
+            "release_count": 4,
+            "designation_count": 2,
             "redesignation_count": 0,
-            "target_date": "2026-05-21",
+            "target_date": "2026-05-20",
             "status": "ok"
           }
         },

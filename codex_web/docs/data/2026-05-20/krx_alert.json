@@ -2,50 +2,90 @@
   "schema_version": 1,
   "report": "krx_alert",
   "status": "ok",
-  "date": "2026-05-20",
-  "generated_at": "2026-05-20T13:55:55.885419+09:00",
+  "date": "2026-05-19",
+  "generated_at": "2026-05-20T14:38:49.386540+09:00",
   "source": {
     "module": "codex_web"
   },
   "data": {
-    "target_date": "2026-05-21",
-    "source_date": "2026-05-20",
+    "target_date": "2026-05-20",
+    "source_date": "2026-05-19",
     "avg_trade_value_threshold": 10000000000,
     "release": [
       {
-        "code": "089970",
-        "name": "브이엠",
-        "designation_date": "2026-05-07",
-        "current_price": 51900,
-        "release_ceiling": 60000,
-        "diff_pct": 15.606936416184972,
-        "avg_trade_value_5d": 18999812340.0
+        "code": "092190",
+        "name": "서울바이오시스",
+        "designation_date": "2026-04-30",
+        "current_price": 16450,
+        "release_ceiling": 11920,
+        "diff_pct": -27.537993920972642,
+        "avg_trade_value_5d": 41880745652.0
       },
       {
-        "code": "203650",
-        "name": "드림시큐리티",
-        "designation_date": "2026-05-07",
-        "current_price": 3035,
-        "release_ceiling": 4130,
-        "diff_pct": 36.07907742998353,
-        "avg_trade_value_5d": 20577999468.0
+        "code": "024840",
+        "name": "KBI메탈",
+        "designation_date": "2026-05-04",
+        "current_price": 6420,
+        "release_ceiling": 6160,
+        "diff_pct": -4.049844236760125,
+        "avg_trade_value_5d": 50823058762.0
+      },
+      {
+        "code": "229640",
+        "name": "LS에코에너지",
+        "designation_date": "2026-05-06",
+        "current_price": 81500,
+        "release_ceiling": 93400,
+        "diff_pct": 14.60122699386503,
+        "avg_trade_value_5d": 40541683400.0
+      },
+      {
+        "code": "033640",
+        "name": "네패스",
+        "designation_date": "2026-05-06",
+        "current_price": 27700,
+        "release_ceiling": 34800,
+        "diff_pct": 25.63176895306859,
+        "avg_trade_value_5d": 11710187220.0
       }
     ],
-    "designation": [],
+    "designation": [
+      {
+        "code": "425040",
+        "name": "티이엠씨",
+        "notice_date": "2026-05-19",
+        "valid_until": "2026-06-03",
+        "current_price": 25850,
+        "trigger_price": 32680,
+        "diff_pct": 26.42166344294004,
+        "avg_trade_value_5d": 47464108190.0
+      },
+      {
+        "code": "025560",
+        "name": "미래산업",
+        "notice_date": "2026-05-19",
+        "valid_until": "2026-06-03",
+        "current_price": 25850,
+        "trigger_price": 33400,
+        "diff_pct": 29.206963249516445,
+        "avg_trade_value_5d": 20104289810.0
+      }
+    ],
     "redesignation": [],
     "diagnostics": {
       "ticker_set_count": 0,
-      "warning_fetched_count": 38,
-      "warning_old_enough_count": 5,
-      "caution_fetched_count": 0,
-      "candidate_map_count": 0,
-      "rewarn_map_count": 0
+      "warning_fetched_count": 46,
+      "warning_old_enough_count": 10,
+      "caution_fetched_count": 15,
+      "candidate_map_count": 5,
+      "rewarn_map_count": 2
     }
   },
   "summary": {
-    "release_count": 2,
-    "designation_count": 0,
+    "release_count": 4,
+    "designation_count": 2,
     "redesignation_count": 0,
-    "target_date": "2026-05-21"
-  }
+    "target_date": "2026-05-20"
+  },
+  "display_date": "2026-05-20"
 }
