@@ -14,6 +14,19 @@
         "foreigner_total_count": 2554,
         "status": "ok"
       }
+    },
+    "krx_alert": {
+      "file": "krx_alert.json",
+      "report": "krx_alert",
+      "status": "ok",
+      "generated_at": "2026-05-20T21:21:51.564831+09:00",
+      "summary": {
+        "release_count": 3,
+        "designation_count": 2,
+        "redesignation_count": 1,
+        "target_date": "2026-05-21",
+        "status": "ok"
+      }
     }
   }
 }

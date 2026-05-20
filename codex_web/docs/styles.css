@@ -358,6 +358,11 @@ table {
   table-layout: fixed;
 }
 
+.flowCompactTable {
+  min-width: 0;
+  table-layout: fixed;
+}
+
 th,
 td {
   padding: 10px 12px;
@@ -375,6 +380,38 @@ th {
 
 td {
   font-weight: 700;
+}
+
+.flowCompactTable th,
+.flowCompactTable td {
+  padding: 8px 7px;
+  font-size: 12px;
+}
+
+.flowRankCell {
+  width: 34px;
+}
+
+.flowNameCell {
+  width: 34%;
+  max-width: 104px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.flowAmountCell {
+  width: 31%;
+}
+
+.flowSectorCell {
+  width: 78%;
+  max-width: 180px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.flowCountCell {
+  width: 56px;
 }
 
 tbody tr:hover {
@@ -426,6 +463,14 @@ tbody tr:hover {
   border: 1px solid #243140;
   border-radius: 6px;
   background: #090d12;
+}
+
+.marketPriceCell {
+  display: inline-block;
+  min-width: 58px;
+  color: var(--text);
+  font-weight: 850;
+  text-align: right;
 }
 
 .usNameCell {

@@ -12,6 +12,8 @@ on:
     - cron: "1 9 * * 1-5"   # 18:01 KST, investor flow
     - cron: "10 11 * * 1-5" # 20:10 KST, liquidity / NXT
     - cron: "25 11 * * 1-5" # 20:25 KST, KRX alert
+    - cron: "45 11 * * 1-5" # 20:45 KST, KRX alert retry
+    - cron: "5 12 * * 1-5"  # 21:05 KST, KRX alert retry
 
 permissions:
   contents: write
@@ -65,6 +67,10 @@ jobs:
           PY
           )
             python codex_web/update_reports.py --date "$BASE_DATE" --reports krx_alert --verbose
+            if [ "$(TZ=Asia/Seoul date +%H)" -ge 20 ]; then
+              TODAY_KST=$(TZ=Asia/Seoul date +%F)
+              python codex_web/update_reports.py --date "$TODAY_KST" --reports krx_alert --verbose
+            fi
             python codex_web/update_reports.py --reports liquidity,nxt_market --verbose
             exit 0
           fi
@@ -74,7 +80,7 @@ jobs:
               "20 6 * * 1-5") REPORTS="ipo" ;;
               "1 9 * * 1-5") REPORTS="investor_flow" ;;
               "10 11 * * 1-5") REPORTS="liquidity,nxt_market" ;;
-              "25 11 * * 1-5") REPORTS="krx_alert" ;;
+              "25 11 * * 1-5"|"45 11 * * 1-5"|"5 12 * * 1-5") REPORTS="krx_alert" ;;
             esac
           fi
           DATE_ARGS=""
@@ -100,6 +106,15 @@ jobs:
           if next_day is None:
               raise SystemExit("No next KRX session found")
           print(next_day.date().isoformat())
+          PY
+          )
+            DATE_ARGS="--date $BASE_DATE"
+          elif [ "$EVENT_NAME" = "schedule" ] && [ "$REPORTS" = "krx_alert" ]; then
+            BASE_DATE=$(PYTHONPATH=codex_web/src python - <<'PY'
+          import datetime as dt
+          from codex_web.sources.common import KST
+
+          print(dt.datetime.now(KST).date().isoformat())
           PY
           )
             DATE_ARGS="--date $BASE_DATE"

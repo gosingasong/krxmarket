@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "generated_at": "2026-05-20T11:51:04.700026+00:00",
+  "generated_at": "2026-05-20T12:21:51.569812+00:00",
   "latest_date": "2026-05-21",
   "dates": [
     {
@@ -17,6 +17,19 @@
             "institution_total_count": 2395,
             "foreigner_count": 10,
             "foreigner_total_count": 2554,
+            "status": "ok"
+          }
+        },
+        "krx_alert": {
+          "file": "krx_alert.json",
+          "report": "krx_alert",
+          "status": "ok",
+          "generated_at": "2026-05-20T21:21:51.564831+09:00",
+          "summary": {
+            "release_count": 3,
+            "designation_count": 2,
+            "redesignation_count": 1,
+            "target_date": "2026-05-21",
             "status": "ok"
           }
         }

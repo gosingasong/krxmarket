@@ -267,6 +267,10 @@ function tablePanel(title, rows, columns, subtitle = "") {
     `;
   }
   const isUsCompact = columns.some((col) => col.usCompact);
+  const isFlowCompact = columns.some((col) => col.flowCompact);
+  const tableClass = [isUsCompact ? "usMarketTable" : "", isFlowCompact ? "flowCompactTable" : ""]
+    .filter(Boolean)
+    .join(" ");
   const header = columns
     .map((col) => `<th class="${[col.numeric ? "num" : "", col.headerClass || ""].join(" ")}">${escapeHtml(col.label)}</th>`)
     .join("");
@@ -288,7 +292,7 @@ function tablePanel(title, rows, columns, subtitle = "") {
     <section class="panel">
       <div class="panelHeader"><h3>${escapeHtml(title)}</h3><small>${escapeHtml(subtitle)}</small></div>
       <div class="tableWrap">
-        <table class="${isUsCompact ? "usMarketTable" : ""}">
+        <table class="${tableClass}">
           <thead><tr>${header}</tr></thead>
           <tbody>${body}</tbody>
         </table>
@@ -348,6 +352,21 @@ function candleCell(row) {
       </svg>
     </div>
   `;
+}
+
+function formatMarketPrice(row) {
+  const close = asNumber(row?.Close, NaN);
+  if (!Number.isFinite(close)) return "-";
+  if (row.Ticker === "CL=F") return `$${formatNumber(close, 2)}`;
+  if (row.Ticker === "KRW=X") return `₩${formatNumber(close, 1)}`;
+  return formatNumber(close, 2);
+}
+
+function marketValueCell(row) {
+  if (row?.Ticker === "CL=F" || row?.Ticker === "KRW=X") {
+    return `<span class="marketPriceCell">${escapeHtml(formatMarketPrice(row))}</span>`;
+  }
+  return candleCell(row);
 }
 
 function chartShell(title, subtitle, body) {
@@ -668,7 +687,7 @@ function renderUsMarket() {
   }
   const cols = [
     { key: "Name", label: "Name", className: "usNameCell", headerClass: "usNameCell", usCompact: true },
-    { label: "Candle", value: candleCell, html: true, className: "usCandleCell", headerClass: "usCandleCell", usCompact: true },
+    { label: "Price", value: marketValueCell, html: true, className: "usCandleCell", headerClass: "usCandleCell", usCompact: true },
     { key: "Chg", label: "Chg", numeric: true, format: formatPct, className: signedClass },
     { key: "Body", label: "Body", numeric: true, format: formatPct, className: signedClass },
   ];
@@ -689,14 +708,14 @@ function renderFlow() {
     return;
   }
   const cols = [
-    { key: "rank", label: "#", numeric: true },
-    { key: "name", label: "종목" },
-    { key: "buy_amount_eok", label: "매수금액", numeric: true, format: (v) => `${formatNumber(v)}억` },
-    { key: "net_buy_amount_eok", label: "순매수", numeric: true, format: (v) => `${formatNumber(v)}억`, className: signedClass },
+    { key: "rank", label: "#", numeric: true, className: "flowRankCell", headerClass: "flowRankCell", flowCompact: true },
+    { key: "name", label: "종목", className: "flowNameCell", headerClass: "flowNameCell", flowCompact: true },
+    { key: "buy_amount_eok", label: "매수금액", numeric: true, format: (v) => `${formatNumber(v)}억`, className: "flowAmountCell", headerClass: "flowAmountCell", flowCompact: true },
+    { key: "net_buy_amount_eok", label: "순매수", numeric: true, format: (v) => `${formatNumber(v)}억`, className: (v) => `${signedClass(v)} flowAmountCell`, headerClass: "flowAmountCell", flowCompact: true },
   ];
   const sectorCols = [
-    { key: "sector", label: "주요업종" },
-    { key: "count", label: "Count", numeric: true },
+    { key: "sector", label: "주요업종", className: "flowSectorCell", headerClass: "flowSectorCell", flowCompact: true },
+    { key: "count", label: "Count", numeric: true, className: "flowCountCell", headerClass: "flowCountCell", flowCompact: true },
   ];
   const institutionTop = (payload.data.institution || []).slice(0, 10);
   const foreignerTop = (payload.data.foreigner || []).slice(0, 10);
