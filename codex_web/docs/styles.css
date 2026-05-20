@@ -189,10 +189,21 @@ input[type="date"] {
 }
 
 .quickLists {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  display: flex;
+  flex-direction: column;
   gap: 8px;
-  padding: 6px 14px 14px;
+  padding: 4px 14px 14px;
+}
+
+.quickLists:empty {
+  display: none;
+}
+
+.summaryMessage {
+  color: #d6dee8;
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1.45;
 }
 
 .miniList {
@@ -337,6 +348,11 @@ table {
   border-collapse: collapse;
 }
 
+.usMarketTable {
+  min-width: 390px;
+  table-layout: fixed;
+}
+
 th,
 td {
   padding: 10px 12px;
@@ -391,20 +407,35 @@ tbody tr:hover {
   align-items: center;
   justify-content: center;
   gap: 8px;
-  min-width: 52px;
+  min-width: 40px;
   font-variant-numeric: tabular-nums;
 }
 
 .candleOnly {
-  min-width: 46px;
+  min-width: 38px;
 }
 
 .miniCandle {
-  width: 42px;
-  height: 42px;
+  width: 36px;
+  height: 36px;
   border: 1px solid #243140;
   border-radius: 6px;
   background: #090d12;
+}
+
+.usNameCell {
+  width: 30%;
+  max-width: 128px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.usCandleCell {
+  width: 48px;
+  max-width: 48px;
+  padding-left: 4px;
+  padding-right: 4px;
+  text-align: center;
 }
 
 .chartPanel {
@@ -566,9 +597,12 @@ tbody tr:hover {
   }
 
   .quickLists {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: 6px;
     padding: 5px 10px 10px;
+  }
+
+  .summaryMessage {
+    font-size: 11px;
   }
 
   .miniList {

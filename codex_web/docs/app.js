@@ -249,6 +249,10 @@ function miniItem(left, right, cls = "") {
   return `<div class="miniItem"><span>${escapeHtml(left)}</span><span class="${cls}">${escapeHtml(right)}</span></div>`;
 }
 
+function summaryMessage(text) {
+  return `<div class="summaryMessage">${escapeHtml(text)}</div>`;
+}
+
 function tablePanel(title, rows, columns, subtitle = "") {
   if (!rows || !rows.length) {
     return `
@@ -258,14 +262,18 @@ function tablePanel(title, rows, columns, subtitle = "") {
       </section>
     `;
   }
-  const header = columns.map((col) => `<th class="${col.numeric ? "num" : ""}">${escapeHtml(col.label)}</th>`).join("");
+  const isUsCompact = columns.some((col) => col.usCompact);
+  const header = columns
+    .map((col) => `<th class="${[col.numeric ? "num" : "", col.headerClass || ""].join(" ")}">${escapeHtml(col.label)}</th>`)
+    .join("");
   const body = rows
     .map((row) => {
       const cells = columns
         .map((col) => {
           const raw = col.value ? col.value(row) : row[col.key];
           const value = col.format ? col.format(raw, row) : raw;
-          const cls = [col.numeric ? "num" : "", col.className ? col.className(raw, row) : ""].join(" ");
+          const cellClass = typeof col.className === "function" ? col.className(raw, row) : col.className || "";
+          const cls = [col.numeric ? "num" : "", cellClass].join(" ");
           return `<td class="${cls}">${col.html ? value ?? "-" : escapeHtml(value ?? "-")}</td>`;
         })
         .join("");
@@ -276,7 +284,7 @@ function tablePanel(title, rows, columns, subtitle = "") {
     <section class="panel">
       <div class="panelHeader"><h3>${escapeHtml(title)}</h3><small>${escapeHtml(subtitle)}</small></div>
       <div class="tableWrap">
-        <table>
+        <table class="${isUsCompact ? "usMarketTable" : ""}">
           <thead><tr>${header}</tr></thead>
           <tbody>${body}</tbody>
         </table>
@@ -585,7 +593,6 @@ function creditSvg(rows) {
 
 function renderSummary() {
   const usPayload = currentPayloads.us_market;
-  const flow = currentPayloads.investor_flow?.data || {};
   const ipo = currentPayloads.ipo?.data || {};
   const us = usPayload?.data || {};
   const liquidity = currentPayloads.liquidity?.data || {};
@@ -594,24 +601,23 @@ function renderSummary() {
   const liquidityRow = latestRowOnOrBefore(liquidity.lower, "Date", currentDate);
   const nasdaq = (us.fixed || []).find((row) => row.Ticker === "^IXIC");
   const usMarketDate = us.market_date || us.target_session_date || shiftDateString(usPayload?.date || currentDate, -1);
-  const ipoQuickRows = [
-    ...todayIpoItems.map((row) => ({ ...row, bucket: "오늘" })),
-    ...nextIpoItems.map((row) => ({ ...row, bucket: "다음" })),
-  ];
+  const ipoMessages = [
+    todayIpoItems.length
+      ? `${ipo.today_listing_date || "오늘"} 오늘 거래일에 신규상장 종목이 ${todayIpoItems.length}건 있습니다.`
+      : "",
+    nextIpoItems.length
+      ? `${ipo.next_listing_date || ipo.target_listing_date || "다음 거래일"} 다음 거래일에 신규상장 종목이 ${nextIpoItems.length}건 있습니다.`
+      : "",
+  ].filter(Boolean);
 
   $("summaryCards").innerHTML = [
-    metric("신규상장", `${todayIpoItems.length}/${nextIpoItems.length}`, `${ipo.today_listing_date || "오늘"} / ${ipo.next_listing_date || ipo.target_listing_date || "다음"}`),
     metric("NASDAQ", nasdaq ? formatPct(nasdaq.Chg) : "-", usMarketDate || "미국장", signedClass(nasdaq?.Chg)),
     metric("KOSPI 거래대금", formatJoFromEok(tradeTotalEok(liquidityRow, "KOSPI")), liquidityRow?.Date ? `${liquidityRow.Date} KRX+NXT` : "시장 유동성"),
     metric("KOSDAQ 거래대금", formatJoFromEok(tradeTotalEok(liquidityRow, "KOSDAQ")), liquidityRow?.Date ? `${liquidityRow.Date} KRX+NXT` : "시장 유동성"),
     metric("Data", currentDate || "-", `${weekdayEn(currentDate)} · ${selectedDay() ? "available" : "missing"}`),
   ].join("");
 
-  $("quickLists").innerHTML = [
-    miniList("외국인 수급", flow.foreigner || [], (row) => miniItem(row.name, `${formatNumber(row.buy_amount_eok)}억`)),
-    miniList("기관 수급", flow.institution || [], (row) => miniItem(row.name, `${formatNumber(row.buy_amount_eok)}억`)),
-    miniList("신규상장 오늘/다음", ipoQuickRows, (row) => miniItem(`${row.bucket} ${row.name}`, formatEok(row.market_cap))),
-  ].join("");
+  $("quickLists").innerHTML = ipoMessages.map(summaryMessage).join("");
 }
 
 function renderAlerts() {
@@ -658,8 +664,8 @@ function renderUsMarket() {
     return;
   }
   const cols = [
-    { key: "Name", label: "Name" },
-    { label: "Candle", value: candleCell, html: true },
+    { key: "Name", label: "Name", className: "usNameCell", headerClass: "usNameCell", usCompact: true },
+    { label: "Candle", value: candleCell, html: true, className: "usCandleCell", headerClass: "usCandleCell", usCompact: true },
     { key: "Chg", label: "Chg", numeric: true, format: formatPct, className: signedClass },
     { key: "Body", label: "Body", numeric: true, format: formatPct, className: signedClass },
   ];
