@@ -119,6 +119,14 @@ function dateWithWeekday(dateStr) {
   return dateStr ? `${dateStr} ${weekdayEn(dateStr)}` : "-";
 }
 
+function shiftDateString(dateStr, days) {
+  if (!dateStr) return null;
+  const [year, month, day] = dateStr.split("-").map(Number);
+  if (!year || !month || !day) return null;
+  const date = new Date(Date.UTC(year, month - 1, day + days));
+  return date.toISOString().slice(0, 10);
+}
+
 function selectedDay() {
   return appIndex?.dates?.find((item) => item.date === currentDate);
 }
@@ -240,10 +248,11 @@ function latestRowOnOrBefore(rows, dateKey, dateStr) {
 }
 
 function renderSummary() {
+  const usPayload = currentPayloads.us_market;
   const flow = currentPayloads.investor_flow?.data || {};
   const ipo = currentPayloads.ipo?.data || {};
   const alert = currentPayloads.krx_alert?.data || {};
-  const us = currentPayloads.us_market?.data || {};
+  const us = usPayload?.data || {};
   const liquidity = currentPayloads.liquidity?.data || {};
   const foreignTop = flow.foreigner?.[0];
   const instTop = flow.institution?.[0];
@@ -253,6 +262,7 @@ function renderSummary() {
   const releaseCount = alert.release?.length || 0;
   const designationCount = (alert.designation?.length || 0) + (alert.redesignation?.length || 0);
   const nasdaq = (us.fixed || []).find((row) => row.Ticker === "^IXIC");
+  const usMarketDate = us.market_date || us.target_session_date || shiftDateString(usPayload?.date || currentDate, -1);
   const ipoQuickRows = [
     ...todayIpoItems.map((row) => ({ ...row, bucket: "오늘" })),
     ...nextIpoItems.map((row) => ({ ...row, bucket: "다음" })),
@@ -263,7 +273,7 @@ function renderSummary() {
     metric("기관 1위", instTop?.name || "-", instTop ? `${formatNumber(instTop.buy_amount_eok)}억 매수` : "수급"),
     metric("신규상장", `${todayIpoItems.length}/${nextIpoItems.length}`, `${ipo.today_listing_date || "오늘"} / ${ipo.next_listing_date || ipo.target_listing_date || "다음"}`),
     metric("투자경고", `${releaseCount}/${designationCount}`, "해제 / 지정·재지정"),
-    metric("NASDAQ", nasdaq ? formatPct(nasdaq.Chg) : "-", us.market_date || "미국장"),
+    metric("NASDAQ", nasdaq ? formatPct(nasdaq.Chg) : "-", usMarketDate || "미국장"),
     metric("KOSPI 거래대금", formatJoFromEok(liquidityRow?.KOSPI_Trade_Total), liquidityRow?.Date || "시장 유동성"),
     metric("KOSDAQ 거래대금", formatJoFromEok(liquidityRow?.KOSDAQ_Trade_Total), liquidityRow?.Date || "시장 유동성"),
     metric("Data", currentDate || "-", `${weekdayEn(currentDate)} · ${selectedDay() ? "available" : "missing"}`),
@@ -324,7 +334,7 @@ function renderUsMarket() {
     { key: "Close", label: "Close", numeric: true, format: (v) => formatNumber(v, 2) },
     { key: "Volume", label: "Volume", numeric: true, format: formatNumber },
   ];
-  const marketDate = payload.data.market_date || payload.data.target_session_date || "Latest";
+  const marketDate = payload.data.market_date || payload.data.target_session_date || shiftDateString(payload.date || currentDate, -1) || "Latest";
   $("us").innerHTML = `
     <div class="sectionHeader"><div><span class="eyebrow">US Market</span><h2>미국장</h2></div><span class="dateBadge">${escapeHtml(marketDate)}</span></div>
     <div class="twoCol">
