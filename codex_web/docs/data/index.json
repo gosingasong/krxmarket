@@ -1,6 +1,82 @@
 {
   "schema_version": 1,
-  "generated_at": null,
-  "latest_date": null,
-  "dates": []
+  "generated_at": "2026-05-20T04:49:53.400817+00:00",
+  "latest_date": "2026-05-20",
+  "dates": [
+    {
+      "date": "2026-05-20",
+      "manifest": "2026-05-20/manifest.json",
+      "reports": {
+        "investor_flow": {
+          "file": "investor_flow.json",
+          "report": "investor_flow",
+          "status": "ok",
+          "generated_at": "2026-05-20T13:48:54.817958+09:00",
+          "summary": {
+            "institution_count": 0,
+            "institution_total_count": 0,
+            "foreigner_count": 0,
+            "foreigner_total_count": 0,
+            "status": "ok"
+          }
+        },
+        "ipo": {
+          "file": "ipo.json",
+          "report": "ipo",
+          "status": "ok",
+          "generated_at": "2026-05-20T13:49:00.016971+09:00",
+          "summary": {
+            "item_count": 0,
+            "status": "ok"
+          }
+        },
+        "krx_alert": {
+          "file": "krx_alert.json",
+          "report": "krx_alert",
+          "status": "ok",
+          "generated_at": "2026-05-20T13:49:39.359231+09:00",
+          "summary": {
+            "release_count": 2,
+            "designation_count": 0,
+            "redesignation_count": 0,
+            "target_date": "2026-05-21",
+            "status": "ok"
+          }
+        },
+        "liquidity": {
+          "file": "liquidity.json",
+          "report": "liquidity",
+          "status": "ok",
+          "generated_at": "2026-05-20T13:49:53.397021+09:00",
+          "summary": {
+            "upper_count": 30,
+            "lower_count": 30,
+            "latest_credit_date": "2026-05-18",
+            "latest_liquidity_date": "2026-05-19",
+            "status": "ok"
+          }
+        },
+        "nxt_market": {
+          "file": "nxt_market.json",
+          "report": "nxt_market",
+          "status": "ok",
+          "generated_at": "2026-05-20T13:49:47.370064+09:00",
+          "summary": {
+            "status": "ok"
+          }
+        },
+        "us_market": {
+          "file": "us_market.json",
+          "report": "us_market",
+          "status": "ok",
+          "generated_at": "2026-05-20T13:49:45.651221+09:00",
+          "summary": {
+            "fixed_count": 9,
+            "top_traded_value_count": 11,
+            "status": "ok"
+          }
+        }
+      }
+    }
+  ]
 }

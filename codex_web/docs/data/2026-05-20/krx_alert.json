@@ -1,0 +1,51 @@
+{
+  "schema_version": 1,
+  "report": "krx_alert",
+  "status": "ok",
+  "date": "2026-05-20",
+  "generated_at": "2026-05-20T13:49:39.359231+09:00",
+  "source": {
+    "module": "codex_web"
+  },
+  "data": {
+    "target_date": "2026-05-21",
+    "source_date": "2026-05-20",
+    "avg_trade_value_threshold": 10000000000,
+    "release": [
+      {
+        "code": "089970",
+        "name": "브이엠",
+        "designation_date": "2026-05-07",
+        "current_price": 52100,
+        "release_ceiling": 60000,
+        "diff_pct": 15.163147792706333,
+        "avg_trade_value_5d": 18967453360.0
+      },
+      {
+        "code": "203650",
+        "name": "드림시큐리티",
+        "designation_date": "2026-05-07",
+        "current_price": 3045,
+        "release_ceiling": 4130,
+        "diff_pct": 35.63218390804598,
+        "avg_trade_value_5d": 20575975369.0
+      }
+    ],
+    "designation": [],
+    "redesignation": [],
+    "diagnostics": {
+      "ticker_set_count": 0,
+      "warning_fetched_count": 38,
+      "warning_old_enough_count": 5,
+      "caution_fetched_count": 0,
+      "candidate_map_count": 0,
+      "rewarn_map_count": 0
+    }
+  },
+  "summary": {
+    "release_count": 2,
+    "designation_count": 0,
+    "redesignation_count": 0,
+    "target_date": "2026-05-21"
+  }
+}
