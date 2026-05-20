@@ -68,9 +68,11 @@ def is_krx_trading_day(ctx):
 def fetch_investor_flow_report(ctx):
     if ctx.skip_non_trading and not is_krx_trading_day(ctx):
         return skipped_payload(ctx, "investor_flow", "KRX 휴장일")
-    display_date = ctx.calendar.add_krx_trading_days(pd.Timestamp(ctx.base_date), 1)
+    source_date = ctx.calendar.shift_krx_session(pd.Timestamp(ctx.base_date), -1)
+    if source_date is None:
+        return skipped_payload(ctx, "investor_flow", "전 거래일 계산 실패")
     data = fetch_investor_flow(
-        ctx.yyyymmdd,
+        source_date.strftime("%Y%m%d"),
         limit=ctx.flow_limit,
         sector_lookup_limit=ctx.sector_lookup_limit,
     )
@@ -85,7 +87,7 @@ def fetch_investor_flow_report(ctx):
         "investor_flow",
         data=data,
         summary=summary,
-        display_date=display_date.date().isoformat() if display_date is not None else ctx.date_str,
+        display_date=ctx.date_str,
     )
 
 
