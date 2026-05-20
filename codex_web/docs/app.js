@@ -36,6 +36,18 @@ function formatJoFromEok(value) {
   return `${formatNumber(Number(value) / 10000, 1)}조`;
 }
 
+function formatJoFromMillion(value) {
+  if (value === null || value === undefined || Number.isNaN(Number(value))) return "-";
+  return `${formatNumber(Number(value) / 1000000, 1)}조`;
+}
+
+function formatPlainPct(value, digits = 1) {
+  if (value === null || value === undefined || value === "") return "-";
+  const number = Number(value);
+  if (Number.isNaN(number)) return String(value);
+  return `${number.toFixed(digits)}%`;
+}
+
 function formatPct(value) {
   if (value === null || value === undefined || value === "") return "-";
   const number = Number(value);
@@ -146,6 +158,14 @@ async function loadCurrentPayloads() {
   currentPayloads = Object.fromEntries(entries);
 }
 
+async function loadWorkflowStatus() {
+  try {
+    return await fetchJson(`${DATA_ROOT}/workflow_status.json`);
+  } catch (error) {
+    return null;
+  }
+}
+
 function globalMemoKey() {
   return "krxmarket:memo:global";
 }
@@ -177,6 +197,24 @@ function saveGlobalMemo() {
 function saveDailyMemo() {
   localStorage.setItem(dailyMemoKey(), $("dailyMemoBox").value);
   showSavedStatus("dailyNoteStatus", currentDate ? `${currentDate} 저장` : "선택일에 저장");
+}
+
+function renderWorkflowAlert(status) {
+  const target = $("workflowAlert");
+  if (!target) return;
+  if (!status) {
+    target.className = "workflowAlert";
+    target.textContent = "Workflow 상태: 아직 알림 데이터 없음";
+    return;
+  }
+  const generatedAt = status.generated_at ? ` · ${status.generated_at}` : "";
+  if (status.failed) {
+    target.className = "workflowAlert fail";
+    target.textContent = `⚠️ Workflow 실패: ${status.message || "데이터 갱신 실패"}${generatedAt}`;
+    return;
+  }
+  target.className = "workflowAlert ok";
+  target.textContent = `Workflow 정상${generatedAt}`;
 }
 
 function metric(label, value, caption = "") {
@@ -250,6 +288,12 @@ function latestRowOnOrBefore(rows, dateKey, dateStr) {
 function asNumber(value, fallback = 0) {
   const number = Number(value);
   return Number.isFinite(number) ? number : fallback;
+}
+
+function asFiniteValue(value) {
+  if (value === null || value === undefined || value === "") return NaN;
+  const number = Number(value);
+  return Number.isFinite(number) ? number : NaN;
 }
 
 function tradeTotalEok(row, market) {
@@ -385,43 +429,60 @@ function liquiditySvg(rows) {
   if (!data.length) return "";
   const width = 940;
   const height = 310;
-  const margin = { left: 52, right: 76, top: 28, bottom: 58 };
+  const margin = { left: 72, right: 76, top: 28, bottom: 58 };
   const plotW = width - margin.left - margin.right;
   const plotH = height - margin.top - margin.bottom;
-  const deposits = data.map((row) => asNumber(row.Deposit_Value, NaN)).filter(Number.isFinite);
-  const closes = data.map((row) => asNumber(row.KOSPI_Close, NaN)).filter(Number.isFinite);
-  const depMin = deposits.length ? Math.min(...deposits) : 0;
-  const depMax = deposits.length ? Math.max(...deposits) : 1;
+  const deposits = data.map((row) => asFiniteValue(row.Deposit_Value)).filter(Number.isFinite);
+  const closes = data.map((row) => asFiniteValue(row.KOSPI_Close)).filter(Number.isFinite);
+  const depMinRaw = deposits.length ? Math.min(...deposits) : 0;
+  const depMaxRaw = deposits.length ? Math.max(...deposits) : 1;
   const closeMin = closes.length ? Math.min(...closes) : 0;
   const closeMax = closes.length ? Math.max(...closes) : 1;
+  const depRangeRaw = Math.max(depMaxRaw - depMinRaw, 1);
+  const depMin = Math.max(0, depMinRaw - depRangeRaw * 0.2);
+  const depMax = depMaxRaw + depRangeRaw * 0.2;
   const depRange = Math.max(depMax - depMin, 1);
   const closeRange = Math.max(closeMax - closeMin, 1);
   const lineY = (value, min, range) => margin.top + plotH - ((value - min) / range) * plotH;
   const groupW = plotW / data.length;
   const depositPath = data
     .map((row, index) => {
-      const value = asNumber(row.Deposit_Value, NaN);
+      const value = asFiniteValue(row.Deposit_Value);
       if (!Number.isFinite(value)) return "";
       const x = margin.left + groupW * index + groupW / 2;
-      return `${index === 0 ? "M" : "L"} ${x.toFixed(1)} ${lineY(value, depMin - depRange * 0.15, depRange * 1.3).toFixed(1)}`;
+      return `${index === 0 ? "M" : "L"} ${x.toFixed(1)} ${lineY(value, depMin, depRange).toFixed(1)}`;
     })
     .filter(Boolean)
     .join(" ");
   const closePath = data
     .map((row, index) => {
-      const value = asNumber(row.KOSPI_Close, NaN);
+      const value = asFiniteValue(row.KOSPI_Close);
       if (!Number.isFinite(value)) return "";
       const x = margin.left + groupW * index + groupW / 2;
       return `${index === 0 ? "M" : "L"} ${x.toFixed(1)} ${lineY(value, closeMin - closeRange * 0.15, closeRange * 1.3).toFixed(1)}`;
     })
     .filter(Boolean)
     .join(" ");
+  const grid = [0, 0.25, 0.5, 0.75, 1]
+    .map((ratio) => {
+      const value = depMin + depRange * ratio;
+      const yy = lineY(value, depMin, depRange);
+      return `<line x1="${margin.left}" x2="${width - margin.right}" y1="${yy}" y2="${yy}" class="gridLine" />
+        <text x="${margin.left - 10}" y="${yy + 4}" class="axisText" text-anchor="end">${formatJoFromMillion(value)}</text>`;
+    })
+    .join("");
+  const lastDeposit = data.slice().reverse().find((row) => Number.isFinite(asFiniteValue(row.Deposit_Value)));
+  const labels = lastDeposit
+    ? `<text x="${width - margin.right - 4}" y="${lineY(asFiniteValue(lastDeposit.Deposit_Value), depMin, depRange) - 10}" class="chartValue" text-anchor="end">${formatJoFromMillion(lastDeposit.Deposit_Value)}</text>`
+    : "";
   return `
     <div class="chartStackInner">
-      ${tradeBarsSvg(data, { height: 310 })}
-      <svg class="chartSvg overlayLines" viewBox="0 0 ${width} ${height}" aria-hidden="true">
+      <svg class="chartSvg" viewBox="0 0 ${width} ${height}" role="img" aria-label="customer deposit and KOSPI close chart">
+        ${grid}
         <path d="${depositPath}" class="depositLine" />
         <path d="${closePath}" class="closeLine" />
+        ${labels}
+        <line x1="${margin.left}" x2="${width - margin.right}" y1="${margin.top + plotH}" y2="${margin.top + plotH}" class="axisLine" />
         <g class="legend">
           <line x1="${margin.left}" x2="${margin.left + 18}" y1="18" y2="18" class="depositLine" /><text x="${margin.left + 25}" y="22">고객예탁금</text>
           <line x1="${margin.left + 122}" x2="${margin.left + 140}" y1="18" y2="18" class="closeLine" /><text x="${margin.left + 147}" y="22">KOSPI 종가</text>
@@ -476,12 +537,22 @@ function creditSvg(rows) {
       })
       .filter(Boolean)
       .join(" ");
+  const last = data.at(-1);
+  const lastX = last ? margin.left + groupW * (data.length - 1) + groupW / 2 : 0;
+  const lastLabels = last
+    ? `
+      <text x="${lastX + 10}" y="${yCredit(asNumber(last.Credit_Total, 0)) - 8}" class="chartValue" text-anchor="start">${formatJoFromMillion(last.Credit_Total)}</text>
+      <text x="${lastX + 10}" y="${yRatio(asNumber(last.Ratio_KOSPI, 0)) - 8}" class="chartValue" text-anchor="start">${formatPlainPct(last.Ratio_KOSPI)}</text>
+      <text x="${lastX + 10}" y="${yRatio(asNumber(last.Ratio_KOSDAQ, 0)) + 16}" class="chartValue" text-anchor="start">${formatPlainPct(last.Ratio_KOSDAQ)}</text>
+    `
+    : "";
   return `
     <svg class="chartSvg" viewBox="0 0 ${width} ${height}" role="img" aria-label="credit balance and ratio chart">
       <line x1="${margin.left}" x2="${width - margin.right}" y1="${margin.top + plotH}" y2="${margin.top + plotH}" class="axisLine" />
       ${bars}
       <path d="${line("Ratio_KOSPI")}" class="ratioKospiLine" />
       <path d="${line("Ratio_KOSDAQ")}" class="ratioKosdaqLine" />
+      ${lastLabels}
       <g class="legend">
         <rect x="${margin.left}" y="8" width="10" height="10" fill="#4a7ebb" /><text x="${margin.left + 16}" y="17">KOSPI 신용</text>
         <rect x="${margin.left + 100}" y="8" width="10" height="10" fill="#bb4a4a" /><text x="${margin.left + 116}" y="17">KOSDAQ 신용</text>
@@ -652,7 +723,7 @@ function renderExtra() {
   $("extra").innerHTML = `
     <div class="sectionHeader"><div><span class="eyebrow">Extra</span><h2>보조 지표</h2></div><span class="dateBadge">Liquidity / KRX+NXT</span></div>
     <div class="twoCol">
-      ${chartShell("시장 유동성", "신용잔고율 / 거래대금 / 예탁금", `${creditSvg(upperRows)}${liquiditySvg(lowerRows)}`)}
+      ${chartShell("시장 유동성", "신용잔고율 / 예탁금", `${creditSvg(upperRows)}${liquiditySvg(lowerRows)}`)}
       ${chartShell("KOSPI · KOSDAQ 거래대금", latestLower?.Date ? `${latestLower.Date} KRX + NXT` : "KRX + NXT", tradeBarsSvg(lowerRows, { height: 390 }))}
     </div>
   `;
@@ -669,7 +740,9 @@ async function renderAll() {
   $("selectedDateLabel").textContent = dateWithWeekday(currentDate);
   $("briefTitle").textContent = currentDate === preferredCurrentDate() ? "오늘 요약" : "선택일 요약";
   await loadCurrentPayloads();
+  const workflowStatus = await loadWorkflowStatus();
   loadMemo();
+  renderWorkflowAlert(workflowStatus);
   renderSummary();
   renderUsMarket();
   renderAlerts();

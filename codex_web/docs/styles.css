@@ -267,6 +267,26 @@ input[type="date"] {
   font: 400 18px/1.5 "Segoe UI", "Apple SD Gothic Neo", "Malgun Gothic", system-ui, sans-serif;
 }
 
+.workflowAlert {
+  margin: 0;
+  border-top: 1px solid var(--line);
+  background: #0a0f14;
+  color: var(--muted);
+  padding: 12px 16px;
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1.45;
+}
+
+.workflowAlert.ok {
+  color: var(--teal);
+}
+
+.workflowAlert.fail {
+  background: rgba(255, 95, 100, 0.1);
+  color: var(--red);
+}
+
 .jumpNav {
   position: sticky;
   top: 0;
@@ -324,6 +344,10 @@ td {
 th {
   color: var(--muted);
   background: var(--panel-2);
+  font-weight: 700;
+}
+
+td {
   font-weight: 700;
 }
 

@@ -109,3 +109,5 @@ https://gosingasong.github.io/
 - GitHub Actions 스케줄은 기존 텔레그램 봇 시간에 맞춰 나눠져 있습니다: 미국장 06:59, IPO 15:20, 전일 수급용 데이터 18:01, 유동성/NXT 20:10, 다음 거래일 Risk Watch 20:25 KST.
 - KRX/KIND/Finviz가 GitHub Actions 서버 요청을 막으면, 로컬 PC에서 `update_reports.py`를 작업 스케줄러로 실행한 뒤 `docs/data`와 `state`를 push하는 방식으로 바꾸면 됩니다.
 - 투자경고 분석은 이미지에서 잘라 보여주던 개수 제한을 쓰지 않고, 필터를 통과한 전체 데이터를 JSON으로 저장합니다.
+- `update_reports.py`는 기본적으로 `docs/data/YYYY-MM-DD` 폴더 중 60일보다 오래된 데이터를 삭제하되, 최신 20개 날짜 폴더는 항상 보존합니다. 필요하면 `--prune-days`, `--prune-keep-min`으로 조정합니다.
+- GitHub Actions는 보고서 생성 실패 시 `docs/data/workflow_status.json`에 실패 상태를 기록해 배포하고, 웹 화면의 일일 메모 아래 알림 창에 표시합니다.

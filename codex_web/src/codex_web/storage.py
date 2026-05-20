@@ -1,8 +1,12 @@
 import datetime as dt
 import json
 from pathlib import Path
+import re
 
 from .serialization import json_safe
+
+
+DATE_DIR_RE = re.compile(r"^\d{4}-\d{2}-\d{2}$")
 
 
 def write_json(path, payload):
@@ -106,3 +110,35 @@ def build_global_index(data_root):
     if dates:
         write_json(data_root / "latest.json", dates[0])
     return index
+
+
+
+def prune_old_data(data_root, today=None, keep_days=60, keep_min=20):
+    data_root = Path(data_root)
+    if not data_root.exists():
+        return []
+    today = today or dt.datetime.now(dt.timezone.utc).date()
+    cutoff = today - dt.timedelta(days=keep_days)
+    day_dirs = []
+    for path in data_root.iterdir():
+        if not path.is_dir() or not DATE_DIR_RE.match(path.name):
+            continue
+        try:
+            day = dt.date.fromisoformat(path.name)
+        except ValueError:
+            continue
+        day_dirs.append((day, path))
+    day_dirs.sort(reverse=True)
+    protected = {path for _, path in day_dirs[:keep_min]}
+    removed = []
+    for day, path in day_dirs:
+        if path in protected or day >= cutoff:
+            continue
+        for child in sorted(path.rglob("*"), reverse=True):
+            if child.is_file() or child.is_symlink():
+                child.unlink()
+            elif child.is_dir():
+                child.rmdir()
+        path.rmdir()
+        removed.append(path.name)
+    return removed

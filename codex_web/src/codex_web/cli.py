@@ -53,6 +53,8 @@ def main(argv=None):
     parser.add_argument("--sector-lookup-limit", type=int, default=30, help="Naver sector lookup count per investor flow side.")
     parser.add_argument("--force-non-trading", action="store_true", help="Generate KRX reports even on non-trading days.")
     parser.add_argument("--fail-fast", action="store_true", help="Stop on the first report error.")
+    parser.add_argument("--prune-days", type=int, default=60, help="Delete docs/data date folders older than this many days.")
+    parser.add_argument("--prune-keep-min", type=int, default=20, help="Always keep at least this many latest date folders.")
     parser.add_argument("--verbose", action="store_true")
     args = parser.parse_args(argv)
 
@@ -62,7 +64,7 @@ def main(argv=None):
     report_names = parse_reports(args.reports)
 
     from .reports import REPORT_FUNCTIONS, ReportContext, base_payload
-    from .storage import build_day_manifest, build_global_index, write_report
+    from .storage import build_day_manifest, build_global_index, prune_old_data, write_report
 
     out_dir = Path(args.out_dir).resolve()
     root_dir = Path(__file__).resolve().parents[2]
@@ -107,6 +109,9 @@ def main(argv=None):
 
     for date_str in sorted(written_dates):
         build_day_manifest(out_dir, date_str)
+    removed = prune_old_data(out_dir, today=base_date, keep_days=args.prune_days, keep_min=args.prune_keep_min)
+    if removed:
+        logging.info("pruned old data folders: %s", ",".join(removed))
     build_global_index(out_dir)
     logging.info("done")
     return 0
