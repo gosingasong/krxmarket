@@ -62,6 +62,7 @@ jobs:
           PY
           )
             python codex_web/update_reports.py --date "$BASE_DATE" --reports krx_alert --verbose
+            python codex_web/update_reports.py --reports liquidity,nxt_market --verbose
             exit 0
           fi
           if [ "$EVENT_NAME" = "schedule" ]; then
