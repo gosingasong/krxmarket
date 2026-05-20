@@ -119,7 +119,18 @@ def get_sector_map(tickers):
     return result
 
 
-def fetch_investor_flow(date_str, limit=100, sector_lookup_limit=30):
+def build_sector_counts(rows):
+    counts = {}
+    for row in rows or []:
+        sector = (row.get("sector") or "기타").strip() or "기타"
+        counts[sector] = counts.get(sector, 0) + 1
+    return [
+        {"sector": sector, "count": count}
+        for sector, count in sorted(counts.items(), key=lambda item: (-item[1], item[0]))
+    ]
+
+
+def fetch_investor_flow(date_str, limit=10, sector_lookup_limit=10):
     institution, institution_total = fetch_investor_ranking(date_str, "기관합계", limit=limit)
     foreigner, foreigner_total = fetch_investor_ranking(date_str, "외국인", limit=limit)
     sector_tickers = []
@@ -138,6 +149,8 @@ def fetch_investor_flow(date_str, limit=100, sector_lookup_limit=30):
         "sector_map": sector_map,
         "institution": institution,
         "foreigner": foreigner,
+        "institution_sector_counts": build_sector_counts(institution),
+        "foreigner_sector_counts": build_sector_counts(foreigner),
         "institution_total_count": institution_total,
         "foreigner_total_count": foreigner_total,
     }

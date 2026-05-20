@@ -690,18 +690,25 @@ function renderFlow() {
   }
   const cols = [
     { key: "rank", label: "#", numeric: true },
-    { key: "ticker", label: "Ticker" },
     { key: "name", label: "종목" },
-    { key: "sector", label: "업종" },
     { key: "buy_amount_eok", label: "매수금액", numeric: true, format: (v) => `${formatNumber(v)}억` },
     { key: "net_buy_amount_eok", label: "순매수", numeric: true, format: (v) => `${formatNumber(v)}억`, className: signedClass },
-    { key: "market", label: "시장" },
   ];
+  const sectorCols = [
+    { key: "sector", label: "주요업종" },
+    { key: "count", label: "Count", numeric: true },
+  ];
+  const institutionTop = (payload.data.institution || []).slice(0, 10);
+  const foreignerTop = (payload.data.foreigner || []).slice(0, 10);
   $("flow").innerHTML = `
-    <div class="sectionHeader"><div><span class="eyebrow">Flow</span><h2>전일 수급 상위</h2></div><span class="dateBadge">${escapeHtml(payload.data.trade_date || "")}</span></div>
+    <div class="sectionHeader"><div><span class="eyebrow">Flow</span><h2>수급 Top 10 & 업종</h2></div><span class="dateBadge">${escapeHtml(payload.data.trade_date || "")}</span></div>
     <div class="twoCol">
-      ${tablePanel("외국인", payload.data.foreigner || [], cols)}
-      ${tablePanel("기관합계", payload.data.institution || [], cols)}
+      ${tablePanel("기관 매수 Top 10", institutionTop, cols)}
+      ${tablePanel("외국인 매수 Top 10", foreignerTop, cols)}
+    </div>
+    <div class="twoCol flowSectorGrid">
+      ${tablePanel("기관 주요업종", payload.data.institution_sector_counts || [], sectorCols)}
+      ${tablePanel("외국인 주요업종", payload.data.foreigner_sector_counts || [], sectorCols)}
     </div>
   `;
 }

@@ -6,11 +6,11 @@
       "file": "investor_flow.json",
       "report": "investor_flow",
       "status": "ok",
-      "generated_at": "2026-05-20T19:43:05.396569+09:00",
+      "generated_at": "2026-05-20T19:55:36.821308+09:00",
       "summary": {
-        "institution_count": 100,
+        "institution_count": 10,
         "institution_total_count": 2395,
-        "foreigner_count": 100,
+        "foreigner_count": 10,
         "foreigner_total_count": 2554,
         "status": "ok"
       }
