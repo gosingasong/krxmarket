@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "date": "2026-05-20",
-  "generated_at": "2026-05-20T08:55:29.678328+00:00",
+  "generated_at": "2026-05-20T09:56:06.708735+00:00",
   "reports": {
     "investor_flow": {
       "file": "investor_flow.json",
@@ -20,8 +20,10 @@
       "file": "ipo.json",
       "report": "ipo",
       "status": "ok",
-      "generated_at": "2026-05-20T13:55:22.850543+09:00",
+      "generated_at": "2026-05-20T18:56:06.706753+09:00",
       "summary": {
+        "today_item_count": 1,
+        "next_item_count": 0,
         "item_count": 0,
         "status": "ok"
       }
