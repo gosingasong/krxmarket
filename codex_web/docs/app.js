@@ -87,6 +87,11 @@ function previousAvailableDate(dateStr) {
   return candidates.at(-1) || null;
 }
 
+function nextAvailableDate(dateStr) {
+  const candidates = sortedDates().filter((date) => date > dateStr);
+  return candidates[0] || null;
+}
+
 function kstNowParts() {
   const parts = new Intl.DateTimeFormat("en-US", {
     timeZone: "Asia/Seoul",
@@ -324,12 +329,11 @@ function candleCell(row) {
   const bodyY = Math.min(y(open), y(close));
   const bodyH = Math.max(Math.abs(y(open) - y(close)), 3);
   return `
-    <div class="candleCell">
+    <div class="candleCell candleOnly">
       <svg class="miniCandle" viewBox="0 0 54 54" aria-hidden="true">
         <line x1="27" x2="27" y1="${y(high).toFixed(1)}" y2="${y(low).toFixed(1)}" stroke="${color}" stroke-width="2" />
         <rect x="20" y="${bodyY.toFixed(1)}" width="14" height="${bodyH.toFixed(1)}" rx="1.5" fill="${color}" />
       </svg>
-      <span>${formatNumber(close, 2)}</span>
     </div>
   `;
 }
@@ -583,17 +587,11 @@ function renderSummary() {
   const usPayload = currentPayloads.us_market;
   const flow = currentPayloads.investor_flow?.data || {};
   const ipo = currentPayloads.ipo?.data || {};
-  const alert = currentPayloads.krx_alert?.data || {};
-  const alertForDate = !alert.target_date || alert.target_date === currentDate ? alert : {};
   const us = usPayload?.data || {};
   const liquidity = currentPayloads.liquidity?.data || {};
-  const foreignTop = flow.foreigner?.[0];
-  const instTop = flow.institution?.[0];
   const todayIpoItems = ipo.today_items || [];
   const nextIpoItems = ipo.next_items || ipo.items || [];
   const liquidityRow = latestRowOnOrBefore(liquidity.lower, "Date", currentDate);
-  const releaseCount = alertForDate.release?.length || 0;
-  const designationCount = (alertForDate.designation?.length || 0) + (alertForDate.redesignation?.length || 0);
   const nasdaq = (us.fixed || []).find((row) => row.Ticker === "^IXIC");
   const usMarketDate = us.market_date || us.target_session_date || shiftDateString(usPayload?.date || currentDate, -1);
   const ipoQuickRows = [
@@ -602,10 +600,7 @@ function renderSummary() {
   ];
 
   $("summaryCards").innerHTML = [
-    metric("외국인 1위", foreignTop?.name || "-", foreignTop ? `${formatNumber(foreignTop.buy_amount_eok)}억 매수` : "수급"),
-    metric("기관 1위", instTop?.name || "-", instTop ? `${formatNumber(instTop.buy_amount_eok)}억 매수` : "수급"),
     metric("신규상장", `${todayIpoItems.length}/${nextIpoItems.length}`, `${ipo.today_listing_date || "오늘"} / ${ipo.next_listing_date || ipo.target_listing_date || "다음"}`),
-    metric("투자경고", `${releaseCount}/${designationCount}`, "해제 / 지정·재지정"),
     metric("NASDAQ", nasdaq ? formatPct(nasdaq.Chg) : "-", usMarketDate || "미국장", signedClass(nasdaq?.Chg)),
     metric("KOSPI 거래대금", formatJoFromEok(tradeTotalEok(liquidityRow, "KOSPI")), liquidityRow?.Date ? `${liquidityRow.Date} KRX+NXT` : "시장 유동성"),
     metric("KOSDAQ 거래대금", formatJoFromEok(tradeTotalEok(liquidityRow, "KOSDAQ")), liquidityRow?.Date ? `${liquidityRow.Date} KRX+NXT` : "시장 유동성"),
@@ -631,20 +626,19 @@ function renderAlerts() {
     return;
   }
   const releaseCols = [
-    { key: "code", label: "Code" },
     { key: "name", label: "종목" },
-    { key: "current_price", label: "현재가", numeric: true, format: formatNumber },
-    { key: "release_ceiling", label: "해제 상한", numeric: true, format: formatNumber },
-    { key: "diff_pct", label: "여유율", numeric: true, format: formatPct, className: signedClass },
-    { key: "avg_trade_value_5d", label: "5일 평균 거래대금", numeric: true, format: formatEok },
-  ];
-  const triggerCols = [
-    { key: "code", label: "Code" },
-    { key: "name", label: "종목" },
-    { key: "current_price", label: "현재가", numeric: true, format: formatNumber },
-    { key: "trigger_price", label: "트리거", numeric: true, format: formatNumber },
     { key: "diff_pct", label: "거리", numeric: true, format: formatPct, className: signedClass },
     { key: "avg_trade_value_5d", label: "5일 평균 거래대금", numeric: true, format: formatEok },
+    { key: "current_price", label: "현재가", numeric: true, format: formatNumber },
+    { key: "release_ceiling", label: "트리거", numeric: true, format: formatNumber },
+    { key: "valid_until", label: "유효일" },
+  ];
+  const triggerCols = [
+    { key: "name", label: "종목" },
+    { key: "diff_pct", label: "거리", numeric: true, format: formatPct, className: signedClass },
+    { key: "avg_trade_value_5d", label: "5일 평균 거래대금", numeric: true, format: formatEok },
+    { key: "current_price", label: "현재가", numeric: true, format: formatNumber },
+    { key: "trigger_price", label: "트리거", numeric: true, format: formatNumber },
     { key: "valid_until", label: "유효일" },
   ];
   $("alerts").innerHTML = `
@@ -664,11 +658,10 @@ function renderUsMarket() {
     return;
   }
   const cols = [
-    { key: "Ticker", label: "Ticker" },
     { key: "Name", label: "Name" },
+    { label: "Candle", value: candleCell, html: true },
     { key: "Chg", label: "Chg", numeric: true, format: formatPct, className: signedClass },
     { key: "Body", label: "Body", numeric: true, format: formatPct, className: signedClass },
-    { label: "Candle", value: candleCell, html: true },
   ];
   const marketDate = payload.data.market_date || payload.data.target_session_date || shiftDateString(payload.date || currentDate, -1) || "Latest";
   $("us").innerHTML = `
@@ -755,6 +748,12 @@ function sectionEmpty(title, message) {
 async function renderAll() {
   $("selectedDateLabel").textContent = dateWithWeekday(currentDate);
   $("briefTitle").textContent = currentDate === preferredCurrentDate() ? "오늘 요약" : "선택일 요약";
+  const nextButton = $("nextDayButton");
+  if (nextButton) {
+    const nextDate = nextAvailableDate(currentDate);
+    nextButton.disabled = !nextDate;
+    nextButton.title = nextDate ? `다음 거래일 ${nextDate}` : "가장 최신 거래일입니다";
+  }
   await loadCurrentPayloads();
   const workflowStatus = await loadWorkflowStatus();
   loadMemo();
@@ -782,6 +781,14 @@ $("dateInput").addEventListener("change", async (event) => {
 
 $("todayButton").addEventListener("click", async () => {
   currentDate = preferredCurrentDate();
+  $("dateInput").value = currentDate;
+  await renderAll();
+});
+
+$("nextDayButton").addEventListener("click", async () => {
+  const nextDate = nextAvailableDate(currentDate);
+  if (!nextDate) return;
+  currentDate = nextDate;
   $("dateInput").value = currentDate;
   await renderAll();
 });

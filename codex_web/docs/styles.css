@@ -98,6 +98,11 @@ button {
   cursor: pointer;
 }
 
+button:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
+}
+
 input[type="date"] {
   padding: 0 10px;
 }
@@ -120,7 +125,7 @@ input[type="date"] {
 
 .briefPanel,
 .notePanel {
-  min-height: 360px;
+  min-height: 320px;
 }
 
 .sectionHeader,
@@ -148,17 +153,17 @@ input[type="date"] {
 
 .summaryCards {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 10px;
-  padding: 14px 16px 8px;
+  grid-template-columns: repeat(auto-fit, minmax(128px, 1fr));
+  gap: 8px;
+  padding: 12px 14px 6px;
 }
 
 .metric {
-  min-height: 98px;
+  min-height: 86px;
   border: 1px solid #243140;
   border-radius: 8px;
   background: var(--panel-2);
-  padding: 13px;
+  padding: 11px;
 }
 
 .metric strong {
@@ -170,8 +175,8 @@ input[type="date"] {
 
 .metric span {
   display: block;
-  margin-top: 10px;
-  font-size: 30px;
+  margin-top: 8px;
+  font-size: clamp(20px, 2.2vw, 28px);
   font-weight: 800;
   line-height: 1;
 }
@@ -186,16 +191,16 @@ input[type="date"] {
 .quickLists {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 10px;
-  padding: 8px 16px 16px;
+  gap: 8px;
+  padding: 6px 14px 14px;
 }
 
 .miniList {
   border: 1px solid #243140;
   border-radius: 8px;
   background: var(--panel-3);
-  padding: 12px;
-  min-height: 144px;
+  padding: 10px;
+  min-height: 118px;
 }
 
 .miniList h3 {
@@ -328,7 +333,7 @@ input[type="date"] {
 
 table {
   width: 100%;
-  min-width: 640px;
+  min-width: 560px;
   border-collapse: collapse;
 }
 
@@ -384,10 +389,14 @@ tbody tr:hover {
 .candleCell {
   display: inline-flex;
   align-items: center;
-  justify-content: flex-end;
+  justify-content: center;
   gap: 8px;
-  min-width: 112px;
+  min-width: 52px;
   font-variant-numeric: tabular-nums;
+}
+
+.candleOnly {
+  min-width: 46px;
 }
 
 .miniCandle {
@@ -501,9 +510,8 @@ tbody tr:hover {
     grid-template-columns: 1fr;
   }
 
-  .summaryCards,
   .quickLists {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 }
 
@@ -518,13 +526,64 @@ tbody tr:hover {
     flex-direction: column;
   }
 
+  .dateTools {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .dateTools label {
+    grid-column: 1 / -1;
+  }
+
   .brand h1 {
     font-size: 25px;
   }
 
-  .summaryCards,
+  .briefPanel,
+  .notePanel {
+    min-height: 0;
+  }
+
+  .summaryCards {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 6px;
+    padding: 10px 10px 5px;
+  }
+
+  .metric {
+    min-height: 78px;
+    padding: 9px 8px;
+  }
+
+  .metric strong,
+  .metric small {
+    font-size: 10px;
+  }
+
+  .metric span {
+    font-size: 17px;
+    margin-top: 7px;
+  }
+
   .quickLists {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 6px;
+    padding: 5px 10px 10px;
+  }
+
+  .miniList {
+    min-height: 92px;
+    padding: 8px;
+  }
+
+  .miniList h3,
+  .miniItem {
+    font-size: 10px;
+  }
+
+  .miniItem {
+    gap: 6px;
+    padding: 5px 0;
   }
 
   .memoStack {
