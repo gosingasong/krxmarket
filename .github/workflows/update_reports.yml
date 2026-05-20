@@ -77,7 +77,23 @@ jobs:
               "25 11 * * 1-5") REPORTS="krx_alert" ;;
             esac
           fi
-          python codex_web/update_reports.py --reports "$REPORTS" --verbose
+          DATE_ARGS=""
+          if [ "$EVENT_NAME" = "schedule" ] && { [ "$EVENT_SCHEDULE" = "1 9 * * 1-5" ] || [ "$EVENT_SCHEDULE" = "10 11 * * 1-5" ]; }; then
+            BASE_DATE=$(PYTHONPATH=codex_web/src python - <<'PY'
+          import datetime as dt
+          import pandas as pd
+          from codex_web.sources.common import KST, TradingDayCalendar
+
+          today = pd.Timestamp(dt.datetime.now(KST).date())
+          next_day = TradingDayCalendar().add_krx_trading_days(today, 1)
+          if next_day is None:
+              raise SystemExit("No next KRX session found")
+          print(next_day.date().isoformat())
+          PY
+          )
+            DATE_ARGS="--date $BASE_DATE"
+          fi
+          python codex_web/update_reports.py $DATE_ARGS --reports "$REPORTS" --verbose
 
       - name: Record workflow status
         if: always()

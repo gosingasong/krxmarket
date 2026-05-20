@@ -144,6 +144,10 @@ function shiftDateString(dateStr, days) {
   return date.toISOString().slice(0, 10);
 }
 
+function nextCalendarDate(dateStr) {
+  return shiftDateString(dateStr, 1);
+}
+
 function selectedDay() {
   return appIndex?.dates?.find((item) => item.date === currentDate);
 }
@@ -614,7 +618,6 @@ function renderSummary() {
     metric("NASDAQ", nasdaq ? formatPct(nasdaq.Chg) : "-", usMarketDate || "미국장", signedClass(nasdaq?.Chg)),
     metric("KOSPI 거래대금", formatJoFromEok(tradeTotalEok(liquidityRow, "KOSPI")), liquidityRow?.Date ? `${liquidityRow.Date} KRX+NXT` : "시장 유동성"),
     metric("KOSDAQ 거래대금", formatJoFromEok(tradeTotalEok(liquidityRow, "KOSDAQ")), liquidityRow?.Date ? `${liquidityRow.Date} KRX+NXT` : "시장 유동성"),
-    metric("Data", currentDate || "-", `${weekdayEn(currentDate)} · ${selectedDay() ? "available" : "missing"}`),
   ].join("");
 
   $("quickLists").innerHTML = ipoMessages.map(summaryMessage).join("");
@@ -756,9 +759,9 @@ async function renderAll() {
   $("briefTitle").textContent = currentDate === preferredCurrentDate() ? "오늘 요약" : "선택일 요약";
   const nextButton = $("nextDayButton");
   if (nextButton) {
-    const nextDate = nextAvailableDate(currentDate);
+    const nextDate = nextCalendarDate(currentDate);
     nextButton.disabled = !nextDate;
-    nextButton.title = nextDate ? `다음 거래일 ${nextDate}` : "가장 최신 거래일입니다";
+    nextButton.title = nextDate ? `다음 날짜 ${nextDate}` : "다음 날짜로 이동";
   }
   await loadCurrentPayloads();
   const workflowStatus = await loadWorkflowStatus();
@@ -792,7 +795,7 @@ $("todayButton").addEventListener("click", async () => {
 });
 
 $("nextDayButton").addEventListener("click", async () => {
-  const nextDate = nextAvailableDate(currentDate);
+  const nextDate = nextCalendarDate(currentDate);
   if (!nextDate) return;
   currentDate = nextDate;
   $("dateInput").value = currentDate;
