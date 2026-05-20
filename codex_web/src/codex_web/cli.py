@@ -77,6 +77,7 @@ def main(argv=None):
 
     logging.info("date=%s reports=%s out_dir=%s", base_date, ",".join(report_names), out_dir)
 
+    written_dates = set()
     for report_name in report_names:
         logging.info("[%s] generating", report_name)
         try:
@@ -96,12 +97,16 @@ def main(argv=None):
             )
             if args.fail_fast:
                 write_report(out_dir, ctx.date_str, report_name, payload)
+                written_dates.add(ctx.date_str)
                 raise
 
-        path = write_report(out_dir, ctx.date_str, report_name, payload)
+        write_date = payload.get("display_date") or ctx.date_str
+        path = write_report(out_dir, write_date, report_name, payload)
+        written_dates.add(write_date)
         logging.info("[%s] wrote %s status=%s", report_name, path, payload.get("status"))
 
-    build_day_manifest(out_dir, ctx.date_str)
+    for date_str in sorted(written_dates):
+        build_day_manifest(out_dir, date_str)
     build_global_index(out_dir)
     logging.info("done")
     return 0

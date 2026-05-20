@@ -4,12 +4,12 @@ GitHub Pages에 올리는 개인용 시장 데이터 노트입니다. `0_krx_ale
 
 ## 포함 데이터
 
-- `investor_flow`: KRX 기관합계/외국인 매수금액 랭킹
+- `investor_flow`: 전일 KRX 기관합계/외국인 매수금액 랭킹
 - `ipo`: 오늘 거래일 / 다음 거래일 신규상장 예정 종목
 - `krx_alert`: 다음 거래일 투자경고 해제/지정/재지정 시뮬레이션
 - `us_market`: 미국 주요 지수/섹터와 거래대금 상위 종목
 - `nxt_market`: NXT 누적 거래대금
-- `liquidity`: 예탁금, 신용, KOSPI/KOSDAQ 거래대금
+- `liquidity`: 예탁금, 신용, KOSPI/KOSDAQ KRX+NXT 거래대금
 
 업종쏠림지수처럼 Excel/COM을 쓰는 리포트는 제외했습니다.
 
@@ -106,6 +106,6 @@ https://gosingasong.github.io/
 
 ## 배포 메모
 
-- GitHub Actions 스케줄은 기존 텔레그램 봇 시간에 맞춰 나눠져 있습니다: 미국장 06:59, IPO 15:20, 수급 18:01, 유동성/NXT 20:10, 투자경고 20:25 KST.
+- GitHub Actions 스케줄은 기존 텔레그램 봇 시간에 맞춰 나눠져 있습니다: 미국장 06:59, IPO 15:20, 전일 수급용 데이터 18:01, 유동성/NXT 20:10, 다음 거래일 Risk Watch 20:25 KST.
 - KRX/KIND/Finviz가 GitHub Actions 서버 요청을 막으면, 로컬 PC에서 `update_reports.py`를 작업 스케줄러로 실행한 뒤 `docs/data`와 `state`를 push하는 방식으로 바꾸면 됩니다.
 - 투자경고 분석은 이미지에서 잘라 보여주던 개수 제한을 쓰지 않고, 필터를 통과한 전체 데이터를 JSON으로 저장합니다.

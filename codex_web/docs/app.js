@@ -222,7 +222,7 @@ function tablePanel(title, rows, columns, subtitle = "") {
           const raw = col.value ? col.value(row) : row[col.key];
           const value = col.format ? col.format(raw, row) : raw;
           const cls = [col.numeric ? "num" : "", col.className ? col.className(raw, row) : ""].join(" ");
-          return `<td class="${cls}">${escapeHtml(value ?? "-")}</td>`;
+          return `<td class="${cls}">${col.html ? value ?? "-" : escapeHtml(value ?? "-")}</td>`;
         })
         .join("");
       return `<tr>${cells}</tr>`;
@@ -247,11 +247,257 @@ function latestRowOnOrBefore(rows, dateKey, dateStr) {
   return (candidates.length ? candidates : rows).at(-1);
 }
 
+function asNumber(value, fallback = 0) {
+  const number = Number(value);
+  return Number.isFinite(number) ? number : fallback;
+}
+
+function tradeTotalEok(row, market) {
+  if (!row) return null;
+  const krx = asNumber(row[`${market}_Trade`], 0);
+  const nxt = asNumber(row[`NXT_${market}_Trade`], 0);
+  const total = asNumber(row[`${market}_Trade_Total`], NaN);
+  return Number.isFinite(total) && total >= krx + nxt ? total : krx + nxt;
+}
+
+function shortDate(dateStr) {
+  return String(dateStr || "").slice(5);
+}
+
+function candleCell(row) {
+  const open = asNumber(row.Open, NaN);
+  const high = asNumber(row.High, NaN);
+  const low = asNumber(row.Low, NaN);
+  const close = asNumber(row.Close, NaN);
+  if (![open, high, low, close].every(Number.isFinite) || high <= low) return "-";
+  const y = (price) => 8 + ((high - price) / (high - low)) * 38;
+  const color = close >= open ? "var(--red)" : "var(--blue)";
+  const bodyY = Math.min(y(open), y(close));
+  const bodyH = Math.max(Math.abs(y(open) - y(close)), 3);
+  return `
+    <div class="candleCell">
+      <svg class="miniCandle" viewBox="0 0 54 54" aria-hidden="true">
+        <line x1="27" x2="27" y1="${y(high).toFixed(1)}" y2="${y(low).toFixed(1)}" stroke="${color}" stroke-width="2" />
+        <rect x="20" y="${bodyY.toFixed(1)}" width="14" height="${bodyH.toFixed(1)}" rx="1.5" fill="${color}" />
+      </svg>
+      <span>${formatNumber(close, 2)}</span>
+    </div>
+  `;
+}
+
+function chartShell(title, subtitle, body) {
+  return `
+    <section class="panel chartPanel">
+      <div class="panelHeader"><h3>${escapeHtml(title)}</h3><small>${escapeHtml(subtitle)}</small></div>
+      ${body || `<div class="empty">데이터 없음</div>`}
+    </section>
+  `;
+}
+
+function tradeBarsSvg(rows, options = {}) {
+  const data = (rows || []).slice(-24);
+  if (!data.length) return "";
+  const width = 940;
+  const height = options.height || 330;
+  const margin = { left: 52, right: 32, top: 26, bottom: 58 };
+  const plotW = width - margin.left - margin.right;
+  const plotH = height - margin.top - margin.bottom;
+  const maxTrade = Math.max(
+    1,
+    ...data.flatMap((row) => [tradeTotalEok(row, "KOSPI") || 0, tradeTotalEok(row, "KOSDAQ") || 0])
+  );
+  const y = (value) => margin.top + plotH - (value / (maxTrade * 1.18)) * plotH;
+  const groupW = plotW / data.length;
+  const barW = Math.max(5, Math.min(13, groupW * 0.24));
+  const colors = {
+    kospiKrx: "#64b5f6",
+    kospiNxt: "#1976d2",
+    kosdaqKrx: "#81c784",
+    kosdaqNxt: "#2e7d32",
+  };
+  const grid = [0, 0.25, 0.5, 0.75, 1]
+    .map((ratio) => {
+      const value = maxTrade * ratio;
+      const yy = y(value);
+      return `<line x1="${margin.left}" x2="${width - margin.right}" y1="${yy}" y2="${yy}" class="gridLine" />
+        <text x="${margin.left - 10}" y="${yy + 4}" class="axisText" text-anchor="end">${formatNumber(value / 10000, 1)}조</text>`;
+    })
+    .join("");
+
+  function rect(x, value, bottom, color) {
+    const safeValue = Math.max(0, asNumber(value, 0));
+    const safeBottom = Math.max(0, asNumber(bottom, 0));
+    if (!safeValue) return "";
+    const yTop = y(safeBottom + safeValue);
+    const yBottom = y(safeBottom);
+    return `<rect x="${x}" y="${yTop}" width="${barW}" height="${Math.max(yBottom - yTop, 1)}" fill="${color}" rx="2" />`;
+  }
+
+  const bars = data
+    .map((row, index) => {
+      const center = margin.left + groupW * index + groupW / 2;
+      const kospiX = center - barW - 2;
+      const kosdaqX = center + 2;
+      const kospiKrx = asNumber(row.KOSPI_Trade, 0);
+      const kospiNxt = asNumber(row.NXT_KOSPI_Trade, 0);
+      const kosdaqKrx = asNumber(row.KOSDAQ_Trade, 0);
+      const kosdaqNxt = asNumber(row.NXT_KOSDAQ_Trade, 0);
+      const label = index % Math.ceil(data.length / 8) === 0 || index === data.length - 1
+        ? `<text x="${center}" y="${height - 30}" class="axisText" text-anchor="middle">${shortDate(row.Date)}</text>`
+        : "";
+      return `
+        ${rect(kospiX, kospiKrx, 0, colors.kospiKrx)}
+        ${rect(kospiX, kospiNxt, kospiKrx, colors.kospiNxt)}
+        ${rect(kosdaqX, kosdaqKrx, 0, colors.kosdaqKrx)}
+        ${rect(kosdaqX, kosdaqNxt, kosdaqKrx, colors.kosdaqNxt)}
+        ${label}
+      `;
+    })
+    .join("");
+
+  const last = data.at(-1);
+  const lastCenter = margin.left + groupW * (data.length - 1) + groupW / 2;
+  const labels = last
+    ? `
+      <text x="${lastCenter - barW - 4}" y="${y(tradeTotalEok(last, "KOSPI") || 0) - 8}" class="chartValue" text-anchor="middle">${formatJoFromEok(tradeTotalEok(last, "KOSPI"))}</text>
+      <text x="${lastCenter + barW + 8}" y="${y(tradeTotalEok(last, "KOSDAQ") || 0) - 8}" class="chartValue" text-anchor="middle">${formatJoFromEok(tradeTotalEok(last, "KOSDAQ"))}</text>
+    `
+    : "";
+
+  return `
+    <svg class="chartSvg" viewBox="0 0 ${width} ${height}" role="img" aria-label="KRX and NXT trade value chart">
+      ${grid}
+      ${bars}
+      ${labels}
+      <line x1="${margin.left}" x2="${width - margin.right}" y1="${margin.top + plotH}" y2="${margin.top + plotH}" class="axisLine" />
+      <g class="legend">
+        <rect x="${margin.left}" y="8" width="10" height="10" fill="${colors.kospiKrx}" /><text x="${margin.left + 16}" y="17">KOSPI KRX</text>
+        <rect x="${margin.left + 105}" y="8" width="10" height="10" fill="${colors.kospiNxt}" /><text x="${margin.left + 121}" y="17">KOSPI NXT</text>
+        <rect x="${margin.left + 210}" y="8" width="10" height="10" fill="${colors.kosdaqKrx}" /><text x="${margin.left + 226}" y="17">KOSDAQ KRX</text>
+        <rect x="${margin.left + 332}" y="8" width="10" height="10" fill="${colors.kosdaqNxt}" /><text x="${margin.left + 348}" y="17">KOSDAQ NXT</text>
+      </g>
+    </svg>
+  `;
+}
+
+function liquiditySvg(rows) {
+  const data = (rows || []).slice(-24);
+  if (!data.length) return "";
+  const width = 940;
+  const height = 310;
+  const margin = { left: 52, right: 76, top: 28, bottom: 58 };
+  const plotW = width - margin.left - margin.right;
+  const plotH = height - margin.top - margin.bottom;
+  const deposits = data.map((row) => asNumber(row.Deposit_Value, NaN)).filter(Number.isFinite);
+  const closes = data.map((row) => asNumber(row.KOSPI_Close, NaN)).filter(Number.isFinite);
+  const depMin = deposits.length ? Math.min(...deposits) : 0;
+  const depMax = deposits.length ? Math.max(...deposits) : 1;
+  const closeMin = closes.length ? Math.min(...closes) : 0;
+  const closeMax = closes.length ? Math.max(...closes) : 1;
+  const depRange = Math.max(depMax - depMin, 1);
+  const closeRange = Math.max(closeMax - closeMin, 1);
+  const lineY = (value, min, range) => margin.top + plotH - ((value - min) / range) * plotH;
+  const groupW = plotW / data.length;
+  const depositPath = data
+    .map((row, index) => {
+      const value = asNumber(row.Deposit_Value, NaN);
+      if (!Number.isFinite(value)) return "";
+      const x = margin.left + groupW * index + groupW / 2;
+      return `${index === 0 ? "M" : "L"} ${x.toFixed(1)} ${lineY(value, depMin - depRange * 0.15, depRange * 1.3).toFixed(1)}`;
+    })
+    .filter(Boolean)
+    .join(" ");
+  const closePath = data
+    .map((row, index) => {
+      const value = asNumber(row.KOSPI_Close, NaN);
+      if (!Number.isFinite(value)) return "";
+      const x = margin.left + groupW * index + groupW / 2;
+      return `${index === 0 ? "M" : "L"} ${x.toFixed(1)} ${lineY(value, closeMin - closeRange * 0.15, closeRange * 1.3).toFixed(1)}`;
+    })
+    .filter(Boolean)
+    .join(" ");
+  return `
+    <div class="chartStackInner">
+      ${tradeBarsSvg(data, { height: 310 })}
+      <svg class="chartSvg overlayLines" viewBox="0 0 ${width} ${height}" aria-hidden="true">
+        <path d="${depositPath}" class="depositLine" />
+        <path d="${closePath}" class="closeLine" />
+        <g class="legend">
+          <line x1="${margin.left}" x2="${margin.left + 18}" y1="18" y2="18" class="depositLine" /><text x="${margin.left + 25}" y="22">고객예탁금</text>
+          <line x1="${margin.left + 122}" x2="${margin.left + 140}" y1="18" y2="18" class="closeLine" /><text x="${margin.left + 147}" y="22">KOSPI 종가</text>
+        </g>
+      </svg>
+    </div>
+  `;
+}
+
+function creditSvg(rows) {
+  const data = (rows || []).slice(-24);
+  if (!data.length) return "";
+  const width = 940;
+  const height = 260;
+  const margin = { left: 52, right: 70, top: 26, bottom: 48 };
+  const plotW = width - margin.left - margin.right;
+  const plotH = height - margin.top - margin.bottom;
+  const maxCredit = Math.max(1, ...data.map((row) => asNumber(row.Credit_Total, 0)));
+  const ratioValues = data.flatMap((row) => [asNumber(row.Ratio_KOSPI, NaN), asNumber(row.Ratio_KOSDAQ, NaN)]).filter(Number.isFinite);
+  const ratioMin = ratioValues.length ? Math.min(...ratioValues) : 0;
+  const ratioMax = ratioValues.length ? Math.max(...ratioValues) : 1;
+  const ratioRange = Math.max(ratioMax - ratioMin, 0.01);
+  const yCredit = (value) => margin.top + plotH - (value / (maxCredit * 1.12)) * plotH;
+  const yRatio = (value) => margin.top + plotH - ((value - ratioMin) / ratioRange) * plotH;
+  const groupW = plotW / data.length;
+  const barW = Math.max(5, Math.min(15, groupW * 0.34));
+  const bars = data
+    .map((row, index) => {
+      const x = margin.left + groupW * index + groupW / 2 - barW / 2;
+      const kospi = asNumber(row.Credit_KOSPI, 0);
+      const kosdaq = asNumber(row.Credit_KOSDAQ, 0);
+      const y1 = yCredit(kospi);
+      const y2 = yCredit(kospi + kosdaq);
+      const y0 = yCredit(0);
+      const label = index % Math.ceil(data.length / 8) === 0 || index === data.length - 1
+        ? `<text x="${x + barW / 2}" y="${height - 24}" class="axisText" text-anchor="middle">${shortDate(row.Date)}</text>`
+        : "";
+      return `
+        <rect x="${x}" y="${y1}" width="${barW}" height="${Math.max(y0 - y1, 1)}" fill="#4a7ebb" rx="2" />
+        <rect x="${x}" y="${y2}" width="${barW}" height="${Math.max(y1 - y2, 1)}" fill="#bb4a4a" rx="2" />
+        ${label}
+      `;
+    })
+    .join("");
+  const line = (key, cls) =>
+    data
+      .map((row, index) => {
+        const value = asNumber(row[key], NaN);
+        if (!Number.isFinite(value)) return "";
+        const x = margin.left + groupW * index + groupW / 2;
+        return `${index === 0 ? "M" : "L"} ${x.toFixed(1)} ${yRatio(value).toFixed(1)}`;
+      })
+      .filter(Boolean)
+      .join(" ");
+  return `
+    <svg class="chartSvg" viewBox="0 0 ${width} ${height}" role="img" aria-label="credit balance and ratio chart">
+      <line x1="${margin.left}" x2="${width - margin.right}" y1="${margin.top + plotH}" y2="${margin.top + plotH}" class="axisLine" />
+      ${bars}
+      <path d="${line("Ratio_KOSPI")}" class="ratioKospiLine" />
+      <path d="${line("Ratio_KOSDAQ")}" class="ratioKosdaqLine" />
+      <g class="legend">
+        <rect x="${margin.left}" y="8" width="10" height="10" fill="#4a7ebb" /><text x="${margin.left + 16}" y="17">KOSPI 신용</text>
+        <rect x="${margin.left + 100}" y="8" width="10" height="10" fill="#bb4a4a" /><text x="${margin.left + 116}" y="17">KOSDAQ 신용</text>
+        <line x1="${margin.left + 222}" x2="${margin.left + 240}" y1="13" y2="13" class="ratioKospiLine" /><text x="${margin.left + 247}" y="17">KOSPI 잔고율</text>
+        <line x1="${margin.left + 355}" x2="${margin.left + 373}" y1="13" y2="13" class="ratioKosdaqLine" /><text x="${margin.left + 380}" y="17">KOSDAQ 잔고율</text>
+      </g>
+    </svg>
+  `;
+}
+
 function renderSummary() {
   const usPayload = currentPayloads.us_market;
   const flow = currentPayloads.investor_flow?.data || {};
   const ipo = currentPayloads.ipo?.data || {};
   const alert = currentPayloads.krx_alert?.data || {};
+  const alertForDate = !alert.target_date || alert.target_date === currentDate ? alert : {};
   const us = usPayload?.data || {};
   const liquidity = currentPayloads.liquidity?.data || {};
   const foreignTop = flow.foreigner?.[0];
@@ -259,8 +505,8 @@ function renderSummary() {
   const todayIpoItems = ipo.today_items || [];
   const nextIpoItems = ipo.next_items || ipo.items || [];
   const liquidityRow = latestRowOnOrBefore(liquidity.lower, "Date", currentDate);
-  const releaseCount = alert.release?.length || 0;
-  const designationCount = (alert.designation?.length || 0) + (alert.redesignation?.length || 0);
+  const releaseCount = alertForDate.release?.length || 0;
+  const designationCount = (alertForDate.designation?.length || 0) + (alertForDate.redesignation?.length || 0);
   const nasdaq = (us.fixed || []).find((row) => row.Ticker === "^IXIC");
   const usMarketDate = us.market_date || us.target_session_date || shiftDateString(usPayload?.date || currentDate, -1);
   const ipoQuickRows = [
@@ -274,8 +520,8 @@ function renderSummary() {
     metric("신규상장", `${todayIpoItems.length}/${nextIpoItems.length}`, `${ipo.today_listing_date || "오늘"} / ${ipo.next_listing_date || ipo.target_listing_date || "다음"}`),
     metric("투자경고", `${releaseCount}/${designationCount}`, "해제 / 지정·재지정"),
     metric("NASDAQ", nasdaq ? formatPct(nasdaq.Chg) : "-", usMarketDate || "미국장"),
-    metric("KOSPI 거래대금", formatJoFromEok(liquidityRow?.KOSPI_Trade_Total), liquidityRow?.Date || "시장 유동성"),
-    metric("KOSDAQ 거래대금", formatJoFromEok(liquidityRow?.KOSDAQ_Trade_Total), liquidityRow?.Date || "시장 유동성"),
+    metric("KOSPI 거래대금", formatJoFromEok(tradeTotalEok(liquidityRow, "KOSPI")), liquidityRow?.Date ? `${liquidityRow.Date} KRX+NXT` : "시장 유동성"),
+    metric("KOSDAQ 거래대금", formatJoFromEok(tradeTotalEok(liquidityRow, "KOSDAQ")), liquidityRow?.Date ? `${liquidityRow.Date} KRX+NXT` : "시장 유동성"),
     metric("Data", currentDate || "-", `${weekdayEn(currentDate)} · ${selectedDay() ? "available" : "missing"}`),
   ].join("");
 
@@ -293,6 +539,10 @@ function renderAlerts() {
     return;
   }
   const data = payload.data || {};
+  if (data.target_date && currentDate && data.target_date !== currentDate) {
+    $("alerts").innerHTML = sectionEmpty("투자경고", `${currentDate} 화면용 Risk Watch 데이터가 아직 없습니다. 현재 파일 대상일: ${data.target_date}`);
+    return;
+  }
   const releaseCols = [
     { key: "code", label: "Code" },
     { key: "name", label: "종목" },
@@ -331,8 +581,7 @@ function renderUsMarket() {
     { key: "Name", label: "Name" },
     { key: "Chg", label: "Chg", numeric: true, format: formatPct, className: signedClass },
     { key: "Body", label: "Body", numeric: true, format: formatPct, className: signedClass },
-    { key: "Close", label: "Close", numeric: true, format: (v) => formatNumber(v, 2) },
-    { key: "Volume", label: "Volume", numeric: true, format: formatNumber },
+    { label: "Candle", value: candleCell, html: true },
   ];
   const marketDate = payload.data.market_date || payload.data.target_session_date || shiftDateString(payload.date || currentDate, -1) || "Latest";
   $("us").innerHTML = `
@@ -360,7 +609,7 @@ function renderFlow() {
     { key: "market", label: "시장" },
   ];
   $("flow").innerHTML = `
-    <div class="sectionHeader"><div><span class="eyebrow">Flow</span><h2>수급</h2></div><span class="dateBadge">${escapeHtml(payload.data.trade_date || "")}</span></div>
+    <div class="sectionHeader"><div><span class="eyebrow">Flow</span><h2>전일 수급 상위</h2></div><span class="dateBadge">${escapeHtml(payload.data.trade_date || "")}</span></div>
     <div class="twoCol">
       ${tablePanel("외국인", payload.data.foreigner || [], cols)}
       ${tablePanel("기관합계", payload.data.institution || [], cols)}
@@ -397,31 +646,14 @@ function renderIpo() {
 
 function renderExtra() {
   const liquidity = currentPayloads.liquidity;
-  const nxt = currentPayloads.nxt_market;
-  const lowerCols = [
-    { key: "Date", label: "Date" },
-    { key: "KOSPI_Trade_Total", label: "KOSPI 거래대금", numeric: true, format: (v) => `${formatNumber(v)}억` },
-    { key: "KOSDAQ_Trade_Total", label: "KOSDAQ 거래대금", numeric: true, format: (v) => `${formatNumber(v)}억` },
-    { key: "Deposit_Value", label: "예탁금", numeric: true, format: (v) => `${formatNumber(v)}억` },
-  ];
-  const nxtRows = nxt?.status === "ok"
-    ? [
-        { market: "Total", value: nxt.data.total_trade_value, volume: nxt.data.total_trade_volume, issues: nxt.data.issue_total_count },
-        { market: "KOSPI", value: nxt.data.kospi_trade_value, volume: nxt.data.kospi_trade_volume, issues: nxt.data.issue_kospi_count },
-        { market: "KOSDAQ", value: nxt.data.kosdaq_trade_value, volume: nxt.data.kosdaq_trade_volume, issues: nxt.data.issue_kosdaq_count },
-      ]
-    : [];
-  const nxtCols = [
-    { key: "market", label: "Market" },
-    { key: "value", label: "거래대금", numeric: true, format: formatEok },
-    { key: "volume", label: "거래량", numeric: true, format: formatNumber },
-    { key: "issues", label: "종목수", numeric: true, format: formatNumber },
-  ];
+  const lowerRows = liquidity?.data?.lower || [];
+  const upperRows = liquidity?.data?.upper || [];
+  const latestLower = lowerRows.at(-1);
   $("extra").innerHTML = `
-    <div class="sectionHeader"><div><span class="eyebrow">Extra</span><h2>보조 지표</h2></div><span class="dateBadge">Liquidity / NXT</span></div>
+    <div class="sectionHeader"><div><span class="eyebrow">Extra</span><h2>보조 지표</h2></div><span class="dateBadge">Liquidity / KRX+NXT</span></div>
     <div class="twoCol">
-      ${tablePanel("시장 유동성", liquidity?.data?.lower || [], lowerCols)}
-      ${tablePanel("NXT 거래대금", nxtRows, nxtCols, nxt?.data?.trade_time || "")}
+      ${chartShell("시장 유동성", "신용잔고율 / 거래대금 / 예탁금", `${creditSvg(upperRows)}${liquiditySvg(lowerRows)}`)}
+      ${chartShell("KOSPI · KOSDAQ 거래대금", latestLower?.Date ? `${latestLower.Date} KRX + NXT` : "KRX + NXT", tradeBarsSvg(lowerRows, { height: 390 }))}
     </div>
   `;
 }

@@ -44,7 +44,24 @@ jobs:
         run: |
           REPORTS="default"
           if [ "$EVENT_NAME" = "push" ]; then
-            echo "Push event: deploy site code with the committed data snapshot."
+            BASE_DATE=$(PYTHONPATH=codex_web/src python - <<'PY'
+          import datetime as dt
+          import pandas as pd
+          from codex_web.sources.common import KST, TradingDayCalendar
+
+          today = dt.datetime.now(KST).date()
+          sessions = TradingDayCalendar().krx_sessions
+          pos = sessions.searchsorted(pd.Timestamp(today))
+          if pos < len(sessions) and sessions[pos].date() == today:
+              pos -= 1
+          else:
+              pos -= 1
+          if pos < 0:
+              raise SystemExit("No previous KRX session found")
+          print(sessions[pos].date().isoformat())
+          PY
+          )
+            python codex_web/update_reports.py --date "$BASE_DATE" --reports krx_alert --verbose
             exit 0
           fi
           if [ "$EVENT_NAME" = "schedule" ]; then

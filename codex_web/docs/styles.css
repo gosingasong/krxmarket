@@ -308,7 +308,7 @@ input[type="date"] {
 
 table {
   width: 100%;
-  min-width: 740px;
+  min-width: 640px;
   border-collapse: collapse;
 }
 
@@ -355,6 +355,96 @@ tbody tr:hover {
   padding: 28px 16px;
   color: var(--muted);
   text-align: center;
+}
+
+.candleCell {
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+  min-width: 112px;
+  font-variant-numeric: tabular-nums;
+}
+
+.miniCandle {
+  width: 42px;
+  height: 42px;
+  border: 1px solid #243140;
+  border-radius: 6px;
+  background: #090d12;
+}
+
+.chartPanel {
+  min-width: 0;
+}
+
+.chartSvg {
+  display: block;
+  width: 100%;
+  height: auto;
+  padding: 8px 10px 12px;
+}
+
+.chartStackInner {
+  position: relative;
+}
+
+.overlayLines {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.gridLine {
+  stroke: #233140;
+  stroke-dasharray: 4 5;
+}
+
+.axisLine {
+  stroke: #3a4a5d;
+}
+
+.axisText,
+.legend text {
+  fill: var(--muted);
+  font-size: 12px;
+}
+
+.chartValue {
+  fill: var(--text);
+  font-size: 13px;
+  font-weight: 800;
+  paint-order: stroke;
+  stroke: var(--bg);
+  stroke-width: 4px;
+}
+
+.depositLine {
+  fill: none;
+  stroke: #ff9100;
+  stroke-width: 3.5;
+  filter: drop-shadow(0 0 5px rgba(255, 145, 0, 0.5));
+}
+
+.closeLine {
+  fill: none;
+  stroke: #ffffff;
+  stroke-width: 1.8;
+  opacity: 0.9;
+}
+
+.ratioKospiLine {
+  fill: none;
+  stroke: #00ff41;
+  stroke-width: 2.6;
+  filter: drop-shadow(0 0 5px rgba(0, 255, 65, 0.35));
+}
+
+.ratioKosdaqLine {
+  fill: none;
+  stroke: #ffcc00;
+  stroke-width: 2.6;
+  filter: drop-shadow(0 0 5px rgba(255, 204, 0, 0.35));
 }
 
 .jsonBlock {
