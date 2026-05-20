@@ -7,9 +7,9 @@ on:
       - main
   schedule:
     # UTC cron. KST = UTC+9.
-    - cron: "50 21 * * 0-4" # 06:50 KST, US market
-    - cron: "59 21 * * 0-4" # 06:59 KST, US market retry
-    - cron: "10 22 * * 0-4" # 07:10 KST, US market retry
+    - cron: "30 21 * * 0-4" # 06:30 KST, US market
+    - cron: "39 21 * * 0-4" # 06:39 KST, US market retry
+    - cron: "50 21 * * 0-4" # 06:50 KST, US market retry
     - cron: "20 6 * * 1-5"  # 15:20 KST, IPO
     - cron: "1 9 * * 1-5"   # 18:01 KST, investor flow
     - cron: "10 11 * * 1-5" # 20:10 KST, liquidity / NXT
@@ -78,7 +78,7 @@ jobs:
           fi
           if [ "$EVENT_NAME" = "schedule" ]; then
             case "$EVENT_SCHEDULE" in
-              "50 21 * * 0-4"|"59 21 * * 0-4"|"10 22 * * 0-4") REPORTS="us_market" ;;
+              "30 21 * * 0-4"|"39 21 * * 0-4"|"50 21 * * 0-4") REPORTS="us_market" ;;
               "20 6 * * 1-5") REPORTS="ipo" ;;
               "1 9 * * 1-5") REPORTS="investor_flow" ;;
               "10 11 * * 1-5") REPORTS="liquidity,nxt_market" ;;
