@@ -44,6 +44,12 @@ class DashboardStaticTests(unittest.TestCase):
         self.assertIn('name="KST"', workflow)
         self.assertIn("dt.datetime.now(KST).isoformat()", workflow)
 
+    def test_workflow_has_redundant_us_market_morning_refreshes(self):
+        workflow = WORKFLOW.read_text(encoding="utf-8")
+        for cron in ['"50 21 * * 0-4"', '"59 21 * * 0-4"', '"10 22 * * 0-4"']:
+            self.assertIn(cron, workflow)
+        self.assertRegex(workflow, r'"50 21 \* \* 0-4"\|"59 21 \* \* 0-4"\|"10 22 \* \* 0-4"\) REPORTS="us_market"')
+
     def test_workflow_has_redundant_krx_alert_after_8pm_and_today_date_args(self):
         workflow = WORKFLOW.read_text(encoding="utf-8")
         for cron in ['"25 11 * * 1-5"', '"45 11 * * 1-5"', '"5 12 * * 1-5"']:
