@@ -20,6 +20,8 @@ class ReportContext:
         flow_limit=100,
         sector_lookup_limit=30,
         skip_non_trading=True,
+        flow_source_date=None,
+        flow_rollover_next=False,
     ):
         self.base_date = base_date
         self.root_dir = Path(root_dir).resolve()
@@ -27,6 +29,8 @@ class ReportContext:
         self.flow_limit = flow_limit
         self.sector_lookup_limit = sector_lookup_limit
         self.skip_non_trading = skip_non_trading
+        self.flow_source_date = flow_source_date
+        self.flow_rollover_next = flow_rollover_next
         self.calendar = TradingDayCalendar()
 
     @property
@@ -68,9 +72,11 @@ def is_krx_trading_day(ctx):
 def fetch_investor_flow_report(ctx):
     if ctx.skip_non_trading and not is_krx_trading_day(ctx):
         return skipped_payload(ctx, "investor_flow", "KRX 휴장일")
-    source_date = ctx.calendar.shift_krx_session(pd.Timestamp(ctx.base_date), -1)
+    source_date = pd.Timestamp(ctx.flow_source_date) if ctx.flow_source_date else ctx.calendar.shift_krx_session(pd.Timestamp(ctx.base_date), -1)
     if source_date is None:
         return skipped_payload(ctx, "investor_flow", "전 거래일 계산 실패")
+    if ctx.skip_non_trading and not ctx.calendar.is_krx_trading_day(source_date):
+        return skipped_payload(ctx, "investor_flow", "수급 기준일 KRX 휴장일")
     data = fetch_investor_flow(
         source_date.strftime("%Y%m%d"),
         limit=ctx.flow_limit,
@@ -82,12 +88,20 @@ def fetch_investor_flow_report(ctx):
         "foreigner_count": len(data["foreigner"]),
         "foreigner_total_count": data["foreigner_total_count"],
     }
+    display_dates = [ctx.date_str]
+    if ctx.flow_rollover_next:
+        next_date = ctx.calendar.add_krx_trading_days(pd.Timestamp(ctx.base_date), 1)
+        if next_date is not None:
+            next_date_str = next_date.date().isoformat()
+            if next_date_str not in display_dates:
+                display_dates.append(next_date_str)
     return base_payload(
         ctx,
         "investor_flow",
         data=data,
         summary=summary,
         display_date=ctx.date_str,
+        display_dates=display_dates,
     )
 
 

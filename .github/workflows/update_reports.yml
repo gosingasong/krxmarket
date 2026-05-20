@@ -78,7 +78,18 @@ jobs:
             esac
           fi
           DATE_ARGS=""
-          if [ "$EVENT_NAME" = "schedule" ] && { [ "$EVENT_SCHEDULE" = "1 9 * * 1-5" ] || [ "$EVENT_SCHEDULE" = "10 11 * * 1-5" ]; }; then
+          FLOW_ARGS=""
+          if [ "$EVENT_NAME" = "schedule" ] && [ "$EVENT_SCHEDULE" = "1 9 * * 1-5" ]; then
+            BASE_DATE=$(PYTHONPATH=codex_web/src python - <<'PY'
+          import datetime as dt
+          from codex_web.sources.common import KST
+
+          print(dt.datetime.now(KST).date().isoformat())
+          PY
+          )
+            DATE_ARGS="--date $BASE_DATE"
+            FLOW_ARGS="--flow-source-date $BASE_DATE --flow-rollover-next"
+          elif [ "$EVENT_NAME" = "schedule" ] && [ "$EVENT_SCHEDULE" = "10 11 * * 1-5" ]; then
             BASE_DATE=$(PYTHONPATH=codex_web/src python - <<'PY'
           import datetime as dt
           import pandas as pd
@@ -93,7 +104,7 @@ jobs:
           )
             DATE_ARGS="--date $BASE_DATE"
           fi
-          python codex_web/update_reports.py $DATE_ARGS --reports "$REPORTS" --verbose
+          python codex_web/update_reports.py $DATE_ARGS $FLOW_ARGS --reports "$REPORTS" --verbose
 
       - name: Record workflow status
         if: always()

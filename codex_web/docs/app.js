@@ -714,7 +714,7 @@ function renderIpo() {
   }
   const cols = [
     { key: "name", label: "회사" },
-    { key: "code", label: "Code" },
+    { key: "main_product", label: "주요제품" },
     { key: "lead_manager", label: "주간사" },
     { key: "offer_price", label: "공모가", numeric: true, format: formatNumber },
     { key: "market_cap", label: "시가총액", numeric: true, format: formatEok },

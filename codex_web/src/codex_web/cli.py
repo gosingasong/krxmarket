@@ -51,6 +51,8 @@ def main(argv=None):
     parser.add_argument("--out-dir", default=str(Path(__file__).resolve().parents[2] / "docs" / "data"))
     parser.add_argument("--flow-limit", type=int, default=100, help="Investor flow rows per investor. Use 0 for all positive rows.")
     parser.add_argument("--sector-lookup-limit", type=int, default=30, help="Naver sector lookup count per investor flow side.")
+    parser.add_argument("--flow-source-date", help="Investor flow source trade date in YYYY-MM-DD. Default: previous KRX session of --date.")
+    parser.add_argument("--flow-rollover-next", action="store_true", help="Also write investor_flow to the next KRX trading-day folder.")
     parser.add_argument("--force-non-trading", action="store_true", help="Generate KRX reports even on non-trading days.")
     parser.add_argument("--fail-fast", action="store_true", help="Stop on the first report error.")
     parser.add_argument("--prune-days", type=int, default=60, help="Delete docs/data date folders older than this many days.")
@@ -75,6 +77,8 @@ def main(argv=None):
         flow_limit=args.flow_limit,
         sector_lookup_limit=args.sector_lookup_limit,
         skip_non_trading=not args.force_non_trading,
+        flow_source_date=parse_date(args.flow_source_date) if args.flow_source_date else None,
+        flow_rollover_next=args.flow_rollover_next,
     )
 
     logging.info("date=%s reports=%s out_dir=%s", base_date, ",".join(report_names), out_dir)
@@ -102,10 +106,11 @@ def main(argv=None):
                 written_dates.add(ctx.date_str)
                 raise
 
-        write_date = payload.get("display_date") or ctx.date_str
-        path = write_report(out_dir, write_date, report_name, payload)
-        written_dates.add(write_date)
-        logging.info("[%s] wrote %s status=%s", report_name, path, payload.get("status"))
+        write_dates = payload.get("display_dates") or [payload.get("display_date") or ctx.date_str]
+        for write_date in write_dates:
+            path = write_report(out_dir, write_date, report_name, payload)
+            written_dates.add(write_date)
+            logging.info("[%s] wrote %s status=%s", report_name, path, payload.get("status"))
 
     for date_str in sorted(written_dates):
         build_day_manifest(out_dir, date_str)
