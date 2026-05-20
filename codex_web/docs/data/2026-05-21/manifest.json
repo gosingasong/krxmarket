@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "date": "2026-05-21",
-  "generated_at": "2026-05-20T13:46:43.728796+00:00",
+  "generated_at": "2026-05-20T14:04:31.419531+00:00",
   "reports": {
     "investor_flow": {
       "file": "investor_flow.json",
@@ -20,7 +20,7 @@
       "file": "krx_alert.json",
       "report": "krx_alert",
       "status": "ok",
-      "generated_at": "2026-05-20T22:15:55.739767+09:00",
+      "generated_at": "2026-05-20T23:04:31.416052+09:00",
       "summary": {
         "release_count": 3,
         "designation_count": 2,
