@@ -1,0 +1,20 @@
+{
+  "schema_version": 1,
+  "date": "2026-05-19",
+  "generated_at": "2026-05-20T13:14:21.353672+00:00",
+  "reports": {
+    "krx_alert": {
+      "file": "krx_alert.json",
+      "report": "krx_alert",
+      "status": "ok",
+      "generated_at": "2026-05-20T22:14:21.351885+09:00",
+      "summary": {
+        "release_count": 4,
+        "designation_count": 2,
+        "redesignation_count": 0,
+        "target_date": "2026-05-20",
+        "status": "ok"
+      }
+    }
+  }
+}
