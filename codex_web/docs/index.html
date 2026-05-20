@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>KRX Market Notebook</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <main class="shell">
+      <header class="topbar">
+        <div class="brand">
+          <span class="eyebrow">KRX Market</span>
+          <h1>Market Notebook</h1>
+          <p id="lastUpdated">데이터 로딩 중</p>
+        </div>
+        <div class="dateTools">
+          <button id="todayButton" type="button">Today</button>
+          <label>
+            <span>Calendar</span>
+            <input id="dateInput" type="date" />
+          </label>
+        </div>
+      </header>
+
+      <section class="heroGrid">
+        <section class="briefPanel">
+          <div class="sectionHeader">
+            <div>
+              <span class="eyebrow">Today Brief</span>
+              <h2 id="briefTitle">오늘 요약</h2>
+            </div>
+            <span id="selectedDateLabel" class="dateBadge">-</span>
+          </div>
+          <div id="summaryCards" class="summaryCards"></div>
+          <div id="quickLists" class="quickLists"></div>
+        </section>
+
+        <section class="notePanel">
+          <div class="sectionHeader">
+            <div>
+              <span class="eyebrow">Memo</span>
+              <h2>내 메모</h2>
+            </div>
+            <small id="noteStatus">브라우저에 저장</small>
+          </div>
+          <textarea id="memoBox" spellcheck="false" placeholder="오늘 시장에서 볼 것, 장중 체크할 종목, 내 판단을 크게 남겨두세요."></textarea>
+        </section>
+      </section>
+
+      <nav class="jumpNav" aria-label="Sections">
+        <a href="#alerts">투자경고</a>
+        <a href="#us">미국장</a>
+        <a href="#flow">수급</a>
+        <a href="#ipo">IPO</a>
+        <a href="#extra">보조 지표</a>
+      </nav>
+
+      <section id="alerts" class="reportSection"></section>
+      <section id="us" class="reportSection"></section>
+      <section id="flow" class="reportSection"></section>
+      <section id="ipo" class="reportSection"></section>
+      <section id="extra" class="reportSection"></section>
+    </main>
+
+    <script src="app.js"></script>
+  </body>
+</html>

@@ -1,0 +1,8 @@
+# Core crawler dependencies
+pandas
+numpy
+requests
+beautifulsoup4
+pykrx
+exchange-calendars
+yfinance
