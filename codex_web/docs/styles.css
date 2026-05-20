@@ -217,17 +217,54 @@ input[type="date"] {
   border-bottom: 0;
 }
 
-.notePanel textarea {
+.memoStack {
+  display: grid;
+  min-height: 294px;
+}
+
+.memoBlock {
+  display: grid;
+  border-bottom: 1px solid var(--line);
+}
+
+.memoBlock:last-child {
+  border-bottom: 0;
+}
+
+.memoBlock > span {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 11px 16px 0;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.memoBlock small {
+  color: var(--muted);
+  font-weight: 500;
+}
+
+.memoBlock textarea {
   display: block;
   width: 100%;
-  min-height: 294px;
   resize: vertical;
   border: 0;
   outline: 0;
   background: #0a0f14;
   color: var(--text);
-  padding: 18px;
-  font: 700 24px/1.45 "Segoe UI", "Apple SD Gothic Neo", "Malgun Gothic", system-ui, sans-serif;
+  padding: 12px 16px 18px;
+}
+
+.globalMemo {
+  min-height: 156px;
+  font: 800 24px/1.45 "Segoe UI", "Apple SD Gothic Neo", "Malgun Gothic", system-ui, sans-serif;
+}
+
+.dailyMemo {
+  min-height: 126px;
+  font: 400 18px/1.5 "Segoe UI", "Apple SD Gothic Neo", "Malgun Gothic", system-ui, sans-serif;
 }
 
 .jumpNav {
@@ -361,8 +398,17 @@ tbody tr:hover {
     grid-template-columns: 1fr;
   }
 
-  .notePanel textarea {
-    min-height: 220px;
+  .memoStack {
+    min-height: 260px;
+  }
+
+  .globalMemo {
+    min-height: 140px;
     font-size: 20px;
+  }
+
+  .dailyMemo {
+    min-height: 120px;
+    font-size: 16px;
   }
 }

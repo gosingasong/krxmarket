@@ -31,6 +31,11 @@ function formatEok(value, digits = 0) {
   return `${formatNumber(Number(value) / 100000000, digits)}억`;
 }
 
+function formatJoFromEok(value) {
+  if (value === null || value === undefined || Number.isNaN(Number(value))) return "-";
+  return `${formatNumber(Number(value) / 10000, 1)}조`;
+}
+
 function formatPct(value) {
   if (value === null || value === undefined || value === "") return "-";
   const number = Number(value);
@@ -56,6 +61,64 @@ function availableDates() {
   return appIndex?.dates?.map((item) => item.date) || [];
 }
 
+function sortedDates() {
+  return availableDates().slice().sort();
+}
+
+function latestDateOnOrBefore(dateStr) {
+  const candidates = sortedDates().filter((date) => date <= dateStr);
+  return candidates.at(-1) || null;
+}
+
+function previousAvailableDate(dateStr) {
+  const candidates = sortedDates().filter((date) => date < dateStr);
+  return candidates.at(-1) || null;
+}
+
+function kstNowParts() {
+  const parts = new Intl.DateTimeFormat("en-US", {
+    timeZone: "Asia/Seoul",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    hour12: false,
+  }).formatToParts(new Date());
+  const values = Object.fromEntries(parts.map((part) => [part.type, part.value]));
+  const hour = Number(values.hour === "24" ? "0" : values.hour);
+  return {
+    date: `${values.year}-${values.month}-${values.day}`,
+    hour,
+  };
+}
+
+function preferredCurrentDate() {
+  const now = kstNowParts();
+  if (now.hour < 6) {
+    return previousAvailableDate(now.date) || latestDateOnOrBefore(now.date) || appIndex?.latest_date || now.date;
+  }
+  const [year, month, day] = now.date.split("-").map(Number);
+  const dayOfWeek = new Date(Date.UTC(year, month - 1, day)).getUTCDay();
+  const isWeekday = dayOfWeek >= 1 && dayOfWeek <= 5;
+  return availableDates().includes(now.date) || isWeekday
+    ? now.date
+    : latestDateOnOrBefore(now.date) || appIndex?.latest_date || now.date;
+}
+
+function weekdayEn(dateStr) {
+  if (!dateStr) return "-";
+  const [year, month, day] = dateStr.split("-").map(Number);
+  if (!year || !month || !day) return "-";
+  return new Date(Date.UTC(year, month - 1, day)).toLocaleDateString("en-US", {
+    weekday: "long",
+    timeZone: "UTC",
+  });
+}
+
+function dateWithWeekday(dateStr) {
+  return dateStr ? `${dateStr} ${weekdayEn(dateStr)}` : "-";
+}
+
 function selectedDay() {
   return appIndex?.dates?.find((item) => item.date === currentDate);
 }
@@ -70,27 +133,42 @@ async function loadReport(name) {
 
 async function loadCurrentPayloads() {
   const day = selectedDay();
-  const names = REPORT_ORDER.filter((name) => day?.reports?.[name]);
+  const names = day ? REPORT_ORDER.filter((name) => day.reports?.[name]) : REPORT_ORDER;
   const entries = await Promise.all(names.map(async (name) => [name, await loadReport(name)]));
   currentPayloads = Object.fromEntries(entries);
 }
 
-function memoKey() {
-  return `krxmarket:memo:${currentDate || "none"}`;
+function globalMemoKey() {
+  return "krxmarket:memo:global";
+}
+
+function dailyMemoKey() {
+  return `krxmarket:memo:daily:${currentDate || "none"}`;
 }
 
 function loadMemo() {
-  $("memoBox").value = localStorage.getItem(memoKey()) || "";
-  $("noteStatus").textContent = "브라우저에 저장";
+  $("globalMemoBox").value = localStorage.getItem(globalMemoKey()) || "";
+  $("dailyMemoBox").value = localStorage.getItem(dailyMemoKey()) || "";
+  $("globalNoteStatus").textContent = "브라우저에 저장";
+  $("dailyNoteStatus").textContent = currentDate ? `${currentDate} 저장` : "선택일에 저장";
 }
 
-function saveMemo() {
-  localStorage.setItem(memoKey(), $("memoBox").value);
-  $("noteStatus").textContent = "저장됨";
-  window.clearTimeout(saveMemo._timer);
-  saveMemo._timer = window.setTimeout(() => {
-    $("noteStatus").textContent = "브라우저에 저장";
+function showSavedStatus(id, idleText) {
+  $(id).textContent = "저장됨";
+  window.clearTimeout(showSavedStatus[id]);
+  showSavedStatus[id] = window.setTimeout(() => {
+    $(id).textContent = idleText;
   }, 1200);
+}
+
+function saveGlobalMemo() {
+  localStorage.setItem(globalMemoKey(), $("globalMemoBox").value);
+  showSavedStatus("globalNoteStatus", "브라우저에 저장");
+}
+
+function saveDailyMemo() {
+  localStorage.setItem(dailyMemoKey(), $("dailyMemoBox").value);
+  showSavedStatus("dailyNoteStatus", currentDate ? `${currentDate} 저장` : "선택일에 저장");
 }
 
 function metric(label, value, caption = "") {
@@ -155,33 +233,46 @@ function tablePanel(title, rows, columns, subtitle = "") {
   `;
 }
 
+function latestRowOnOrBefore(rows, dateKey, dateStr) {
+  if (!rows?.length) return null;
+  const candidates = rows.filter((row) => !dateStr || !row[dateKey] || row[dateKey] <= dateStr);
+  return (candidates.length ? candidates : rows).at(-1);
+}
+
 function renderSummary() {
   const flow = currentPayloads.investor_flow?.data || {};
   const ipo = currentPayloads.ipo?.data || {};
   const alert = currentPayloads.krx_alert?.data || {};
   const us = currentPayloads.us_market?.data || {};
+  const liquidity = currentPayloads.liquidity?.data || {};
   const foreignTop = flow.foreigner?.[0];
   const instTop = flow.institution?.[0];
-  const ipoCount = ipo.items?.length || 0;
+  const todayIpoItems = ipo.today_items || [];
+  const nextIpoItems = ipo.next_items || ipo.items || [];
+  const liquidityRow = latestRowOnOrBefore(liquidity.lower, "Date", currentDate);
   const releaseCount = alert.release?.length || 0;
   const designationCount = (alert.designation?.length || 0) + (alert.redesignation?.length || 0);
   const nasdaq = (us.fixed || []).find((row) => row.Ticker === "^IXIC");
+  const ipoQuickRows = [
+    ...todayIpoItems.map((row) => ({ ...row, bucket: "오늘" })),
+    ...nextIpoItems.map((row) => ({ ...row, bucket: "다음" })),
+  ];
 
   $("summaryCards").innerHTML = [
     metric("외국인 1위", foreignTop?.name || "-", foreignTop ? `${formatNumber(foreignTop.buy_amount_eok)}억 매수` : "수급"),
     metric("기관 1위", instTop?.name || "-", instTop ? `${formatNumber(instTop.buy_amount_eok)}억 매수` : "수급"),
-    metric("신규상장", `${ipoCount}`, ipo.target_listing_date || "다음 거래일"),
+    metric("신규상장", `${todayIpoItems.length}/${nextIpoItems.length}`, `${ipo.today_listing_date || "오늘"} / ${ipo.next_listing_date || ipo.target_listing_date || "다음"}`),
     metric("투자경고", `${releaseCount}/${designationCount}`, "해제 / 지정·재지정"),
-    metric("NASDAQ", nasdaq ? formatPct(nasdaq.Chg) : "-", "미국장"),
-    metric("US Top", us.top_traded_value?.[0]?.Ticker || "-", us.top_traded_value?.[0]?.Name || "거래대금"),
-    metric("NXT", currentPayloads.nxt_market?.data?.trade_time || "-", currentPayloads.nxt_market?.data?.trade_date || "누적 거래대금"),
-    metric("Data", currentDate || "-", selectedDay() ? "available" : "missing"),
+    metric("NASDAQ", nasdaq ? formatPct(nasdaq.Chg) : "-", us.market_date || "미국장"),
+    metric("KOSPI 거래대금", formatJoFromEok(liquidityRow?.KOSPI_Trade_Total), liquidityRow?.Date || "시장 유동성"),
+    metric("KOSDAQ 거래대금", formatJoFromEok(liquidityRow?.KOSDAQ_Trade_Total), liquidityRow?.Date || "시장 유동성"),
+    metric("Data", currentDate || "-", `${weekdayEn(currentDate)} · ${selectedDay() ? "available" : "missing"}`),
   ].join("");
 
   $("quickLists").innerHTML = [
     miniList("외국인 수급", flow.foreigner || [], (row) => miniItem(row.name, `${formatNumber(row.buy_amount_eok)}억`)),
     miniList("기관 수급", flow.institution || [], (row) => miniItem(row.name, `${formatNumber(row.buy_amount_eok)}억`)),
-    miniList("다음 거래일 신규상장", ipo.items || [], (row) => miniItem(row.name, formatEok(row.market_cap))),
+    miniList("신규상장 오늘/다음", ipoQuickRows, (row) => miniItem(`${row.bucket} ${row.name}`, formatEok(row.market_cap))),
   ].join("");
 }
 
@@ -233,8 +324,9 @@ function renderUsMarket() {
     { key: "Close", label: "Close", numeric: true, format: (v) => formatNumber(v, 2) },
     { key: "Volume", label: "Volume", numeric: true, format: formatNumber },
   ];
+  const marketDate = payload.data.market_date || payload.data.target_session_date || "Latest";
   $("us").innerHTML = `
-    <div class="sectionHeader"><div><span class="eyebrow">US Market</span><h2>미국장</h2></div><span class="dateBadge">Latest</span></div>
+    <div class="sectionHeader"><div><span class="eyebrow">US Market</span><h2>미국장</h2></div><span class="dateBadge">${escapeHtml(marketDate)}</span></div>
     <div class="twoCol">
       ${tablePanel("주요 지수·섹터", payload.data.fixed || [], cols)}
       ${tablePanel("거래대금 상위", payload.data.top_traded_value || [], cols)}
@@ -282,9 +374,14 @@ function renderIpo() {
     { key: "floating_amount", label: "유통금액", numeric: true, format: formatEok },
     { key: "subscription_competition", label: "청약경쟁률" },
   ];
+  const todayItems = payload.data.today_items || [];
+  const nextItems = payload.data.next_items || payload.data.items || [];
   $("ipo").innerHTML = `
-    <div class="sectionHeader"><div><span class="eyebrow">IPO</span><h2>신규상장</h2></div><span class="dateBadge">${escapeHtml(payload.data.target_listing_date || "")}</span></div>
-    ${tablePanel("다음 거래일 신규상장", payload.data.items || [], cols)}
+    <div class="sectionHeader"><div><span class="eyebrow">IPO</span><h2>신규상장</h2></div><span class="dateBadge">${escapeHtml(`${todayItems.length}/${nextItems.length}`)}</span></div>
+    <div class="twoCol">
+      ${tablePanel("오늘 거래일 신규상장", todayItems, cols, payload.data.today_listing_date || currentDate || "")}
+      ${tablePanel("다음 거래일 신규상장", nextItems, cols, payload.data.next_listing_date || payload.data.target_listing_date || "")}
+    </div>
   `;
 }
 
@@ -327,13 +424,13 @@ function sectionEmpty(title, message) {
 }
 
 async function renderAll() {
-  $("selectedDateLabel").textContent = currentDate || "-";
-  $("briefTitle").textContent = currentDate === appIndex?.latest_date ? "오늘 요약" : "선택일 요약";
+  $("selectedDateLabel").textContent = dateWithWeekday(currentDate);
+  $("briefTitle").textContent = currentDate === preferredCurrentDate() ? "오늘 요약" : "선택일 요약";
   await loadCurrentPayloads();
   loadMemo();
   renderSummary();
-  renderAlerts();
   renderUsMarket();
+  renderAlerts();
   renderFlow();
   renderIpo();
   renderExtra();
@@ -342,7 +439,7 @@ async function renderAll() {
 async function init() {
   appIndex = await fetchJson(`${DATA_ROOT}/index.json`);
   $("lastUpdated").textContent = appIndex.generated_at ? `Updated ${appIndex.generated_at}` : "아직 생성된 데이터가 없습니다";
-  currentDate = appIndex.latest_date || availableDates()[0] || new Date().toISOString().slice(0, 10);
+  currentDate = preferredCurrentDate();
   $("dateInput").value = currentDate;
   await renderAll();
 }
@@ -353,12 +450,13 @@ $("dateInput").addEventListener("change", async (event) => {
 });
 
 $("todayButton").addEventListener("click", async () => {
-  currentDate = appIndex?.latest_date || new Date().toISOString().slice(0, 10);
+  currentDate = preferredCurrentDate();
   $("dateInput").value = currentDate;
   await renderAll();
 });
 
-$("memoBox").addEventListener("input", saveMemo);
+$("globalMemoBox").addEventListener("input", saveGlobalMemo);
+$("dailyMemoBox").addEventListener("input", saveDailyMemo);
 
 init().catch((error) => {
   $("summaryCards").innerHTML = `<div class="empty">${escapeHtml(error.message)}</div>`;

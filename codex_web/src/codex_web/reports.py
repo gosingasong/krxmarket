@@ -98,30 +98,52 @@ def fetch_krx_alert_report(ctx):
 def fetch_ipo_report(ctx):
     if ctx.skip_non_trading and not is_krx_trading_day(ctx):
         return skipped_payload(ctx, "ipo", "KRX 휴장일")
-    target_date = ctx.calendar.add_krx_trading_days(pd.Timestamp(ctx.base_date), 1)
-    if target_date is None:
+    today_date = pd.Timestamp(ctx.base_date)
+    next_date = ctx.calendar.add_krx_trading_days(today_date, 1)
+    if next_date is None:
         return skipped_payload(ctx, "ipo", "다음 거래일 계산 실패")
-    items = fetch_ipo_items(target_date)
+    today_items = fetch_ipo_items(today_date)
+    next_items = fetch_ipo_items(next_date)
     data = {
         "source_date": ctx.date_str,
-        "target_listing_date": target_date.strftime("%Y.%m.%d"),
-        "items": items,
+        "today_listing_date": today_date.strftime("%Y.%m.%d"),
+        "next_listing_date": next_date.strftime("%Y.%m.%d"),
+        "target_listing_date": next_date.strftime("%Y.%m.%d"),
+        "today_items": today_items,
+        "next_items": next_items,
+        "items": next_items,
     }
-    return base_payload(ctx, "ipo", data=data, summary={"item_count": len(items)})
+    return base_payload(
+        ctx,
+        "ipo",
+        data=data,
+        summary={
+            "today_item_count": len(today_items),
+            "next_item_count": len(next_items),
+            "item_count": len(next_items),
+        },
+    )
 
 
 def fetch_us_market_report(ctx):
-    fixed, top = fetch_us_market_data()
+    market = fetch_us_market_data(ctx.base_date)
     data = {
-        "fixed": fixed,
-        "top_traded_value": top,
-        "note": "Finviz/yfinance latest-data snapshot.",
+        "fixed": market["fixed"],
+        "top_traded_value": market["top_traded_value"],
+        "target_session_date": market["target_session_date"],
+        "market_date": market["market_date"],
+        "note": market["note"],
     }
     return base_payload(
         ctx,
         "us_market",
         data=data,
-        summary={"fixed_count": len(fixed), "top_traded_value_count": len(top)},
+        summary={
+            "fixed_count": len(market["fixed"]),
+            "top_traded_value_count": len(market["top_traded_value"]),
+            "target_session_date": market["target_session_date"],
+            "market_date": market["market_date"],
+        },
     )
 
 

@@ -6,8 +6,12 @@ on:
     branches:
       - main
   schedule:
-    - cron: "40 20 * * 1-5"
-      timezone: "Asia/Seoul"
+    # UTC cron. KST = UTC+9.
+    - cron: "59 21 * * 0-4" # 06:59 KST, US market
+    - cron: "20 6 * * 1-5"  # 15:20 KST, IPO
+    - cron: "1 9 * * 1-5"   # 18:01 KST, investor flow
+    - cron: "10 11 * * 1-5" # 20:10 KST, liquidity / NXT
+    - cron: "25 11 * * 1-5" # 20:25 KST, KRX alert
 
 permissions:
   contents: write
@@ -34,8 +38,25 @@ jobs:
           pip install -r codex_web/requirements.txt
 
       - name: Generate JSON reports
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          EVENT_SCHEDULE: ${{ github.event.schedule }}
         run: |
-          python codex_web/update_reports.py --reports default --verbose
+          REPORTS="default"
+          if [ "$EVENT_NAME" = "push" ]; then
+            echo "Push event: deploy site code with the committed data snapshot."
+            exit 0
+          fi
+          if [ "$EVENT_NAME" = "schedule" ]; then
+            case "$EVENT_SCHEDULE" in
+              "59 21 * * 0-4") REPORTS="us_market" ;;
+              "20 6 * * 1-5") REPORTS="ipo" ;;
+              "1 9 * * 1-5") REPORTS="investor_flow" ;;
+              "10 11 * * 1-5") REPORTS="liquidity,nxt_market" ;;
+              "25 11 * * 1-5") REPORTS="krx_alert" ;;
+            esac
+          fi
+          python codex_web/update_reports.py --reports "$REPORTS" --verbose
 
       - name: Commit updated data
         run: |

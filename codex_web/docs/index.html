@@ -42,22 +42,30 @@
               <span class="eyebrow">Memo</span>
               <h2>내 메모</h2>
             </div>
-            <small id="noteStatus">브라우저에 저장</small>
           </div>
-          <textarea id="memoBox" spellcheck="false" placeholder="오늘 시장에서 볼 것, 장중 체크할 종목, 내 판단을 크게 남겨두세요."></textarea>
+          <div class="memoStack">
+            <label class="memoBlock">
+              <span>고정 메모 <small id="globalNoteStatus">브라우저에 저장</small></span>
+              <textarea id="globalMemoBox" class="globalMemo" spellcheck="false" placeholder="계속 볼 핵심 원칙, 관심 섹터, 큰 판단을 남겨두세요."></textarea>
+            </label>
+            <label class="memoBlock">
+              <span>일일 메모 <small id="dailyNoteStatus">선택일에 저장</small></span>
+              <textarea id="dailyMemoBox" class="dailyMemo" spellcheck="false" placeholder="오늘 시장에서 볼 것, 장중 체크할 종목을 남겨두세요."></textarea>
+            </label>
+          </div>
         </section>
       </section>
 
       <nav class="jumpNav" aria-label="Sections">
-        <a href="#alerts">투자경고</a>
         <a href="#us">미국장</a>
+        <a href="#alerts">투자경고</a>
         <a href="#flow">수급</a>
         <a href="#ipo">IPO</a>
         <a href="#extra">보조 지표</a>
       </nav>
 
-      <section id="alerts" class="reportSection"></section>
       <section id="us" class="reportSection"></section>
+      <section id="alerts" class="reportSection"></section>
       <section id="flow" class="reportSection"></section>
       <section id="ipo" class="reportSection"></section>
       <section id="extra" class="reportSection"></section>
