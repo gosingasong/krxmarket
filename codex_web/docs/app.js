@@ -668,10 +668,6 @@ function renderAlerts() {
     return;
   }
   const data = payload.data || {};
-  if (data.target_date && currentDate && data.target_date !== currentDate) {
-    $("alerts").innerHTML = sectionEmpty("투자경고", `${currentDate} 화면용 Risk Watch 데이터가 아직 없습니다. 현재 파일 대상일: ${data.target_date}`);
-    return;
-  }
   const releaseCols = [
     { key: "name", label: "종목" },
     { key: "diff_pct", label: "거리", numeric: true, format: formatPct, className: signedClass },

@@ -66,12 +66,12 @@ jobs:
           print(sessions[pos].date().isoformat())
           PY
           )
-            python codex_web/update_reports.py --date "$BASE_DATE" --reports krx_alert --verbose
+            python codex_web/update_reports.py --date "$BASE_DATE" --reports krx_alert --risk-rollover-next --verbose
             if [ "$(TZ=Asia/Seoul date +%H)" -ge 20 ]; then
               TODAY_KST=$(TZ=Asia/Seoul date +%F)
-              python codex_web/update_reports.py --date "$TODAY_KST" --reports krx_alert --verbose
+              python codex_web/update_reports.py --date "$TODAY_KST" --reports krx_alert --risk-rollover-next --verbose
             fi
-            python codex_web/update_reports.py --reports liquidity,nxt_market --verbose
+            python codex_web/update_reports.py --reports liquidity,nxt_market --extra-rollover-next --verbose
             exit 0
           fi
           if [ "$EVENT_NAME" = "schedule" ]; then
@@ -85,6 +85,8 @@ jobs:
           fi
           DATE_ARGS=""
           FLOW_ARGS=""
+          RISK_ARGS=""
+          EXTRA_ARGS=""
           if [ "$EVENT_NAME" = "schedule" ] && [ "$EVENT_SCHEDULE" = "1 9 * * 1-5" ]; then
             BASE_DATE=$(PYTHONPATH=codex_web/src python - <<'PY'
           import datetime as dt
@@ -98,17 +100,13 @@ jobs:
           elif [ "$EVENT_NAME" = "schedule" ] && [ "$EVENT_SCHEDULE" = "10 11 * * 1-5" ]; then
             BASE_DATE=$(PYTHONPATH=codex_web/src python - <<'PY'
           import datetime as dt
-          import pandas as pd
-          from codex_web.sources.common import KST, TradingDayCalendar
+          from codex_web.sources.common import KST
 
-          today = pd.Timestamp(dt.datetime.now(KST).date())
-          next_day = TradingDayCalendar().add_krx_trading_days(today, 1)
-          if next_day is None:
-              raise SystemExit("No next KRX session found")
-          print(next_day.date().isoformat())
+          print(dt.datetime.now(KST).date().isoformat())
           PY
           )
             DATE_ARGS="--date $BASE_DATE"
+            EXTRA_ARGS="--extra-rollover-next"
           elif [ "$EVENT_NAME" = "schedule" ] && [ "$REPORTS" = "krx_alert" ]; then
             BASE_DATE=$(PYTHONPATH=codex_web/src python - <<'PY'
           import datetime as dt
@@ -118,8 +116,9 @@ jobs:
           PY
           )
             DATE_ARGS="--date $BASE_DATE"
+            RISK_ARGS="--risk-rollover-next"
           fi
-          python codex_web/update_reports.py $DATE_ARGS $FLOW_ARGS --reports "$REPORTS" --verbose
+          python codex_web/update_reports.py $DATE_ARGS $FLOW_ARGS $RISK_ARGS $EXTRA_ARGS --reports "$REPORTS" --verbose
 
       - name: Record workflow status
         if: always()

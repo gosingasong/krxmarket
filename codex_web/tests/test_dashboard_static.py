@@ -52,6 +52,23 @@ class DashboardStaticTests(unittest.TestCase):
         self.assertIn('REPORTS="krx_alert"', workflow)
         self.assertIn('DATE_ARGS="--date $BASE_DATE"', workflow)
 
+    def test_risk_and_extra_roll_over_to_next_trading_day_like_flow(self):
+        reports = (ROOT / "src" / "codex_web" / "reports.py").read_text(encoding="utf-8")
+        cli = (ROOT / "src" / "codex_web" / "cli.py").read_text(encoding="utf-8")
+        workflow = WORKFLOW.read_text(encoding="utf-8")
+        app = APP_JS.read_text(encoding="utf-8")
+
+        self.assertIn("def next_krx_display_dates", reports)
+        self.assertIn("risk_rollover_next", reports)
+        self.assertIn("extra_rollover_next", reports)
+        self.assertIn('display_dates=next_krx_display_dates(ctx, ctx.risk_rollover_next, data["target_date"])', reports)
+        self.assertIn('display_dates=next_krx_display_dates(ctx, ctx.extra_rollover_next)', reports)
+        self.assertIn('"--risk-rollover-next"', cli)
+        self.assertIn('"--extra-rollover-next"', cli)
+        self.assertIn("--risk-rollover-next", workflow)
+        self.assertIn("--extra-rollover-next", workflow)
+        self.assertNotIn("화면용 Risk Watch 데이터가 아직 없습니다", app)
+
 
 if __name__ == "__main__":
     unittest.main()

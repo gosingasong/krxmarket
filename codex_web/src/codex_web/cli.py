@@ -53,6 +53,8 @@ def main(argv=None):
     parser.add_argument("--sector-lookup-limit", type=int, default=10, help="Naver sector lookup count per investor flow side.")
     parser.add_argument("--flow-source-date", help="Investor flow source trade date in YYYY-MM-DD. Default: previous KRX session of --date.")
     parser.add_argument("--flow-rollover-next", action="store_true", help="Also write investor_flow to the next KRX trading-day folder.")
+    parser.add_argument("--risk-rollover-next", action="store_true", help="Also write krx_alert to the base-date and next KRX trading-day folders.")
+    parser.add_argument("--extra-rollover-next", action="store_true", help="Also write liquidity/nxt_market to the next KRX trading-day folder.")
     parser.add_argument("--force-non-trading", action="store_true", help="Generate KRX reports even on non-trading days.")
     parser.add_argument("--fail-fast", action="store_true", help="Stop on the first report error.")
     parser.add_argument("--prune-days", type=int, default=60, help="Delete docs/data date folders older than this many days.")
@@ -79,6 +81,8 @@ def main(argv=None):
         skip_non_trading=not args.force_non_trading,
         flow_source_date=parse_date(args.flow_source_date) if args.flow_source_date else None,
         flow_rollover_next=args.flow_rollover_next,
+        risk_rollover_next=args.risk_rollover_next,
+        extra_rollover_next=args.extra_rollover_next,
     )
 
     logging.info("date=%s reports=%s out_dir=%s", base_date, ",".join(report_names), out_dir)

@@ -22,6 +22,8 @@ class ReportContext:
         skip_non_trading=True,
         flow_source_date=None,
         flow_rollover_next=False,
+        risk_rollover_next=False,
+        extra_rollover_next=False,
     ):
         self.base_date = base_date
         self.root_dir = Path(root_dir).resolve()
@@ -31,6 +33,8 @@ class ReportContext:
         self.skip_non_trading = skip_non_trading
         self.flow_source_date = flow_source_date
         self.flow_rollover_next = flow_rollover_next
+        self.risk_rollover_next = risk_rollover_next
+        self.extra_rollover_next = extra_rollover_next
         self.calendar = TradingDayCalendar()
 
     @property
@@ -65,6 +69,17 @@ def skipped_payload(ctx, report_name, reason):
     return base_payload(ctx, report_name, status="skipped", data={"reason": reason})
 
 
+def next_krx_display_dates(ctx, enabled=False, target_date=None):
+    display_dates = [ctx.date_str]
+    if enabled:
+        next_date = pd.Timestamp(target_date) if target_date else ctx.calendar.add_krx_trading_days(pd.Timestamp(ctx.base_date), 1)
+        if next_date is not None:
+            next_date_str = next_date.date().isoformat()
+            if next_date_str not in display_dates:
+                display_dates.append(next_date_str)
+    return display_dates
+
+
 def is_krx_trading_day(ctx):
     return ctx.calendar.is_krx_trading_day(ctx.base_date)
 
@@ -88,13 +103,7 @@ def fetch_investor_flow_report(ctx):
         "foreigner_count": len(data["foreigner"]),
         "foreigner_total_count": data["foreigner_total_count"],
     }
-    display_dates = [ctx.date_str]
-    if ctx.flow_rollover_next:
-        next_date = ctx.calendar.add_krx_trading_days(pd.Timestamp(ctx.base_date), 1)
-        if next_date is not None:
-            next_date_str = next_date.date().isoformat()
-            if next_date_str not in display_dates:
-                display_dates.append(next_date_str)
+    display_dates = next_krx_display_dates(ctx, ctx.flow_rollover_next)
     return base_payload(
         ctx,
         "investor_flow",
@@ -115,7 +124,14 @@ def fetch_krx_alert_report(ctx):
         "redesignation_count": len(data["redesignation"]),
         "target_date": data["target_date"],
     }
-    return base_payload(ctx, "krx_alert", data=data, summary=summary, display_date=data["target_date"])
+    return base_payload(
+        ctx,
+        "krx_alert",
+        data=data,
+        summary=summary,
+        display_date=data["target_date"],
+        display_dates=next_krx_display_dates(ctx, ctx.risk_rollover_next, data["target_date"]),
+    )
 
 
 def fetch_ipo_report(ctx):
@@ -172,7 +188,7 @@ def fetch_us_market_report(ctx):
 
 def fetch_nxt_market_report(ctx):
     data = fetch_nxt_market_trade_summary()
-    return base_payload(ctx, "nxt_market", data=data)
+    return base_payload(ctx, "nxt_market", data=data, display_dates=next_krx_display_dates(ctx, ctx.extra_rollover_next))
 
 
 def fetch_liquidity_report(ctx):
@@ -185,7 +201,13 @@ def fetch_liquidity_report(ctx):
         summary["latest_credit_date"] = upper[-1].get("Date")
     if lower:
         summary["latest_liquidity_date"] = lower[-1].get("Date")
-    return base_payload(ctx, "liquidity", data=payload_data, summary=summary)
+    return base_payload(
+        ctx,
+        "liquidity",
+        data=payload_data,
+        summary=summary,
+        display_dates=next_krx_display_dates(ctx, ctx.extra_rollover_next),
+    )
 
 
 REPORT_FUNCTIONS = {
