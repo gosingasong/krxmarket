@@ -19,9 +19,10 @@ function formatNumber(value, digits = 0) {
   if (value === null || value === undefined || value === "") return "-";
   const number = Number(value);
   if (Number.isNaN(number)) return String(value);
+  const precision = Number.isInteger(digits) ? Math.min(Math.max(digits, 0), 20) : 0;
   return number.toLocaleString("ko-KR", {
-    maximumFractionDigits: digits,
-    minimumFractionDigits: digits,
+    maximumFractionDigits: precision,
+    minimumFractionDigits: precision,
   });
 }
 
