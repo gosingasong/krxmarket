@@ -3,7 +3,7 @@
   "report": "krx_alert",
   "status": "ok",
   "date": "2026-05-19",
-  "generated_at": "2026-05-20T20:04:42.619627+09:00",
+  "generated_at": "2026-05-20T21:25:30.375499+09:00",
   "source": {
     "module": "codex_web"
   },
@@ -77,8 +77,8 @@
       "warning_fetched_count": 46,
       "warning_old_enough_count": 10,
       "caution_fetched_count": 15,
-      "candidate_map_count": 5,
-      "rewarn_map_count": 2
+      "candidate_map_count": 6,
+      "rewarn_map_count": 4
     }
   },
   "summary": {

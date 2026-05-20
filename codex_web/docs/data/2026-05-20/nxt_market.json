@@ -3,7 +3,7 @@
   "report": "nxt_market",
   "status": "ok",
   "date": "2026-05-20",
-  "generated_at": "2026-05-20T20:05:01.971975+09:00",
+  "generated_at": "2026-05-20T21:27:24.275441+09:00",
   "source": {
     "module": "codex_web"
   },
@@ -12,7 +12,7 @@
     "language": "eng",
     "as_of": "2026-05-20 20:00",
     "trade_date": "20260520",
-    "trade_time": "2005",
+    "trade_time": "2127",
     "market_watch_total_count": 644,
     "market_watch_kospi_count": 359,
     "market_watch_kosdaq_count": 285,
