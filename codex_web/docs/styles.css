@@ -413,6 +413,21 @@ tbody tr:hover {
   position: relative;
 }
 
+.creditFootnote {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 14px;
+  margin: -8px 16px 12px 62px;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.35;
+}
+
+.creditFootnote strong {
+  font-weight: 800;
+  color: var(--text);
+}
+
 .overlayLines {
   position: absolute;
   inset: 0;

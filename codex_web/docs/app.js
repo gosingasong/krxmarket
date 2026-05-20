@@ -217,11 +217,12 @@ function renderWorkflowAlert(status) {
   target.textContent = `Workflow 정상${generatedAt}`;
 }
 
-function metric(label, value, caption = "") {
+function metric(label, value, caption = "", valueClass = "") {
+  const spanClass = valueClass ? ` class="${escapeHtml(valueClass)}"` : "";
   return `
     <article class="metric">
       <strong>${escapeHtml(label)}</strong>
-      <span>${escapeHtml(value)}</span>
+      <span${spanClass}>${escapeHtml(value)}</span>
       <small>${escapeHtml(caption)}</small>
     </article>
   `;
@@ -294,6 +295,10 @@ function asFiniteValue(value) {
   if (value === null || value === undefined || value === "") return NaN;
   const number = Number(value);
   return Number.isFinite(number) ? number : NaN;
+}
+
+function sortByAvgTradeValueDesc(rows) {
+  return (rows || []).slice().sort((a, b) => asNumber(b.avg_trade_value_5d, 0) - asNumber(a.avg_trade_value_5d, 0));
 }
 
 function tradeTotalEok(row, market) {
@@ -514,20 +519,20 @@ function creditSvg(rows) {
       const x = margin.left + groupW * index + groupW / 2 - barW / 2;
       const kospi = asNumber(row.Credit_KOSPI, 0);
       const kosdaq = asNumber(row.Credit_KOSDAQ, 0);
-      const y1 = yCredit(kospi);
-      const y2 = yCredit(kospi + kosdaq);
+      const yKosdaq = yCredit(kosdaq);
+      const yTotal = yCredit(kospi + kosdaq);
       const y0 = yCredit(0);
       const label = index % Math.ceil(data.length / 8) === 0 || index === data.length - 1
         ? `<text x="${x + barW / 2}" y="${height - 24}" class="axisText" text-anchor="middle">${shortDate(row.Date)}</text>`
         : "";
       return `
-        <rect x="${x}" y="${y1}" width="${barW}" height="${Math.max(y0 - y1, 1)}" fill="#4a7ebb" rx="2" />
-        <rect x="${x}" y="${y2}" width="${barW}" height="${Math.max(y1 - y2, 1)}" fill="#bb4a4a" rx="2" />
+        <rect x="${x}" y="${yKosdaq}" width="${barW}" height="${Math.max(y0 - yKosdaq, 1)}" fill="#bb4a4a" rx="2" />
+        <rect x="${x}" y="${yTotal}" width="${barW}" height="${Math.max(yKosdaq - yTotal, 1)}" fill="#4a7ebb" rx="2" />
         ${label}
       `;
     })
     .join("");
-  const line = (key, cls) =>
+  const line = (key) =>
     data
       .map((row, index) => {
         const value = asNumber(row[key], NaN);
@@ -541,25 +546,36 @@ function creditSvg(rows) {
   const lastX = last ? margin.left + groupW * (data.length - 1) + groupW / 2 : 0;
   const lastLabels = last
     ? `
-      <text x="${lastX + 10}" y="${yCredit(asNumber(last.Credit_Total, 0)) - 8}" class="chartValue" text-anchor="start">${formatJoFromMillion(last.Credit_Total)}</text>
       <text x="${lastX + 10}" y="${yRatio(asNumber(last.Ratio_KOSPI, 0)) - 8}" class="chartValue" text-anchor="start">${formatPlainPct(last.Ratio_KOSPI)}</text>
       <text x="${lastX + 10}" y="${yRatio(asNumber(last.Ratio_KOSDAQ, 0)) + 16}" class="chartValue" text-anchor="start">${formatPlainPct(last.Ratio_KOSDAQ)}</text>
     `
     : "";
+  const footnote = last
+    ? `
+      <div class="creditFootnote">
+        <strong>KOSPI신용 ${formatJoFromMillion(last.Credit_KOSPI)}</strong>
+        <strong>KOSDAQ신용 ${formatJoFromMillion(last.Credit_KOSDAQ)}</strong>
+        <strong>합계 ${formatJoFromMillion(last.Credit_Total)}</strong>
+      </div>
+    `
+    : "";
   return `
-    <svg class="chartSvg" viewBox="0 0 ${width} ${height}" role="img" aria-label="credit balance and ratio chart">
-      <line x1="${margin.left}" x2="${width - margin.right}" y1="${margin.top + plotH}" y2="${margin.top + plotH}" class="axisLine" />
-      ${bars}
-      <path d="${line("Ratio_KOSPI")}" class="ratioKospiLine" />
-      <path d="${line("Ratio_KOSDAQ")}" class="ratioKosdaqLine" />
-      ${lastLabels}
-      <g class="legend">
-        <rect x="${margin.left}" y="8" width="10" height="10" fill="#4a7ebb" /><text x="${margin.left + 16}" y="17">KOSPI 신용</text>
-        <rect x="${margin.left + 100}" y="8" width="10" height="10" fill="#bb4a4a" /><text x="${margin.left + 116}" y="17">KOSDAQ 신용</text>
-        <line x1="${margin.left + 222}" x2="${margin.left + 240}" y1="13" y2="13" class="ratioKospiLine" /><text x="${margin.left + 247}" y="17">KOSPI 잔고율</text>
-        <line x1="${margin.left + 355}" x2="${margin.left + 373}" y1="13" y2="13" class="ratioKosdaqLine" /><text x="${margin.left + 380}" y="17">KOSDAQ 잔고율</text>
-      </g>
-    </svg>
+    <div class="chartStackInner">
+      <svg class="chartSvg" viewBox="0 0 ${width} ${height}" role="img" aria-label="credit balance and ratio chart">
+        <line x1="${margin.left}" x2="${width - margin.right}" y1="${margin.top + plotH}" y2="${margin.top + plotH}" class="axisLine" />
+        ${bars}
+        <path d="${line("Ratio_KOSPI")}" class="ratioKospiLine" />
+        <path d="${line("Ratio_KOSDAQ")}" class="ratioKosdaqLine" />
+        ${lastLabels}
+        <g class="legend">
+          <rect x="${margin.left}" y="8" width="10" height="10" fill="#bb4a4a" /><text x="${margin.left + 16}" y="17">KOSDAQ 신용</text>
+          <rect x="${margin.left + 112}" y="8" width="10" height="10" fill="#4a7ebb" /><text x="${margin.left + 128}" y="17">KOSPI 신용</text>
+          <line x1="${margin.left + 222}" x2="${margin.left + 240}" y1="13" y2="13" class="ratioKospiLine" /><text x="${margin.left + 247}" y="17">KOSPI 잔고율</text>
+          <line x1="${margin.left + 355}" x2="${margin.left + 373}" y1="13" y2="13" class="ratioKosdaqLine" /><text x="${margin.left + 380}" y="17">KOSDAQ 잔고율</text>
+        </g>
+      </svg>
+      ${footnote}
+    </div>
   `;
 }
 
@@ -590,7 +606,7 @@ function renderSummary() {
     metric("기관 1위", instTop?.name || "-", instTop ? `${formatNumber(instTop.buy_amount_eok)}억 매수` : "수급"),
     metric("신규상장", `${todayIpoItems.length}/${nextIpoItems.length}`, `${ipo.today_listing_date || "오늘"} / ${ipo.next_listing_date || ipo.target_listing_date || "다음"}`),
     metric("투자경고", `${releaseCount}/${designationCount}`, "해제 / 지정·재지정"),
-    metric("NASDAQ", nasdaq ? formatPct(nasdaq.Chg) : "-", usMarketDate || "미국장"),
+    metric("NASDAQ", nasdaq ? formatPct(nasdaq.Chg) : "-", usMarketDate || "미국장", signedClass(nasdaq?.Chg)),
     metric("KOSPI 거래대금", formatJoFromEok(tradeTotalEok(liquidityRow, "KOSPI")), liquidityRow?.Date ? `${liquidityRow.Date} KRX+NXT` : "시장 유동성"),
     metric("KOSDAQ 거래대금", formatJoFromEok(tradeTotalEok(liquidityRow, "KOSDAQ")), liquidityRow?.Date ? `${liquidityRow.Date} KRX+NXT` : "시장 유동성"),
     metric("Data", currentDate || "-", `${weekdayEn(currentDate)} · ${selectedDay() ? "available" : "missing"}`),
@@ -633,10 +649,10 @@ function renderAlerts() {
   ];
   $("alerts").innerHTML = `
     <div class="sectionHeader"><div><span class="eyebrow">Risk Watch</span><h2>투자경고</h2></div><span class="dateBadge">${escapeHtml(data.target_date || "")}</span></div>
-    ${tablePanel("투자경고 해제 심사", data.release || [], releaseCols, "필터 통과 전체")}
+    ${tablePanel("투자경고 해제 심사", sortByAvgTradeValueDesc(data.release), releaseCols, "5일 평균 거래대금순")}
     <div class="twoCol">
-      ${tablePanel("지정 예고", data.designation || [], triggerCols)}
-      ${tablePanel("재지정 심사", data.redesignation || [], triggerCols)}
+      ${tablePanel("지정 예고", sortByAvgTradeValueDesc(data.designation), triggerCols, "5일 평균 거래대금순")}
+      ${tablePanel("재지정 심사", sortByAvgTradeValueDesc(data.redesignation), triggerCols, "5일 평균 거래대금순")}
     </div>
   `;
 }
