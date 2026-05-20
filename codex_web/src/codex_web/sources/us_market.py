@@ -13,6 +13,8 @@ from .common import USER_AGENT, parse_number
 
 FINVIZ_SCREENER_URL = "https://finviz.com/screener.ashx"
 FINVIZ_HEADERS = {"User-Agent": USER_AGENT, "Referer": "https://finviz.com/"}
+KOSPI_NIGHTLY_BARS_URL = "https://kred.dev/futures-api/ohlc/bars"
+KOSPI_NIGHTLY_STATUS_URL = "https://kred.dev/futures-api/ohlc/status"
 US_ACTIVE_SCAN_PAGES = 5
 BACKUP_TOP = ["AAPL", "NVDA", "MSFT", "AMZN", "GOOGL", "META", "TSLA", "BRK-B", "AVGO", "LLY"]
 FIXED_TICKERS = ["^GSPC", "^IXIC", "^DJI", "IWO", "XBI", "SOXX", "EWY", "CL=F", "KRW=X"]
@@ -26,6 +28,7 @@ NAME_MAPPING = {
     "EWY": "MSCI Korea (EWY)",
     "CL=F": "WTI Crude Oil",
     "KRW=X": "USD/KRW",
+    "K_NIGHTLY": "KOSPI200 야간선물",
 }
 
 
@@ -146,6 +149,74 @@ def _fetch_ticker_row(ticker, is_top=False, target_date=None):
     }
 
 
+def _format_yyyymmdd(value):
+    text = str(value or "")
+    if re.fullmatch(r"\d{8}", text):
+        return "%s-%s-%s" % (text[:4], text[4:6], text[6:8])
+    return text or None
+
+
+def _fetch_kospi_nightly_row():
+    bars_response = requests.get(KOSPI_NIGHTLY_BARS_URL, headers={"User-Agent": USER_AGENT}, timeout=15)
+    bars_response.raise_for_status()
+    bars_payload = bars_response.json()
+    bars = bars_payload.get("bars") or []
+    if not bars:
+        return None
+
+    status = {}
+    try:
+        status_response = requests.get(KOSPI_NIGHTLY_STATUS_URL, headers={"User-Agent": USER_AGENT}, timeout=10)
+        status_response.raise_for_status()
+        status = status_response.json() or {}
+    except Exception as exc:
+        logging.warning("[US] KOSPI nightly status failed: %s", exc)
+
+    clean = []
+    for bar in bars:
+        try:
+            clean.append(
+                {
+                    "time": int(bar.get("time", 0)),
+                    "open": float(bar["open"]),
+                    "high": float(bar["high"]),
+                    "low": float(bar["low"]),
+                    "close": float(bar["close"]),
+                    "volume": int(float(bar.get("volume") or 0)),
+                }
+            )
+        except Exception:
+            continue
+    if not clean:
+        return None
+    clean.sort(key=lambda row: row["time"])
+
+    open_price = clean[0]["open"]
+    close = clean[-1]["close"]
+    prev_close = status.get("day_close")
+    try:
+        prev_close = float(prev_close)
+    except Exception:
+        prev_close = None
+    chg = (close - prev_close) / prev_close * 100 if prev_close else None
+    body = (close - open_price) / open_price * 100 if open_price else None
+    return {
+        "Ticker": "K_NIGHTLY",
+        "Name": NAME_MAPPING["K_NIGHTLY"],
+        "Chg": chg,
+        "Body": body,
+        "Open": open_price,
+        "High": max(row["high"] for row in clean),
+        "Low": min(row["low"] for row in clean),
+        "Close": close,
+        "Volume": sum(row["volume"] for row in clean),
+        "MarketDate": _format_yyyymmdd(status.get("session_date")) or dt.datetime.fromtimestamp(clean[-1]["time"], dt.timezone.utc).date().isoformat(),
+        "IsTop10": False,
+        "Status": "OK",
+        "Source": "KRED KOSPI200 night futures",
+    }
+
+
 def fetch_us_market_data(base_date=None):
     target_date = _target_us_session_date(base_date)
     fixed = []
@@ -156,6 +227,13 @@ def fetch_us_market_data(base_date=None):
                 fixed.append(row)
         except Exception as exc:
             logging.warning("[US] fixed ticker failed %s: %s", ticker, exc)
+
+    try:
+        row = _fetch_kospi_nightly_row()
+        if row:
+            fixed.append(row)
+    except Exception as exc:
+        logging.warning("[US] KOSPI nightly futures failed: %s", exc)
 
     top = []
     for ticker in get_us_top_traded_value():

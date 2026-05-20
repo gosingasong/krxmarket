@@ -48,6 +48,25 @@ function formatPlainPct(value, digits = 1) {
   return `${number.toFixed(digits)}%`;
 }
 
+function formatKstDateTime(value) {
+  if (!value) return "";
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return String(value);
+  const parts = new Intl.DateTimeFormat("ko-KR", {
+    timeZone: "Asia/Seoul",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+    hour12: false,
+  }).formatToParts(date);
+  const values = Object.fromEntries(parts.map((part) => [part.type, part.value]));
+  const hour = values.hour === "24" ? "00" : values.hour;
+  return `${values.year}-${values.month}-${values.day} ${hour}:${values.minute}:${values.second} KST`;
+}
+
 function formatPct(value) {
   if (value === null || value === undefined || value === "") return "-";
   const number = Number(value);
@@ -216,7 +235,7 @@ function renderWorkflowAlert(status) {
     target.textContent = "Workflow 상태: 아직 알림 데이터 없음";
     return;
   }
-  const generatedAt = status.generated_at ? ` · ${status.generated_at}` : "";
+  const generatedAt = status.generated_at ? ` · ${formatKstDateTime(status.generated_at)}` : "";
   if (status.failed) {
     target.className = "workflowAlert fail";
     target.textContent = `⚠️ Workflow 실패: ${status.message || "데이터 갱신 실패"}${generatedAt}`;
@@ -803,7 +822,7 @@ async function renderAll() {
 
 async function init() {
   appIndex = await fetchJson(`${DATA_ROOT}/index.json`);
-  $("lastUpdated").textContent = appIndex.generated_at ? `Updated ${appIndex.generated_at}` : "아직 생성된 데이터가 없습니다";
+  $("lastUpdated").textContent = appIndex.generated_at ? `Updated ${formatKstDateTime(appIndex.generated_at)}` : "아직 생성된 데이터가 없습니다";
   currentDate = preferredCurrentDate();
   $("dateInput").value = currentDate;
   await renderAll();

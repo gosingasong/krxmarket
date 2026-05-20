@@ -26,6 +26,24 @@ class DashboardStaticTests(unittest.TestCase):
         self.assertIn('row.Ticker === "KRW=X"', app)
         self.assertIn("formatMarketPrice", app)
 
+    def test_kospi_nightly_futures_is_added_below_usdkrw_as_candle(self):
+        source = (ROOT / "src" / "codex_web" / "sources" / "us_market.py").read_text(encoding="utf-8")
+        app = APP_JS.read_text(encoding="utf-8")
+        self.assertIn('"K_NIGHTLY": "KOSPI200 야간선물"', source)
+        self.assertIn("KOSPI_NIGHTLY_BARS_URL", source)
+        self.assertRegex(source, r'FIXED_TICKERS = \[[^\]]+"KRW=X"\]')
+        self.assertRegex(source, r'(?s)_fetch_kospi_nightly_row\(\).*?fixed\.append\(row\)')
+        self.assertNotIn('row.Ticker === "K_NIGHTLY"', app)
+
+    def test_workflow_times_are_displayed_in_kst(self):
+        app = APP_JS.read_text(encoding="utf-8")
+        workflow = WORKFLOW.read_text(encoding="utf-8")
+        self.assertIn("function formatKstDateTime", app)
+        self.assertIn("formatKstDateTime(status.generated_at)", app)
+        self.assertIn("formatKstDateTime(appIndex.generated_at)", app)
+        self.assertIn('name="KST"', workflow)
+        self.assertIn("dt.datetime.now(KST).isoformat()", workflow)
+
     def test_workflow_has_redundant_krx_alert_after_8pm_and_today_date_args(self):
         workflow = WORKFLOW.read_text(encoding="utf-8")
         for cron in ['"25 11 * * 1-5"', '"45 11 * * 1-5"', '"5 12 * * 1-5"']:

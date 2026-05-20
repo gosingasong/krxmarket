@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "date": "2026-05-20",
-  "generated_at": "2026-05-20T12:27:24.277319+00:00",
+  "generated_at": "2026-05-20T12:46:48.610377+00:00",
   "reports": {
     "investor_flow": {
       "file": "investor_flow.json",
@@ -67,10 +67,12 @@
       "file": "us_market.json",
       "report": "us_market",
       "status": "ok",
-      "generated_at": "2026-05-20T13:56:03.562063+09:00",
+      "generated_at": "2026-05-20T21:46:48.603209+09:00",
       "summary": {
-        "fixed_count": 9,
+        "fixed_count": 10,
         "top_traded_value_count": 11,
+        "target_session_date": "2026-05-19",
+        "market_date": "2026-05-19",
         "status": "ok"
       }
     }
