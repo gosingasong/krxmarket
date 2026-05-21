@@ -1,8 +1,27 @@
 {
   "schema_version": 1,
-  "generated_at": "2026-05-21T14:24:43.818102+00:00",
-  "latest_date": "2026-05-22",
+  "generated_at": "2026-05-21T15:45:39.751775+00:00",
+  "latest_date": "2026-05-26",
   "dates": [
+    {
+      "date": "2026-05-26",
+      "manifest": "2026-05-26/manifest.json",
+      "reports": {
+        "krx_alert": {
+          "file": "krx_alert.json",
+          "report": "krx_alert",
+          "status": "ok",
+          "generated_at": "2026-05-22T00:45:39.747916+09:00",
+          "summary": {
+            "release_count": 2,
+            "designation_count": 4,
+            "redesignation_count": 1,
+            "target_date": "2026-05-26",
+            "status": "ok"
+          }
+        }
+      }
+    },
     {
       "date": "2026-05-22",
       "manifest": "2026-05-22/manifest.json",
@@ -36,12 +55,12 @@
           "file": "krx_alert.json",
           "report": "krx_alert",
           "status": "ok",
-          "generated_at": "2026-05-21T23:24:43.813642+09:00",
+          "generated_at": "2026-05-22T00:45:39.747916+09:00",
           "summary": {
-            "release_count": 3,
+            "release_count": 2,
             "designation_count": 4,
             "redesignation_count": 1,
-            "target_date": "2026-05-22",
+            "target_date": "2026-05-26",
             "status": "ok"
           }
         },

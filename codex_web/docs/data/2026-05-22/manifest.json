@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "date": "2026-05-22",
-  "generated_at": "2026-05-21T14:24:43.817449+00:00",
+  "generated_at": "2026-05-21T15:45:39.750551+00:00",
   "reports": {
     "investor_flow": {
       "file": "investor_flow.json",
@@ -32,12 +32,12 @@
       "file": "krx_alert.json",
       "report": "krx_alert",
       "status": "ok",
-      "generated_at": "2026-05-21T23:24:43.813642+09:00",
+      "generated_at": "2026-05-22T00:45:39.747916+09:00",
       "summary": {
-        "release_count": 3,
+        "release_count": 2,
         "designation_count": 4,
         "redesignation_count": 1,
-        "target_date": "2026-05-22",
+        "target_date": "2026-05-26",
         "status": "ok"
       }
     },
