@@ -48,14 +48,20 @@
             </div>
           </div>
           <div class="memoStack">
-            <label class="memoBlock">
-              <span>고정 메모 <small id="globalNoteStatus">브라우저에 저장</small></span>
-              <textarea id="globalMemoBox" class="globalMemo" spellcheck="false" placeholder="계속 볼 핵심 원칙, 관심 섹터, 큰 판단을 남겨두세요."></textarea>
-            </label>
-            <label class="memoBlock">
-              <span>일일 메모 <small id="dailyNoteStatus">선택일에 저장</small></span>
-              <textarea id="dailyMemoBox" class="dailyMemo" spellcheck="false" placeholder="오늘 시장에서 볼 것, 장중 체크할 종목을 남겨두세요."></textarea>
-            </label>
+            <div class="memoBlock">
+              <div class="memoHeader"><span>고정 메모</span><button id="clearGlobalMemo" class="memoClearButton" type="button">모두 지우기</button></div>
+              <div class="memoEditorWrap">
+                <textarea id="globalMemoBox" class="globalMemo" spellcheck="false" placeholder="계속 볼 핵심 원칙, 관심 섹터, 큰 판단을 남겨두세요."></textarea>
+                <small id="globalNoteStatus" class="memoSaveStatus">브라우저에 저장</small>
+              </div>
+            </div>
+            <div class="memoBlock">
+              <div class="memoHeader"><span>일일 메모</span><button id="clearDailyMemo" class="memoClearButton" type="button">모두 지우기</button></div>
+              <div class="memoEditorWrap">
+                <textarea id="dailyMemoBox" class="dailyMemo" spellcheck="false" placeholder="오늘 시장에서 볼 것, 장중 체크할 종목을 남겨두세요."></textarea>
+                <small id="dailyNoteStatus" class="memoSaveStatus">선택일에 저장</small>
+              </div>
+            </div>
             <div id="workflowAlert" class="workflowAlert" role="status" aria-live="polite"></div>
           </div>
         </section>

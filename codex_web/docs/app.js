@@ -4,6 +4,7 @@ const REPORT_ORDER = ["investor_flow", "ipo", "krx_alert", "us_market", "nxt_mar
 let appIndex = null;
 let currentDate = null;
 let currentPayloads = {};
+let activeDailyMemoDate = null;
 
 const $ = (id) => document.getElementById(id);
 
@@ -198,15 +199,29 @@ function globalMemoKey() {
   return "krxmarket:memo:global";
 }
 
-function dailyMemoKey() {
-  return `krxmarket:memo:daily:${currentDate || "none"}`;
+function dailyMemoKey(dateStr = currentDate) {
+  return `krxmarket:memo:daily:${dateStr || "none"}`;
+}
+
+function dailyMemoIdleText(dateStr = activeDailyMemoDate || currentDate) {
+  return dateStr ? `${dateStr} 저장` : "선택일에 저장";
+}
+
+function dailyMemoSourceDate() {
+  if (!currentDate) return null;
+  const currentValue = localStorage.getItem(dailyMemoKey(currentDate));
+  if (currentValue) return currentDate;
+  const previousDate = shiftDateString(currentDate, -1);
+  const previousValue = previousDate ? localStorage.getItem(dailyMemoKey(previousDate)) : null;
+  return previousValue ? previousDate : currentDate;
 }
 
 function loadMemo() {
+  activeDailyMemoDate = dailyMemoSourceDate();
   $("globalMemoBox").value = localStorage.getItem(globalMemoKey()) || "";
-  $("dailyMemoBox").value = localStorage.getItem(dailyMemoKey()) || "";
+  $("dailyMemoBox").value = localStorage.getItem(dailyMemoKey(activeDailyMemoDate)) || "";
   $("globalNoteStatus").textContent = "브라우저에 저장";
-  $("dailyNoteStatus").textContent = currentDate ? `${currentDate} 저장` : "선택일에 저장";
+  $("dailyNoteStatus").textContent = dailyMemoIdleText();
 }
 
 function showSavedStatus(id, idleText) {
@@ -223,8 +238,31 @@ function saveGlobalMemo() {
 }
 
 function saveDailyMemo() {
-  localStorage.setItem(dailyMemoKey(), $("dailyMemoBox").value);
-  showSavedStatus("dailyNoteStatus", currentDate ? `${currentDate} 저장` : "선택일에 저장");
+  const value = $("dailyMemoBox").value;
+  if (!value) {
+    const sourceDate = activeDailyMemoDate || currentDate;
+    if (sourceDate) localStorage.removeItem(dailyMemoKey(sourceDate));
+    activeDailyMemoDate = currentDate;
+    showSavedStatus("dailyNoteStatus", dailyMemoIdleText(currentDate));
+    return;
+  }
+  activeDailyMemoDate = currentDate;
+  localStorage.setItem(dailyMemoKey(currentDate), value);
+  showSavedStatus("dailyNoteStatus", dailyMemoIdleText(currentDate));
+}
+
+function clearGlobalMemo() {
+  $("globalMemoBox").value = "";
+  localStorage.removeItem(globalMemoKey());
+  showSavedStatus("globalNoteStatus", "브라우저에 저장");
+}
+
+function clearDailyMemo() {
+  const sourceDate = activeDailyMemoDate || currentDate;
+  $("dailyMemoBox").value = "";
+  if (sourceDate) localStorage.removeItem(dailyMemoKey(sourceDate));
+  activeDailyMemoDate = currentDate;
+  showSavedStatus("dailyNoteStatus", dailyMemoIdleText(currentDate));
 }
 
 function renderWorkflowAlert(status) {
@@ -845,6 +883,8 @@ $("nextDayButton").addEventListener("click", async () => {
 
 $("globalMemoBox").addEventListener("input", saveGlobalMemo);
 $("dailyMemoBox").addEventListener("input", saveDailyMemo);
+$("clearGlobalMemo").addEventListener("click", clearGlobalMemo);
+$("clearDailyMemo").addEventListener("click", clearDailyMemo);
 
 init().catch((error) => {
   $("summaryCards").innerHTML = `<div class="empty">${escapeHtml(error.message)}</div>`;

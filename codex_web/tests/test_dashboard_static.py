@@ -74,6 +74,23 @@ class DashboardStaticTests(unittest.TestCase):
         self.assertIn("--risk-rollover-next", workflow)
         self.assertIn("--extra-rollover-next", workflow)
         self.assertNotIn("화면용 Risk Watch 데이터가 아직 없습니다", app)
+    def test_daily_memo_rolls_to_next_day_and_clear_buttons_exist(self):
+        app = APP_JS.read_text(encoding="utf-8")
+        html = (ROOT / "docs" / "index.html").read_text(encoding="utf-8")
+        css = STYLES.read_text(encoding="utf-8")
+        self.assertIn("let activeDailyMemoDate", app)
+        self.assertIn("function dailyMemoSourceDate", app)
+        self.assertIn("shiftDateString(currentDate, -1)", app)
+        self.assertIn("localStorage.getItem(dailyMemoKey(previousDate))", app)
+        self.assertIn("function clearGlobalMemo", app)
+        self.assertIn("function clearDailyMemo", app)
+        self.assertIn('id="clearGlobalMemo"', html)
+        self.assertIn('id="clearDailyMemo"', html)
+        self.assertIn("memoSaveStatus", html)
+        self.assertRegex(css, r"\.memoSaveStatus\s*\{[^}]*position:\s*absolute")
+        self.assertRegex(css, r"\.memoSaveStatus\s*\{[^}]*right:\s*16px")
+        self.assertRegex(css, r"\.memoSaveStatus\s*\{[^}]*bottom:\s*6px")
+
     def test_favicon_links_and_assets_exist(self):
         html = (ROOT / "docs" / "index.html").read_text(encoding="utf-8")
         for rel in [

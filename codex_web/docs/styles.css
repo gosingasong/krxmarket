@@ -252,19 +252,47 @@ input[type="date"] {
   border-bottom: 0;
 }
 
-.memoBlock > span {
+.memoHeader {
   display: flex;
   justify-content: space-between;
+  align-items: center;
   gap: 12px;
-  padding: 11px 16px 0;
+  padding: 9px 12px 7px 16px;
   color: var(--muted);
   font-size: 12px;
   font-weight: 700;
 }
 
-.memoBlock small {
+.memoClearButton {
+  height: auto;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
   color: var(--muted);
+  padding: 2px 4px;
+  font-size: 12px;
   font-weight: 500;
+}
+
+.memoClearButton:hover,
+.memoClearButton:focus-visible {
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--text);
+}
+
+.memoEditorWrap {
+  position: relative;
+  background: #0a0f14;
+}
+
+.memoSaveStatus {
+  position: absolute;
+  right: 16px;
+  bottom: 6px;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 500;
+  pointer-events: none;
 }
 
 .memoBlock textarea {
@@ -275,7 +303,7 @@ input[type="date"] {
   outline: 0;
   background: #0a0f14;
   color: var(--text);
-  padding: 12px 16px 18px;
+  padding: 12px 16px 24px;
 }
 
 .globalMemo {
