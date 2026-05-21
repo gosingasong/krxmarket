@@ -74,6 +74,18 @@ class DashboardStaticTests(unittest.TestCase):
         self.assertIn("--risk-rollover-next", workflow)
         self.assertIn("--extra-rollover-next", workflow)
         self.assertNotIn("화면용 Risk Watch 데이터가 아직 없습니다", app)
+    def test_favicon_links_and_assets_exist(self):
+        html = (ROOT / "docs" / "index.html").read_text(encoding="utf-8")
+        for rel in [
+            'rel="icon" href="./favicon.ico"',
+            'rel="icon" type="image/png" href="./favicon.png"',
+            'rel="apple-touch-icon" href="./apple-touch-icon.png"',
+        ]:
+            self.assertIn(rel, html)
+        for name in ["favicon.ico", "favicon.png", "apple-touch-icon.png", "icon-192.png", "icon-512.png"]:
+            path = ROOT / "docs" / name
+            self.assertTrue(path.exists(), name)
+            self.assertGreater(path.stat().st_size, 0, name)
 
 
 if __name__ == "__main__":
