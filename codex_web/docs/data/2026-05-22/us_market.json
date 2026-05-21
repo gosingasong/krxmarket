@@ -3,7 +3,7 @@
   "report": "us_market",
   "status": "ok",
   "date": "2026-05-22",
-  "generated_at": "2026-05-22T07:50:26.028968+09:00",
+  "generated_at": "2026-05-22T07:51:50.075825+09:00",
   "source": {
     "module": "codex_web"
   },
@@ -116,7 +116,7 @@
         "High": 98.0,
         "Low": 97.29000091552734,
         "Close": 97.77999877929688,
-        "Volume": 1435,
+        "Volume": 1441,
         "MarketDate": "2026-05-21",
         "IsTop10": false,
         "Status": "OK"
