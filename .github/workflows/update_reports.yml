@@ -11,11 +11,20 @@ on:
     - cron: "39 21 * * 0-4" # 06:39 KST, US market retry
     - cron: "50 21 * * 0-4" # 06:50 KST, US market retry
     - cron: "20 6 * * 1-5"  # 15:20 KST, IPO
+    - cron: "40 6 * * 1-5"  # 15:40 KST, IPO retry
+    - cron: "0 7 * * 1-5"   # 16:00 KST, IPO retry
     - cron: "1 9 * * 1-5"   # 18:01 KST, investor flow
+    - cron: "20 9 * * 1-5"  # 18:20 KST, investor flow retry
+    - cron: "40 9 * * 1-5"  # 18:40 KST, investor flow retry
     - cron: "10 11 * * 1-5" # 20:10 KST, liquidity / NXT
+    - cron: "30 11 * * 1-5" # 20:30 KST, liquidity / NXT retry
+    - cron: "50 11 * * 1-5" # 20:50 KST, liquidity / NXT retry
     - cron: "25 11 * * 1-5" # 20:25 KST, KRX alert
     - cron: "45 11 * * 1-5" # 20:45 KST, KRX alert retry
     - cron: "5 12 * * 1-5"  # 21:05 KST, KRX alert retry
+    - cron: "25 12 * * 1-5" # 21:25 KST, KRX alert retry
+    - cron: "45 12 * * 1-5" # 21:45 KST, KRX alert retry
+    - cron: "5 13 * * 1-5"  # 22:05 KST, all KRX evening catch-up
 
 permissions:
   contents: write
@@ -49,17 +58,18 @@ jobs:
           EVENT_NAME: ${{ github.event_name }}
           EVENT_SCHEDULE: ${{ github.event.schedule }}
         run: |
-          REPORTS="default"
-          if [ "$EVENT_NAME" = "push" ]; then
-            BASE_DATE=$(PYTHONPATH=codex_web/src python - <<'PY'
-          import datetime as dt
+          kst_today() {
+            TZ=Asia/Seoul date +%F
+          }
+          krx_prev_session() {
+            PYTHONPATH=codex_web/src python - "$1" <<'PY'
           import pandas as pd
-          from codex_web.sources.common import KST, TradingDayCalendar
-
-          today = dt.datetime.now(KST).date()
+          import sys
+          from codex_web.sources.common import TradingDayCalendar
           sessions = TradingDayCalendar().krx_sessions
-          pos = sessions.searchsorted(pd.Timestamp(today))
-          if pos < len(sessions) and sessions[pos].date() == today:
+          today = pd.Timestamp(sys.argv[1])
+          pos = sessions.searchsorted(today)
+          if pos < len(sessions) and sessions[pos].date() == today.date():
               pos -= 1
           else:
               pos -= 1
@@ -67,56 +77,84 @@ jobs:
               raise SystemExit("No previous KRX session found")
           print(sessions[pos].date().isoformat())
           PY
-          )
+          }
+          krx_next_session() {
+            PYTHONPATH=codex_web/src python - "$1" <<'PY'
+          import pandas as pd
+          import sys
+          from codex_web.sources.common import TradingDayCalendar
+          next_day = TradingDayCalendar().add_krx_trading_days(pd.Timestamp(sys.argv[1]), 1)
+          if next_day is None:
+              raise SystemExit("No next KRX session found")
+          print(next_day.date().isoformat())
+          PY
+          }
+          refresh_ipo_today_and_next() {
+            BASE_DATE="$1"
+            NEXT_DATE=$(krx_next_session "$BASE_DATE")
+            python codex_web/update_reports.py --date "$BASE_DATE" --reports ipo --verbose
+            python codex_web/update_reports.py --date "$NEXT_DATE" --reports ipo --verbose
+          }
+          refresh_evening_krx() {
+            BASE_DATE="$1"
+            refresh_ipo_today_and_next "$BASE_DATE"
+            python codex_web/update_reports.py --date "$BASE_DATE" --reports investor_flow --flow-source-date "$BASE_DATE" --flow-rollover-next --verbose
             python codex_web/update_reports.py --date "$BASE_DATE" --reports krx_alert --risk-rollover-next --verbose
-            if [ "$(TZ=Asia/Seoul date +%H)" -ge 20 ]; then
-              TODAY_KST=$(TZ=Asia/Seoul date +%F)
-              python codex_web/update_reports.py --date "$TODAY_KST" --reports krx_alert --risk-rollover-next --verbose
+            python codex_web/update_reports.py --date "$BASE_DATE" --reports liquidity,nxt_market --extra-rollover-next --verbose
+          }
+
+          REPORTS="default"
+          if [ "$EVENT_NAME" = "push" ]; then
+            TODAY_KST=$(kst_today)
+            BASE_DATE=$(krx_prev_session "$TODAY_KST")
+            python codex_web/update_reports.py --date "$BASE_DATE" --reports krx_alert --risk-rollover-next --verbose
+            HOUR_KST=$(TZ=Asia/Seoul date +%H)
+            if [ "$HOUR_KST" -ge 15 ]; then
+              refresh_ipo_today_and_next "$TODAY_KST"
             fi
-            python codex_web/update_reports.py --reports liquidity,nxt_market --extra-rollover-next --verbose
+            if [ "$HOUR_KST" -ge 18 ]; then
+              python codex_web/update_reports.py --date "$TODAY_KST" --reports investor_flow --flow-source-date "$TODAY_KST" --flow-rollover-next --verbose
+            fi
+            if [ "$HOUR_KST" -ge 20 ]; then
+              python codex_web/update_reports.py --date "$TODAY_KST" --reports krx_alert --risk-rollover-next --verbose
+              python codex_web/update_reports.py --date "$TODAY_KST" --reports liquidity,nxt_market --extra-rollover-next --verbose
+            fi
             exit 0
           fi
           if [ "$EVENT_NAME" = "schedule" ]; then
             case "$EVENT_SCHEDULE" in
               "30 21 * * 0-4"|"39 21 * * 0-4"|"50 21 * * 0-4") REPORTS="us_market" ;;
-              "20 6 * * 1-5") REPORTS="ipo" ;;
-              "1 9 * * 1-5") REPORTS="investor_flow" ;;
-              "10 11 * * 1-5") REPORTS="liquidity,nxt_market" ;;
-              "25 11 * * 1-5"|"45 11 * * 1-5"|"5 12 * * 1-5") REPORTS="krx_alert" ;;
+              "20 6 * * 1-5"|"40 6 * * 1-5"|"0 7 * * 1-5") REPORTS="ipo" ;;
+              "1 9 * * 1-5"|"20 9 * * 1-5"|"40 9 * * 1-5") REPORTS="investor_flow" ;;
+              "10 11 * * 1-5"|"30 11 * * 1-5"|"50 11 * * 1-5") REPORTS="liquidity,nxt_market" ;;
+              "25 11 * * 1-5"|"45 11 * * 1-5"|"5 12 * * 1-5"|"25 12 * * 1-5"|"45 12 * * 1-5") REPORTS="krx_alert" ;;
+              "5 13 * * 1-5") REPORTS="evening_krx" ;;
             esac
+          fi
+          if [ "$EVENT_NAME" = "schedule" ] && [ "$REPORTS" = "evening_krx" ]; then
+            BASE_DATE=$(kst_today)
+            refresh_evening_krx "$BASE_DATE"
+            exit 0
+          fi
+          if [ "$EVENT_NAME" = "schedule" ] && [ "$REPORTS" = "ipo" ]; then
+            BASE_DATE=$(kst_today)
+            refresh_ipo_today_and_next "$BASE_DATE"
+            exit 0
           fi
           DATE_ARGS=""
           FLOW_ARGS=""
           RISK_ARGS=""
           EXTRA_ARGS=""
-          if [ "$EVENT_NAME" = "schedule" ] && [ "$EVENT_SCHEDULE" = "1 9 * * 1-5" ]; then
-            BASE_DATE=$(PYTHONPATH=codex_web/src python - <<'PY'
-          import datetime as dt
-          from codex_web.sources.common import KST
-
-          print(dt.datetime.now(KST).date().isoformat())
-          PY
-          )
+          if [ "$EVENT_NAME" = "schedule" ] && [ "$REPORTS" = "investor_flow" ]; then
+            BASE_DATE=$(kst_today)
             DATE_ARGS="--date $BASE_DATE"
             FLOW_ARGS="--flow-source-date $BASE_DATE --flow-rollover-next"
-          elif [ "$EVENT_NAME" = "schedule" ] && [ "$EVENT_SCHEDULE" = "10 11 * * 1-5" ]; then
-            BASE_DATE=$(PYTHONPATH=codex_web/src python - <<'PY'
-          import datetime as dt
-          from codex_web.sources.common import KST
-
-          print(dt.datetime.now(KST).date().isoformat())
-          PY
-          )
+          elif [ "$EVENT_NAME" = "schedule" ] && [ "$REPORTS" = "liquidity,nxt_market" ]; then
+            BASE_DATE=$(kst_today)
             DATE_ARGS="--date $BASE_DATE"
             EXTRA_ARGS="--extra-rollover-next"
           elif [ "$EVENT_NAME" = "schedule" ] && [ "$REPORTS" = "krx_alert" ]; then
-            BASE_DATE=$(PYTHONPATH=codex_web/src python - <<'PY'
-          import datetime as dt
-          from codex_web.sources.common import KST
-
-          print(dt.datetime.now(KST).date().isoformat())
-          PY
-          )
+            BASE_DATE=$(kst_today)
             DATE_ARGS="--date $BASE_DATE"
             RISK_ARGS="--risk-rollover-next"
           fi

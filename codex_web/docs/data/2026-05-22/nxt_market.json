@@ -3,28 +3,28 @@
   "report": "nxt_market",
   "status": "ok",
   "date": "2026-05-21",
-  "generated_at": "2026-05-21T18:03:28.563029+09:00",
+  "generated_at": "2026-05-21T21:28:07.723124+09:00",
   "source": {
     "module": "codex_web"
   },
   "data": {
     "source": "nextrade_official_refreshMarketData",
     "language": "eng",
-    "as_of": "2026-05-21 18:03",
+    "as_of": "2026-05-21 20:00",
     "trade_date": "20260521",
-    "trade_time": "1803",
+    "trade_time": "2128",
     "market_watch_total_count": 644,
     "market_watch_kospi_count": 359,
     "market_watch_kosdaq_count": 285,
     "issue_total_count": 638,
     "issue_kospi_count": 357,
     "issue_kosdaq_count": 281,
-    "total_trade_volume": 195973140,
-    "kospi_trade_volume": 132522590,
-    "kosdaq_trade_volume": 63450550,
-    "total_trade_value": 34288237309547,
-    "kospi_trade_value": 31365070112876,
-    "kosdaq_trade_value": 2923167196671
+    "total_trade_volume": 222128944,
+    "kospi_trade_volume": 145441470,
+    "kosdaq_trade_volume": 76687474,
+    "total_trade_value": 37782174501897,
+    "kospi_trade_value": 34485691461846,
+    "kosdaq_trade_value": 3296483040051
   },
   "summary": {},
   "display_dates": [

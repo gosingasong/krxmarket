@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "generated_at": "2026-05-21T12:17:18.214249+00:00",
+  "generated_at": "2026-05-21T12:28:15.235779+00:00",
   "latest_date": "2026-05-22",
   "dates": [
     {
@@ -11,7 +11,7 @@
           "file": "investor_flow.json",
           "report": "investor_flow",
           "status": "ok",
-          "generated_at": "2026-05-21T21:17:18.207499+09:00",
+          "generated_at": "2026-05-21T21:27:57.471069+09:00",
           "summary": {
             "institution_count": 10,
             "institution_total_count": 2325,
@@ -20,11 +20,36 @@
             "status": "ok"
           }
         },
+        "ipo": {
+          "file": "ipo.json",
+          "report": "ipo",
+          "status": "ok",
+          "generated_at": "2026-05-21T21:28:15.229718+09:00",
+          "summary": {
+            "today_item_count": 0,
+            "next_item_count": 0,
+            "item_count": 0,
+            "status": "ok"
+          }
+        },
+        "krx_alert": {
+          "file": "krx_alert.json",
+          "report": "krx_alert",
+          "status": "ok",
+          "generated_at": "2026-05-21T21:28:05.203302+09:00",
+          "summary": {
+            "release_count": 3,
+            "designation_count": 4,
+            "redesignation_count": 1,
+            "target_date": "2026-05-22",
+            "status": "ok"
+          }
+        },
         "liquidity": {
           "file": "liquidity.json",
           "report": "liquidity",
           "status": "ok",
-          "generated_at": "2026-05-21T18:03:28.016605+09:00",
+          "generated_at": "2026-05-21T21:28:07.388327+09:00",
           "summary": {
             "upper_count": 30,
             "lower_count": 30,
@@ -37,7 +62,7 @@
           "file": "nxt_market.json",
           "report": "nxt_market",
           "status": "ok",
-          "generated_at": "2026-05-21T18:03:28.563029+09:00",
+          "generated_at": "2026-05-21T21:28:07.723124+09:00",
           "summary": {
             "status": "ok"
           }
@@ -52,7 +77,7 @@
           "file": "investor_flow.json",
           "report": "investor_flow",
           "status": "ok",
-          "generated_at": "2026-05-21T21:17:18.207499+09:00",
+          "generated_at": "2026-05-21T21:27:57.471069+09:00",
           "summary": {
             "institution_count": 10,
             "institution_total_count": 2325,
@@ -65,7 +90,7 @@
           "file": "ipo.json",
           "report": "ipo",
           "status": "ok",
-          "generated_at": "2026-05-21T19:06:12.604898+09:00",
+          "generated_at": "2026-05-21T21:27:51.836870+09:00",
           "summary": {
             "today_item_count": 0,
             "next_item_count": 0,
@@ -77,12 +102,12 @@
           "file": "krx_alert.json",
           "report": "krx_alert",
           "status": "ok",
-          "generated_at": "2026-05-21T18:03:08.196904+09:00",
+          "generated_at": "2026-05-21T21:28:05.203302+09:00",
           "summary": {
             "release_count": 3,
-            "designation_count": 2,
+            "designation_count": 4,
             "redesignation_count": 1,
-            "target_date": "2026-05-21",
+            "target_date": "2026-05-22",
             "status": "ok"
           }
         },
@@ -90,7 +115,7 @@
           "file": "liquidity.json",
           "report": "liquidity",
           "status": "ok",
-          "generated_at": "2026-05-21T18:03:28.016605+09:00",
+          "generated_at": "2026-05-21T21:28:07.388327+09:00",
           "summary": {
             "upper_count": 30,
             "lower_count": 30,
@@ -103,7 +128,7 @@
           "file": "nxt_market.json",
           "report": "nxt_market",
           "status": "ok",
-          "generated_at": "2026-05-21T18:03:28.563029+09:00",
+          "generated_at": "2026-05-21T21:28:07.723124+09:00",
           "summary": {
             "status": "ok"
           }
