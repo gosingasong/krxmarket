@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "generated_at": "2026-05-21T14:21:44.783835+00:00",
+  "generated_at": "2026-05-21T14:24:43.818102+00:00",
   "latest_date": "2026-05-22",
   "dates": [
     {
@@ -36,7 +36,7 @@
           "file": "krx_alert.json",
           "report": "krx_alert",
           "status": "ok",
-          "generated_at": "2026-05-21T23:21:44.779194+09:00",
+          "generated_at": "2026-05-21T23:24:43.813642+09:00",
           "summary": {
             "release_count": 3,
             "designation_count": 4,
@@ -102,7 +102,7 @@
           "file": "krx_alert.json",
           "report": "krx_alert",
           "status": "ok",
-          "generated_at": "2026-05-21T23:21:44.779194+09:00",
+          "generated_at": "2026-05-21T23:24:43.813642+09:00",
           "summary": {
             "release_count": 3,
             "designation_count": 4,
