@@ -3,7 +3,7 @@
   "report": "us_market",
   "status": "ok",
   "date": "2026-05-22",
-  "generated_at": "2026-05-22T07:51:50.075825+09:00",
+  "generated_at": "2026-05-22T07:56:00.956458+09:00",
   "source": {
     "module": "codex_web"
   },
@@ -110,13 +110,13 @@
       {
         "Ticker": "CL=F",
         "Name": "WTI Crude Oil",
-        "Chg": -0.4885033039874184,
-        "Body": -0.22449104153380103,
+        "Chg": -0.45797330333131847,
+        "Body": -0.1938800422512755,
         "Open": 98.0,
         "High": 98.0,
         "Low": 97.29000091552734,
-        "Close": 97.77999877929688,
-        "Volume": 1441,
+        "Close": 97.80999755859375,
+        "Volume": 1478,
         "MarketDate": "2026-05-21",
         "IsTop10": false,
         "Status": "OK"
