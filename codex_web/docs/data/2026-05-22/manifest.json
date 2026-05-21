@@ -1,8 +1,21 @@
 {
   "schema_version": 1,
   "date": "2026-05-22",
-  "generated_at": "2026-05-21T09:03:28.565934+00:00",
+  "generated_at": "2026-05-21T12:17:18.213475+00:00",
   "reports": {
+    "investor_flow": {
+      "file": "investor_flow.json",
+      "report": "investor_flow",
+      "status": "ok",
+      "generated_at": "2026-05-21T21:17:18.207499+09:00",
+      "summary": {
+        "institution_count": 10,
+        "institution_total_count": 2325,
+        "foreigner_count": 10,
+        "foreigner_total_count": 2546,
+        "status": "ok"
+      }
+    },
     "liquidity": {
       "file": "liquidity.json",
       "report": "liquidity",

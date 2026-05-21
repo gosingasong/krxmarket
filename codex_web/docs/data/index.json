@@ -1,12 +1,25 @@
 {
   "schema_version": 1,
-  "generated_at": "2026-05-21T10:06:12.607699+00:00",
+  "generated_at": "2026-05-21T12:17:18.214249+00:00",
   "latest_date": "2026-05-22",
   "dates": [
     {
       "date": "2026-05-22",
       "manifest": "2026-05-22/manifest.json",
       "reports": {
+        "investor_flow": {
+          "file": "investor_flow.json",
+          "report": "investor_flow",
+          "status": "ok",
+          "generated_at": "2026-05-21T21:17:18.207499+09:00",
+          "summary": {
+            "institution_count": 10,
+            "institution_total_count": 2325,
+            "foreigner_count": 10,
+            "foreigner_total_count": 2546,
+            "status": "ok"
+          }
+        },
         "liquidity": {
           "file": "liquidity.json",
           "report": "liquidity",
@@ -39,12 +52,12 @@
           "file": "investor_flow.json",
           "report": "investor_flow",
           "status": "ok",
-          "generated_at": "2026-05-20T20:51:04.691520+09:00",
+          "generated_at": "2026-05-21T21:17:18.207499+09:00",
           "summary": {
             "institution_count": 10,
-            "institution_total_count": 2395,
+            "institution_total_count": 2325,
             "foreigner_count": 10,
-            "foreigner_total_count": 2554,
+            "foreigner_total_count": 2546,
             "status": "ok"
           }
         },

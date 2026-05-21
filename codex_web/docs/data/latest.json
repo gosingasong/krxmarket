@@ -2,6 +2,19 @@
   "date": "2026-05-22",
   "manifest": "2026-05-22/manifest.json",
   "reports": {
+    "investor_flow": {
+      "file": "investor_flow.json",
+      "report": "investor_flow",
+      "status": "ok",
+      "generated_at": "2026-05-21T21:17:18.207499+09:00",
+      "summary": {
+        "institution_count": 10,
+        "institution_total_count": 2325,
+        "foreigner_count": 10,
+        "foreigner_total_count": 2546,
+        "status": "ok"
+      }
+    },
     "liquidity": {
       "file": "liquidity.json",
       "report": "liquidity",
