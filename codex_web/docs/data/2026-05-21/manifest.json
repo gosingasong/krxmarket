@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "date": "2026-05-21",
-  "generated_at": "2026-05-20T22:51:48.175204+00:00",
+  "generated_at": "2026-05-21T05:18:16.656067+00:00",
   "reports": {
     "investor_flow": {
       "file": "investor_flow.json",
@@ -20,7 +20,7 @@
       "file": "krx_alert.json",
       "report": "krx_alert",
       "status": "ok",
-      "generated_at": "2026-05-21T07:51:24.276567+09:00",
+      "generated_at": "2026-05-21T14:17:54.289449+09:00",
       "summary": {
         "release_count": 3,
         "designation_count": 2,
@@ -33,12 +33,12 @@
       "file": "liquidity.json",
       "report": "liquidity",
       "status": "ok",
-      "generated_at": "2026-05-21T07:51:47.702143+09:00",
+      "generated_at": "2026-05-21T14:18:16.161578+09:00",
       "summary": {
         "upper_count": 30,
         "lower_count": 30,
         "latest_credit_date": "2026-05-19",
-        "latest_liquidity_date": "2026-05-19",
+        "latest_liquidity_date": "2026-05-20",
         "status": "ok"
       }
     },
@@ -46,7 +46,7 @@
       "file": "nxt_market.json",
       "report": "nxt_market",
       "status": "ok",
-      "generated_at": "2026-05-21T07:51:48.173100+09:00",
+      "generated_at": "2026-05-21T14:18:16.654279+09:00",
       "summary": {
         "status": "ok"
       }
