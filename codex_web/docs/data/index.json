@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "generated_at": "2026-05-21T22:56:00.959771+00:00",
+  "generated_at": "2026-05-22T01:21:06.936989+00:00",
   "latest_date": "2026-05-26",
   "dates": [
     {
@@ -24,7 +24,7 @@
           "file": "ipo.json",
           "report": "ipo",
           "status": "ok",
-          "generated_at": "2026-05-22T01:23:10.054548+09:00",
+          "generated_at": "2026-05-22T10:21:06.934860+09:00",
           "summary": {
             "today_item_count": 0,
             "next_item_count": 0,
@@ -90,7 +90,7 @@
           "file": "ipo.json",
           "report": "ipo",
           "status": "ok",
-          "generated_at": "2026-05-22T01:22:55.736938+09:00",
+          "generated_at": "2026-05-22T10:20:53.770244+09:00",
           "summary": {
             "today_item_count": 0,
             "next_item_count": 0,
@@ -102,12 +102,12 @@
           "file": "krx_alert.json",
           "report": "krx_alert",
           "status": "ok",
-          "generated_at": "2026-05-22T01:24:36.780372+09:00",
+          "generated_at": "2026-05-22T10:20:25.645662+09:00",
           "summary": {
-            "release_count": 2,
+            "release_count": 3,
             "designation_count": 4,
             "redesignation_count": 1,
-            "target_date": "2026-05-26",
+            "target_date": "2026-05-22",
             "status": "ok"
           }
         },
@@ -137,7 +137,7 @@
           "file": "us_market.json",
           "report": "us_market",
           "status": "ok",
-          "generated_at": "2026-05-22T07:56:00.956458+09:00",
+          "generated_at": "2026-05-22T10:20:37.010823+09:00",
           "summary": {
             "fixed_count": 9,
             "top_traded_value_count": 11,
@@ -181,7 +181,7 @@
           "file": "krx_alert.json",
           "report": "krx_alert",
           "status": "ok",
-          "generated_at": "2026-05-21T23:24:43.813642+09:00",
+          "generated_at": "2026-05-22T10:20:25.645662+09:00",
           "summary": {
             "release_count": 3,
             "designation_count": 4,

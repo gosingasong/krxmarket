@@ -3,7 +3,7 @@
   "report": "krx_alert",
   "status": "ok",
   "date": "2026-05-21",
-  "generated_at": "2026-05-21T23:24:43.813642+09:00",
+  "generated_at": "2026-05-22T10:20:25.645662+09:00",
   "source": {
     "module": "codex_web"
   },
@@ -19,7 +19,7 @@
         "current_price": 15650,
         "release_ceiling": 13300,
         "diff_pct": -15.015974440894569,
-        "avg_trade_value_5d": 20913172114.0
+        "avg_trade_value_5d": 20932049144.0
       },
       {
         "code": "059120",
@@ -28,7 +28,7 @@
         "current_price": 10500,
         "release_ceiling": 13470,
         "diff_pct": 28.285714285714285,
-        "avg_trade_value_5d": 10677205596.0
+        "avg_trade_value_5d": 10698633996.0
       },
       {
         "code": "448900",
@@ -37,7 +37,7 @@
         "current_price": 98000,
         "release_ceiling": 137600,
         "diff_pct": 40.40816326530612,
-        "avg_trade_value_5d": 22452194580.0
+        "avg_trade_value_5d": 22485122580.0
       }
     ],
     "designation": [
@@ -59,7 +59,7 @@
         "current_price": 25950,
         "trigger_price": 33520,
         "diff_pct": 29.171483622350674,
-        "avg_trade_value_5d": 67126317030.0
+        "avg_trade_value_5d": 67293201480.0
       },
       {
         "code": "131290",
@@ -79,7 +79,7 @@
         "current_price": 27600,
         "trigger_price": 30736,
         "diff_pct": 11.36231884057971,
-        "avg_trade_value_5d": 20118423490.0
+        "avg_trade_value_5d": 20131003570.0
       }
     ],
     "redesignation": [
@@ -91,7 +91,7 @@
         "current_price": 6890,
         "trigger_price": 6040,
         "diff_pct": -12.336719883889694,
-        "avg_trade_value_5d": 31277756656.0
+        "avg_trade_value_5d": 31279020282.0
       }
     ],
     "diagnostics": {

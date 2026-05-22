@@ -2,33 +2,42 @@
   "schema_version": 1,
   "report": "krx_alert",
   "status": "ok",
-  "date": "2026-05-22",
-  "generated_at": "2026-05-22T01:24:36.780372+09:00",
+  "date": "2026-05-21",
+  "generated_at": "2026-05-22T10:20:25.645662+09:00",
   "source": {
     "module": "codex_web"
   },
   "data": {
-    "target_date": "2026-05-26",
-    "source_date": "2026-05-22",
+    "target_date": "2026-05-22",
+    "source_date": "2026-05-21",
     "avg_trade_value_threshold": 10000000000,
     "release": [
       {
-        "code": "084370",
-        "name": "유진테크",
-        "designation_date": "2026-05-11",
-        "current_price": 129500,
-        "release_ceiling": 150300,
-        "diff_pct": 16.06177606177606,
-        "avg_trade_value_5d": 20960099325.0
+        "code": "092190",
+        "name": "서울바이오시스",
+        "designation_date": "2026-04-30",
+        "current_price": 15650,
+        "release_ceiling": 13300,
+        "diff_pct": -15.015974440894569,
+        "avg_trade_value_5d": 20932049144.0
       },
       {
-        "code": "078150",
-        "name": "HB테크놀러지",
-        "designation_date": "2026-05-11",
-        "current_price": 3810,
-        "release_ceiling": 4965,
-        "diff_pct": 30.314960629921263,
-        "avg_trade_value_5d": 11719232075.0
+        "code": "059120",
+        "name": "아진엑스텍",
+        "designation_date": "2026-05-08",
+        "current_price": 10500,
+        "release_ceiling": 13470,
+        "diff_pct": 28.285714285714285,
+        "avg_trade_value_5d": 10698633996.0
+      },
+      {
+        "code": "448900",
+        "name": "한국피아이엠",
+        "designation_date": "2026-05-08",
+        "current_price": 98000,
+        "release_ceiling": 137600,
+        "diff_pct": 40.40816326530612,
+        "avg_trade_value_5d": 22485122580.0
       }
     ],
     "designation": [
@@ -40,7 +49,7 @@
         "current_price": 125500,
         "trigger_price": 160480,
         "diff_pct": 27.872509960159363,
-        "avg_trade_value_5d": 103008556775.0
+        "avg_trade_value_5d": 98849225020.0
       },
       {
         "code": "425040",
@@ -50,7 +59,7 @@
         "current_price": 25950,
         "trigger_price": 33520,
         "diff_pct": 29.171483622350674,
-        "avg_trade_value_5d": 74827126412.5
+        "avg_trade_value_5d": 67293201480.0
       },
       {
         "code": "131290",
@@ -60,7 +69,7 @@
         "current_price": 226500,
         "trigger_price": 290400,
         "diff_pct": 28.211920529801326,
-        "avg_trade_value_5d": 44548532500.0
+        "avg_trade_value_5d": 39062387900.0
       },
       {
         "code": "025560",
@@ -70,7 +79,7 @@
         "current_price": 27600,
         "trigger_price": 30736,
         "diff_pct": 11.36231884057971,
-        "avg_trade_value_5d": 23804698075.0
+        "avg_trade_value_5d": 20131003570.0
       }
     ],
     "redesignation": [
@@ -82,27 +91,27 @@
         "current_price": 6890,
         "trigger_price": 6040,
         "diff_pct": -12.336719883889694,
-        "avg_trade_value_5d": 27525559710.0
+        "avg_trade_value_5d": 31279020282.0
       }
     ],
     "diagnostics": {
       "ticker_set_count": 0,
-      "warning_fetched_count": 37,
+      "warning_fetched_count": 42,
       "warning_old_enough_count": 7,
-      "caution_fetched_count": 0,
+      "caution_fetched_count": 19,
       "candidate_map_count": 5,
-      "rewarn_map_count": 5
+      "rewarn_map_count": 6
     }
   },
   "summary": {
-    "release_count": 2,
+    "release_count": 3,
     "designation_count": 4,
     "redesignation_count": 1,
-    "target_date": "2026-05-26"
+    "target_date": "2026-05-22"
   },
-  "display_date": "2026-05-26",
+  "display_date": "2026-05-22",
   "display_dates": [
-    "2026-05-22",
-    "2026-05-26"
+    "2026-05-21",
+    "2026-05-22"
   ]
 }
