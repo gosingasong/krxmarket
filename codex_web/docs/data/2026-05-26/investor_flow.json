@@ -3,7 +3,7 @@
   "report": "investor_flow",
   "status": "ok",
   "date": "2026-05-22",
-  "generated_at": "2026-05-22T01:23:14.784613+09:00",
+  "generated_at": "2026-05-22T19:17:21.480018+09:00",
   "source": {
     "module": "codex_web"
   },
@@ -11,19 +11,441 @@
     "trade_date": "20260522",
     "flow_limit": 10,
     "sector_lookup_limit": 10,
-    "sector_map": {},
-    "institution": [],
-    "foreigner": [],
-    "institution_sector_counts": [],
-    "foreigner_sector_counts": [],
-    "institution_total_count": 0,
-    "foreigner_total_count": 0
+    "sector_map": {
+      "005930": "반도체와반도체장비",
+      "000660": "반도체와반도체장비",
+      "009150": "전자장비와기기",
+      "402340": "복합기업",
+      "005380": "자동차",
+      "012330": "자동차부품",
+      "066570": "전자제품",
+      "006400": "전기제품",
+      "086520": "화학",
+      "196170": "생물공학",
+      "005935": "반도체와반도체장비",
+      "036930": "반도체와반도체장비",
+      "012450": "우주항공과국방"
+    },
+    "institution": [
+      {
+        "ticker": "005930",
+        "name": "삼성전자",
+        "market": "",
+        "buy_amount_raw": 1893766046000.0,
+        "buy_amount_eok": 18937,
+        "sell_amount_raw": 1983095473250.0,
+        "sell_amount_eok": 19830,
+        "net_buy_amount_raw": -89329427250.0,
+        "net_buy_amount_eok": -893,
+        "trade_amount_raw": 0.0,
+        "trade_amount_eok": 0,
+        "buy_volume": 6434178,
+        "sell_volume": 6741809,
+        "rank": 1,
+        "sector": "반도체와반도체장비"
+      },
+      {
+        "ticker": "000660",
+        "name": "SK하이닉스",
+        "market": "",
+        "buy_amount_raw": 1611441265000.0,
+        "buy_amount_eok": 16114,
+        "sell_amount_raw": 1313968935500.0,
+        "sell_amount_eok": 13139,
+        "net_buy_amount_raw": 297472329500.0,
+        "net_buy_amount_eok": 2974,
+        "trade_amount_raw": 0.0,
+        "trade_amount_eok": 0,
+        "buy_volume": 831711,
+        "sell_volume": 678721,
+        "rank": 2,
+        "sector": "반도체와반도체장비"
+      },
+      {
+        "ticker": "009150",
+        "name": "삼성전기",
+        "market": "",
+        "buy_amount_raw": 366545851500.0,
+        "buy_amount_eok": 3665,
+        "sell_amount_raw": 454841776500.0,
+        "sell_amount_eok": 4548,
+        "net_buy_amount_raw": -88295925000.0,
+        "net_buy_amount_eok": -882,
+        "trade_amount_raw": 0.0,
+        "trade_amount_eok": 0,
+        "buy_volume": 282594,
+        "sell_volume": 350358,
+        "rank": 3,
+        "sector": "전자장비와기기"
+      },
+      {
+        "ticker": "402340",
+        "name": "SK스퀘어",
+        "market": "",
+        "buy_amount_raw": 211034193000.0,
+        "buy_amount_eok": 2110,
+        "sell_amount_raw": 150773687000.0,
+        "sell_amount_eok": 1507,
+        "net_buy_amount_raw": 60260506000.0,
+        "net_buy_amount_eok": 602,
+        "trade_amount_raw": 0.0,
+        "trade_amount_eok": 0,
+        "buy_volume": 178870,
+        "sell_volume": 127968,
+        "rank": 4,
+        "sector": "복합기업"
+      },
+      {
+        "ticker": "005380",
+        "name": "현대차",
+        "market": "",
+        "buy_amount_raw": 192833315000.0,
+        "buy_amount_eok": 1928,
+        "sell_amount_raw": 145426827500.0,
+        "sell_amount_eok": 1454,
+        "net_buy_amount_raw": 47406487500.0,
+        "net_buy_amount_eok": 474,
+        "trade_amount_raw": 0.0,
+        "trade_amount_eok": 0,
+        "buy_volume": 295128,
+        "sell_volume": 222771,
+        "rank": 5,
+        "sector": "자동차"
+      },
+      {
+        "ticker": "012330",
+        "name": "현대모비스",
+        "market": "",
+        "buy_amount_raw": 139205387000.0,
+        "buy_amount_eok": 1392,
+        "sell_amount_raw": 92293678000.0,
+        "sell_amount_eok": 922,
+        "net_buy_amount_raw": 46911709000.0,
+        "net_buy_amount_eok": 469,
+        "trade_amount_raw": 0.0,
+        "trade_amount_eok": 0,
+        "buy_volume": 216620,
+        "sell_volume": 143876,
+        "rank": 6,
+        "sector": "자동차부품"
+      },
+      {
+        "ticker": "066570",
+        "name": "LG전자",
+        "market": "",
+        "buy_amount_raw": 132987459000.0,
+        "buy_amount_eok": 1329,
+        "sell_amount_raw": 86068749500.0,
+        "sell_amount_eok": 860,
+        "net_buy_amount_raw": 46918709500.0,
+        "net_buy_amount_eok": 469,
+        "trade_amount_raw": 0.0,
+        "trade_amount_eok": 0,
+        "buy_volume": 559564,
+        "sell_volume": 361479,
+        "rank": 7,
+        "sector": "전자제품"
+      },
+      {
+        "ticker": "006400",
+        "name": "삼성SDI",
+        "market": "",
+        "buy_amount_raw": 94898115000.0,
+        "buy_amount_eok": 948,
+        "sell_amount_raw": 61886125000.0,
+        "sell_amount_eok": 618,
+        "net_buy_amount_raw": 33011990000.0,
+        "net_buy_amount_eok": 330,
+        "trade_amount_raw": 0.0,
+        "trade_amount_eok": 0,
+        "buy_volume": 147368,
+        "sell_volume": 96220,
+        "rank": 8,
+        "sector": "전기제품"
+      },
+      {
+        "ticker": "086520",
+        "name": "에코프로",
+        "market": "",
+        "buy_amount_raw": 91490105450.0,
+        "buy_amount_eok": 914,
+        "sell_amount_raw": 73187665000.0,
+        "sell_amount_eok": 731,
+        "net_buy_amount_raw": 18302440450.0,
+        "net_buy_amount_eok": 183,
+        "trade_amount_raw": 0.0,
+        "trade_amount_eok": 0,
+        "buy_volume": 626206,
+        "sell_volume": 500982,
+        "rank": 9,
+        "sector": "화학"
+      },
+      {
+        "ticker": "196170",
+        "name": "알테오젠",
+        "market": "",
+        "buy_amount_raw": 86382533000.0,
+        "buy_amount_eok": 863,
+        "sell_amount_raw": 66764518000.0,
+        "sell_amount_eok": 667,
+        "net_buy_amount_raw": 19618015000.0,
+        "net_buy_amount_eok": 196,
+        "trade_amount_raw": 0.0,
+        "trade_amount_eok": 0,
+        "buy_volume": 230922,
+        "sell_volume": 179359,
+        "rank": 10,
+        "sector": "생물공학"
+      }
+    ],
+    "foreigner": [
+      {
+        "ticker": "000660",
+        "name": "SK하이닉스",
+        "market": "",
+        "buy_amount_raw": 2701524362170.0,
+        "buy_amount_eok": 27015,
+        "sell_amount_raw": 3007024773670.0,
+        "sell_amount_eok": 30070,
+        "net_buy_amount_raw": -305500411500.0,
+        "net_buy_amount_eok": -3055,
+        "trade_amount_raw": 0.0,
+        "trade_amount_eok": 0,
+        "buy_volume": 1393461,
+        "sell_volume": 1551712,
+        "rank": 1,
+        "sector": "반도체와반도체장비"
+      },
+      {
+        "ticker": "005930",
+        "name": "삼성전자",
+        "market": "",
+        "buy_amount_raw": 1224981878069.0,
+        "buy_amount_eok": 12249,
+        "sell_amount_raw": 2235938877569.0,
+        "sell_amount_eok": 22359,
+        "net_buy_amount_raw": -1010956999500.0,
+        "net_buy_amount_eok": -10109,
+        "trade_amount_raw": 0.0,
+        "trade_amount_eok": 0,
+        "buy_volume": 4157999,
+        "sell_volume": 7589361,
+        "rank": 2,
+        "sector": "반도체와반도체장비"
+      },
+      {
+        "ticker": "402340",
+        "name": "SK스퀘어",
+        "market": "",
+        "buy_amount_raw": 639257022675.0,
+        "buy_amount_eok": 6392,
+        "sell_amount_raw": 636993032175.0,
+        "sell_amount_eok": 6369,
+        "net_buy_amount_raw": 2263990500.0,
+        "net_buy_amount_eok": 22,
+        "trade_amount_raw": 0.0,
+        "trade_amount_eok": 0,
+        "buy_volume": 543423,
+        "sell_volume": 541546,
+        "rank": 3,
+        "sector": "복합기업"
+      },
+      {
+        "ticker": "009150",
+        "name": "삼성전기",
+        "market": "",
+        "buy_amount_raw": 602018507512.0,
+        "buy_amount_eok": 6020,
+        "sell_amount_raw": 584612205512.0,
+        "sell_amount_eok": 5846,
+        "net_buy_amount_raw": 17406302000.0,
+        "net_buy_amount_eok": 174,
+        "trade_amount_raw": 0.0,
+        "trade_amount_eok": 0,
+        "buy_volume": 462002,
+        "sell_volume": 451876,
+        "rank": 4,
+        "sector": "전자장비와기기"
+      },
+      {
+        "ticker": "005935",
+        "name": "삼성전자우",
+        "market": "",
+        "buy_amount_raw": 347666356750.0,
+        "buy_amount_eok": 3476,
+        "sell_amount_raw": 263915371800.0,
+        "sell_amount_eok": 2639,
+        "net_buy_amount_raw": 83750984950.0,
+        "net_buy_amount_eok": 837,
+        "trade_amount_raw": 0.0,
+        "trade_amount_eok": 0,
+        "buy_volume": 1861198,
+        "sell_volume": 1413213,
+        "rank": 5,
+        "sector": "반도체와반도체장비"
+      },
+      {
+        "ticker": "036930",
+        "name": "주성엔지니어링",
+        "market": "",
+        "buy_amount_raw": 247908963050.0,
+        "buy_amount_eok": 2479,
+        "sell_amount_raw": 223585986350.0,
+        "sell_amount_eok": 2235,
+        "net_buy_amount_raw": 24322976700.0,
+        "net_buy_amount_eok": 243,
+        "trade_amount_raw": 0.0,
+        "trade_amount_eok": 0,
+        "buy_volume": 1184240,
+        "sell_volume": 1066496,
+        "rank": 6,
+        "sector": "반도체와반도체장비"
+      },
+      {
+        "ticker": "066570",
+        "name": "LG전자",
+        "market": "",
+        "buy_amount_raw": 232145417250.0,
+        "buy_amount_eok": 2321,
+        "sell_amount_raw": 372760391250.0,
+        "sell_amount_eok": 3727,
+        "net_buy_amount_raw": -140614974000.0,
+        "net_buy_amount_eok": -1406,
+        "trade_amount_raw": 0.0,
+        "trade_amount_eok": 0,
+        "buy_volume": 975645,
+        "sell_volume": 1564652,
+        "rank": 7,
+        "sector": "전자제품"
+      },
+      {
+        "ticker": "006400",
+        "name": "삼성SDI",
+        "market": "",
+        "buy_amount_raw": 181639978000.0,
+        "buy_amount_eok": 1816,
+        "sell_amount_raw": 141624677500.0,
+        "sell_amount_eok": 1416,
+        "net_buy_amount_raw": 40015300500.0,
+        "net_buy_amount_eok": 400,
+        "trade_amount_raw": 0.0,
+        "trade_amount_eok": 0,
+        "buy_volume": 281334,
+        "sell_volume": 220190,
+        "rank": 8,
+        "sector": "전기제품"
+      },
+      {
+        "ticker": "086520",
+        "name": "에코프로",
+        "market": "",
+        "buy_amount_raw": 167965194750.0,
+        "buy_amount_eok": 1679,
+        "sell_amount_raw": 121750007400.0,
+        "sell_amount_eok": 1217,
+        "net_buy_amount_raw": 46215187350.0,
+        "net_buy_amount_eok": 462,
+        "trade_amount_raw": 0.0,
+        "trade_amount_eok": 0,
+        "buy_volume": 1150298,
+        "sell_volume": 836014,
+        "rank": 9,
+        "sector": "화학"
+      },
+      {
+        "ticker": "012450",
+        "name": "한화에어로스페이스",
+        "market": "",
+        "buy_amount_raw": 157392178488.0,
+        "buy_amount_eok": 1573,
+        "sell_amount_raw": 176222131988.0,
+        "sell_amount_eok": 1762,
+        "net_buy_amount_raw": -18829953500.0,
+        "net_buy_amount_eok": -188,
+        "trade_amount_raw": 0.0,
+        "trade_amount_eok": 0,
+        "buy_volume": 125911,
+        "sell_volume": 141082,
+        "rank": 10,
+        "sector": "우주항공과국방"
+      }
+    ],
+    "institution_sector_counts": [
+      {
+        "sector": "반도체와반도체장비",
+        "count": 2
+      },
+      {
+        "sector": "복합기업",
+        "count": 1
+      },
+      {
+        "sector": "생물공학",
+        "count": 1
+      },
+      {
+        "sector": "자동차",
+        "count": 1
+      },
+      {
+        "sector": "자동차부품",
+        "count": 1
+      },
+      {
+        "sector": "전기제품",
+        "count": 1
+      },
+      {
+        "sector": "전자장비와기기",
+        "count": 1
+      },
+      {
+        "sector": "전자제품",
+        "count": 1
+      },
+      {
+        "sector": "화학",
+        "count": 1
+      }
+    ],
+    "foreigner_sector_counts": [
+      {
+        "sector": "반도체와반도체장비",
+        "count": 4
+      },
+      {
+        "sector": "복합기업",
+        "count": 1
+      },
+      {
+        "sector": "우주항공과국방",
+        "count": 1
+      },
+      {
+        "sector": "전기제품",
+        "count": 1
+      },
+      {
+        "sector": "전자장비와기기",
+        "count": 1
+      },
+      {
+        "sector": "전자제품",
+        "count": 1
+      },
+      {
+        "sector": "화학",
+        "count": 1
+      }
+    ],
+    "institution_total_count": 2257,
+    "foreigner_total_count": 2558
   },
   "summary": {
-    "institution_count": 0,
-    "institution_total_count": 0,
-    "foreigner_count": 0,
-    "foreigner_total_count": 0
+    "institution_count": 10,
+    "institution_total_count": 2257,
+    "foreigner_count": 10,
+    "foreigner_total_count": 2558
   },
   "display_date": "2026-05-22",
   "display_dates": [
