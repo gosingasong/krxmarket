@@ -3,7 +3,7 @@
   "report": "krx_alert",
   "status": "ok",
   "date": "2026-05-22",
-  "generated_at": "2026-05-22T01:24:36.780372+09:00",
+  "generated_at": "2026-05-22T22:37:22.813733+09:00",
   "source": {
     "module": "codex_web"
   },
@@ -16,88 +16,96 @@
         "code": "084370",
         "name": "유진테크",
         "designation_date": "2026-05-11",
-        "current_price": 129500,
+        "current_price": 138700,
         "release_ceiling": 150300,
-        "diff_pct": 16.06177606177606,
-        "avg_trade_value_5d": 20960099325.0
+        "diff_pct": 8.363374188896898,
+        "avg_trade_value_5d": 20647725080.0
+      },
+      {
+        "code": "092190",
+        "name": "서울바이오시스",
+        "designation_date": "2026-04-30",
+        "current_price": 14630,
+        "release_ceiling": 17280,
+        "diff_pct": 18.113465481886536,
+        "avg_trade_value_5d": 18241316426.0
       },
       {
         "code": "078150",
         "name": "HB테크놀러지",
         "designation_date": "2026-05-11",
-        "current_price": 3810,
+        "current_price": 4095,
         "release_ceiling": 4965,
-        "diff_pct": 30.314960629921263,
-        "avg_trade_value_5d": 11719232075.0
+        "diff_pct": 21.245421245421245,
+        "avg_trade_value_5d": 11787190771.0
       }
     ],
     "designation": [
       {
-        "code": "222800",
-        "name": "심텍",
-        "notice_date": "2026-05-21",
-        "valid_until": "2026-06-05",
-        "current_price": 125500,
-        "trigger_price": 160480,
-        "diff_pct": 27.872509960159363,
-        "avg_trade_value_5d": 103008556775.0
+        "code": "069540",
+        "name": "빛과전자",
+        "notice_date": "2026-05-22",
+        "valid_until": "2026-06-08",
+        "current_price": 6610,
+        "trigger_price": 8080,
+        "diff_pct": 22.239031770045386,
+        "avg_trade_value_5d": 114252223094.0
+      },
+      {
+        "code": "005950",
+        "name": "이수화학",
+        "notice_date": "2026-05-22",
+        "valid_until": "2026-06-08",
+        "current_price": 16240,
+        "trigger_price": 17264,
+        "diff_pct": 6.305418719211822,
+        "avg_trade_value_5d": 93061039202.0
       },
       {
         "code": "425040",
         "name": "티이엠씨",
-        "notice_date": "2026-05-19",
-        "valid_until": "2026-06-03",
-        "current_price": 25950,
-        "trigger_price": 33520,
-        "diff_pct": 29.171483622350674,
-        "avg_trade_value_5d": 74827126412.5
+        "notice_date": "2026-05-22",
+        "valid_until": "2026-06-08",
+        "current_price": 27850,
+        "trigger_price": 34320,
+        "diff_pct": 23.23159784560144,
+        "avg_trade_value_5d": 74766994960.0
       },
       {
-        "code": "131290",
-        "name": "티에스이",
-        "notice_date": "2026-05-20",
-        "valid_until": "2026-06-04",
-        "current_price": 226500,
-        "trigger_price": 290400,
-        "diff_pct": 28.211920529801326,
-        "avg_trade_value_5d": 44548532500.0
+        "code": "032500",
+        "name": "케이엠더블유",
+        "notice_date": "2026-05-22",
+        "valid_until": "2026-06-08",
+        "current_price": 36400,
+        "trigger_price": 46240,
+        "diff_pct": 27.032967032967033,
+        "avg_trade_value_5d": 28370718660.0
       },
       {
-        "code": "025560",
-        "name": "미래산업",
-        "notice_date": "2026-05-19",
-        "valid_until": "2026-06-03",
-        "current_price": 27600,
-        "trigger_price": 30736,
-        "diff_pct": 11.36231884057971,
-        "avg_trade_value_5d": 23804698075.0
+        "code": "078350",
+        "name": "한양디지텍",
+        "notice_date": "2026-05-22",
+        "valid_until": "2026-06-08",
+        "current_price": 42500,
+        "trigger_price": 54400,
+        "diff_pct": 28.000000000000004,
+        "avg_trade_value_5d": 15543793120.0
       }
     ],
-    "redesignation": [
-      {
-        "code": "024840",
-        "name": "KBI메탈",
-        "release_date": "2026-05-20",
-        "valid_until": "2026-06-04",
-        "current_price": 6890,
-        "trigger_price": 6040,
-        "diff_pct": -12.336719883889694,
-        "avg_trade_value_5d": 27525559710.0
-      }
-    ],
+    "redesignation": [],
     "diagnostics": {
       "ticker_set_count": 0,
-      "warning_fetched_count": 37,
-      "warning_old_enough_count": 7,
-      "caution_fetched_count": 0,
-      "candidate_map_count": 5,
-      "rewarn_map_count": 5
+      "warning_fetched_count": 41,
+      "warning_old_enough_count": 8,
+      "caution_fetched_count": 22,
+      "candidate_map_count": 15,
+      "rewarn_map_count": 9
     }
   },
   "summary": {
-    "release_count": 2,
-    "designation_count": 4,
-    "redesignation_count": 1,
+    "release_count": 3,
+    "designation_count": 5,
+    "redesignation_count": 0,
     "target_date": "2026-05-26"
   },
   "display_date": "2026-05-26",

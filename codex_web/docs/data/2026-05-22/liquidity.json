@@ -3,7 +3,7 @@
   "report": "liquidity",
   "status": "ok",
   "date": "2026-05-22",
-  "generated_at": "2026-05-22T01:25:02.304473+09:00",
+  "generated_at": "2026-05-22T22:37:49.733036+09:00",
   "source": {
     "module": "codex_web"
   },
@@ -13,18 +13,6 @@
       "end": "20260522"
     },
     "upper": [
-      {
-        "Date": "2026-04-07",
-        "KOSPI_Trade": 237194,
-        "KOSPI_Cap": 45264649,
-        "KOSDAQ_Trade": 101001,
-        "KOSDAQ_Cap": 5739407,
-        "Credit_Total": 32657681,
-        "Credit_KOSPI": 22468639,
-        "Credit_KOSDAQ": 10189042,
-        "Ratio_KOSPI": 0.49638381157004,
-        "Ratio_KOSDAQ": 1.7752778292252145
-      },
       {
         "Date": "2026-04-08",
         "KOSPI_Trade": 363070,
@@ -372,24 +360,21 @@
         "Credit_KOSDAQ": 10233400,
         "Ratio_KOSPI": 0.4404495441694589,
         "Ratio_KOSDAQ": 1.7337704891369539
+      },
+      {
+        "Date": "2026-05-21",
+        "KOSPI_Trade": 431871,
+        "KOSPI_Cap": 63962399,
+        "KOSDAQ_Trade": 126815,
+        "KOSDAQ_Cap": 6179290,
+        "Credit_Total": 36472380,
+        "Credit_KOSPI": 26364442,
+        "Credit_KOSDAQ": 10107938,
+        "Ratio_KOSPI": 0.4121865723016424,
+        "Ratio_KOSDAQ": 1.6357766021662683
       }
     ],
     "lower": [
-      {
-        "Date": "2026-04-07",
-        "KOSPI_Trade": 237194,
-        "KOSPI_Close": 5494.78,
-        "KOSDAQ_Trade": 101001,
-        "Deposit_Value": 108921448,
-        "NXT_KOSPI_Trade": 177747.40356515,
-        "NXT_KOSDAQ_Trade": 36776.0449649,
-        "NXT_KOSPI_Records": 360,
-        "NXT_KOSDAQ_Records": 286,
-        "NXT_Set_Time_STK": "2026-04-07 20:05",
-        "NXT_Set_Time_KSQ": "2026-04-07 20:05",
-        "KOSPI_Trade_Total": 414941.40356515,
-        "KOSDAQ_Trade_Total": 137777.0449649
-      },
       {
         "Date": "2026-04-08",
         "KOSPI_Trade": 363070,
@@ -824,14 +809,29 @@
         "NXT_Set_Time_KSQ": "2026-05-20 20:05",
         "KOSPI_Trade_Total": 669824.2862069,
         "KOSDAQ_Trade_Total": 153559.59378548
+      },
+      {
+        "Date": "2026-05-21",
+        "KOSPI_Trade": 431871,
+        "KOSPI_Close": 7815.59,
+        "KOSDAQ_Trade": 126815,
+        "Deposit_Value": 122381941,
+        "NXT_KOSPI_Trade": 344856.91461846,
+        "NXT_KOSDAQ_Trade": 32964.83040051,
+        "NXT_KOSPI_Records": 359,
+        "NXT_KOSDAQ_Records": 285,
+        "NXT_Set_Time_STK": "2026-05-21 20:05",
+        "NXT_Set_Time_KSQ": "2026-05-21 20:05",
+        "KOSPI_Trade_Total": 776727.91461846,
+        "KOSDAQ_Trade_Total": 159779.83040051
       }
     ]
   },
   "summary": {
     "upper_count": 30,
     "lower_count": 30,
-    "latest_credit_date": "2026-05-20",
-    "latest_liquidity_date": "2026-05-20"
+    "latest_credit_date": "2026-05-21",
+    "latest_liquidity_date": "2026-05-21"
   },
   "display_dates": [
     "2026-05-22",
