@@ -44,59 +44,66 @@ class DashboardStaticTests(unittest.TestCase):
         self.assertIn('name="KST"', workflow)
         self.assertIn("dt.datetime.now(KST).isoformat()", workflow)
 
-    def test_workflow_uses_user_requested_three_retry_windows(self):
+    def test_workflow_uses_user_requested_five_three_minute_scheduled_attempts(self):
         workflow = WORKFLOW.read_text(encoding="utf-8")
-        expected_crons = {
-            '"5 21 * * 0-4"': "06:05 KST, US market + IPO",
-            '"1 9 * * 1-5"': "18:01 KST, investor flow",
-            '"3 11 * * 1-5"': "20:03 KST, KRX alert + liquidity / NXT",
-        }
-        for cron, comment in expected_crons.items():
-            self.assertIn(cron, workflow)
-            self.assertIn(comment, workflow)
-        removed_old_retries = [
-            '"30 21 * * 0-4"',
-            '"39 21 * * 0-4"',
-            '"50 21 * * 0-4"',
-            '"20 6 * * 1-5"',
-            '"40 6 * * 1-5"',
-            '"0 7 * * 1-5"',
-            '"20 9 * * 1-5"',
-            '"40 9 * * 1-5"',
-            '"10 11 * * 1-5"',
-            '"30 11 * * 1-5"',
-            '"50 11 * * 1-5"',
-            '"25 11 * * 1-5"',
-            '"45 11 * * 1-5"',
-            '"5 12 * * 1-5"',
-            '"25 12 * * 1-5"',
-            '"45 12 * * 1-5"',
-            '"5 13 * * 1-5"',
+        expected_crons = [
+            '"5 21 * * 0-4"',
+            '"8 21 * * 0-4"',
+            '"11 21 * * 0-4"',
+            '"14 21 * * 0-4"',
+            '"17 21 * * 0-4"',
+            '"1 9 * * 1-5"',
+            '"4 9 * * 1-5"',
+            '"7 9 * * 1-5"',
+            '"10 9 * * 1-5"',
+            '"13 9 * * 1-5"',
+            '"3 11 * * 1-5"',
+            '"6 11 * * 1-5"',
+            '"9 11 * * 1-5"',
+            '"12 11 * * 1-5"',
+            '"15 11 * * 1-5"',
         ]
-        for cron in removed_old_retries:
-            self.assertNotIn(cron, workflow)
+        for cron in expected_crons:
+            self.assertIn(cron, workflow)
+        for comment in [
+            "06:05 KST, US market + IPO attempt 1/5",
+            "18:13 KST, investor flow attempt 5/5",
+            "20:15 KST, KRX alert + liquidity / NXT attempt 5/5",
+        ]:
+            self.assertIn(comment, workflow)
 
-    def test_workflow_retries_five_times_in_one_run_and_stops_on_success(self):
+    def test_workflow_scheduled_attempts_skip_after_fresh_success(self):
         workflow = WORKFLOW.read_text(encoding="utf-8")
-        self.assertIn("for attempt in 1 2 3 4 5", workflow)
-        self.assertIn("sleep 180", workflow)
-        self.assertIn("fetch succeeded on attempt $attempt; stopping retries", workflow)
-        self.assertRegex(workflow, r'if "\$@"; then\n\s+echo "\[\$NAME\] fetch succeeded on attempt \$attempt; stopping retries"\n\s+return 0')
-        self.assertIn('retry_group morning_us_ipo refresh_morning_us_ipo "$BASE_DATE"', workflow)
-        self.assertIn('retry_group investor_flow refresh_investor_flow "$BASE_DATE"', workflow)
-        self.assertIn('retry_group risk_auxiliary refresh_risk_and_auxiliary "$BASE_DATE"', workflow)
+        self.assertIn("group_is_fresh()", workflow)
+        self.assertIn("run_group_once_if_stale()", workflow)
+        self.assertIn("fresh data already exists; skipping this scheduled attempt", workflow)
+        self.assertIn("generated_at is older than", workflow)
+        self.assertIn("has empty investor flow rows", workflow)
+        self.assertIn('run_group_once_if_stale morning_us_ipo 06:05 "$BASE_DATE" refresh_morning_us_ipo', workflow)
+        self.assertIn('run_group_once_if_stale investor_flow 18:01 "$BASE_DATE" refresh_investor_flow', workflow)
+        self.assertIn('run_group_once_if_stale risk_auxiliary 20:03 "$BASE_DATE" refresh_risk_and_auxiliary', workflow)
         self.assertIn('--fail-fast', workflow)
 
     def test_workflow_maps_requested_report_groups(self):
         workflow = WORKFLOW.read_text(encoding="utf-8")
-        self.assertRegex(workflow, r'"5 21 \* \* 0-4"\) REPORTS="morning_us_ipo"')
-        self.assertRegex(workflow, r'"1 9 \* \* 1-5"\) REPORTS="investor_flow"')
-        self.assertRegex(workflow, r'"3 11 \* \* 1-5"\) REPORTS="risk_auxiliary"')
+        self.assertRegex(workflow, r'"5 21 \* \* 0-4"\|"8 21 \* \* 0-4".*REPORTS="morning_us_ipo"')
+        self.assertRegex(workflow, r'"1 9 \* \* 1-5"\|"4 9 \* \* 1-5".*REPORTS="investor_flow"')
+        self.assertRegex(workflow, r'"3 11 \* \* 1-5"\|"6 11 \* \* 1-5".*REPORTS="risk_auxiliary"')
         self.assertIn('python codex_web/update_reports.py --date "$BASE_DATE" --reports us_market --fail-fast --verbose', workflow)
         self.assertIn('refresh_ipo_today_and_next "$BASE_DATE"', workflow)
         self.assertIn('--flow-source-date "$BASE_DATE" --flow-rollover-next --fail-fast', workflow)
         self.assertIn('--reports krx_alert --risk-rollover-next --fail-fast', workflow)
         self.assertIn('--reports liquidity,nxt_market --extra-rollover-next --fail-fast', workflow)
+
+    def test_client_uses_available_krx_dates_for_today_next_and_memo_rollover(self):
+        app = APP_JS.read_text(encoding="utf-8")
+        self.assertIn("function nextTradingDate", app)
+        self.assertIn("return nextAvailableDate(dateStr);", app)
+        self.assertIn("nextTradingDate(currentDate)", app)
+        self.assertIn("다음 거래일", app)
+        self.assertIn("previousAvailableDate(currentDate) || shiftDateString(currentDate, -1)", app)
+        self.assertNotIn("function nextCalendarDate", app)
+        self.assertNotIn("const isWeekday", app)
 
     def test_risk_and_extra_roll_over_to_next_trading_day_like_flow(self):
         reports = (ROOT / "src" / "codex_web" / "reports.py").read_text(encoding="utf-8")

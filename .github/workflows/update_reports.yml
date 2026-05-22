@@ -6,10 +6,22 @@ on:
     branches:
       - main
   schedule:
-    # UTC cron. KST = UTC+9. Each scheduled run retries internally 5 times at 3-minute intervals.
-    - cron: "5 21 * * 0-4"  # 06:05 KST, US market + IPO
-    - cron: "1 9 * * 1-5"   # 18:01 KST, investor flow
-    - cron: "3 11 * * 1-5"  # 20:03 KST, KRX alert + liquidity / NXT
+    # UTC cron. KST = UTC+9. Five 3-minute attempts per group; later runs skip fetch if fresh data already exists.
+    - cron: "5 21 * * 0-4"  # 06:05 KST, US market + IPO attempt 1/5
+    - cron: "8 21 * * 0-4"  # 06:08 KST, US market + IPO attempt 2/5
+    - cron: "11 21 * * 0-4" # 06:11 KST, US market + IPO attempt 3/5
+    - cron: "14 21 * * 0-4" # 06:14 KST, US market + IPO attempt 4/5
+    - cron: "17 21 * * 0-4" # 06:17 KST, US market + IPO attempt 5/5
+    - cron: "1 9 * * 1-5"   # 18:01 KST, investor flow attempt 1/5
+    - cron: "4 9 * * 1-5"   # 18:04 KST, investor flow attempt 2/5
+    - cron: "7 9 * * 1-5"   # 18:07 KST, investor flow attempt 3/5
+    - cron: "10 9 * * 1-5"  # 18:10 KST, investor flow attempt 4/5
+    - cron: "13 9 * * 1-5"  # 18:13 KST, investor flow attempt 5/5
+    - cron: "3 11 * * 1-5"  # 20:03 KST, KRX alert + liquidity / NXT attempt 1/5
+    - cron: "6 11 * * 1-5"  # 20:06 KST, KRX alert + liquidity / NXT attempt 2/5
+    - cron: "9 11 * * 1-5"  # 20:09 KST, KRX alert + liquidity / NXT attempt 3/5
+    - cron: "12 11 * * 1-5" # 20:12 KST, KRX alert + liquidity / NXT attempt 4/5
+    - cron: "15 11 * * 1-5" # 20:15 KST, KRX alert + liquidity / NXT attempt 5/5
 
 permissions:
   contents: write
@@ -91,6 +103,96 @@ jobs:
             echo "[$NAME] fetch failed after 5 attempts"
             return 1
           }
+          group_is_fresh() {
+            GROUP="$1"
+            BASE_DATE="$2"
+            WINDOW_START="$3"
+            PYTHONPATH=codex_web/src python - "$GROUP" "$BASE_DATE" "$WINDOW_START" <<'PY'
+          import datetime as dt
+          import json
+          import sys
+          from pathlib import Path
+
+          import pandas as pd
+
+          from codex_web.sources.common import KST, TradingDayCalendar
+
+          group, base_date, window_start = sys.argv[1:]
+          data_root = Path("codex_web/docs/data")
+          calendar = TradingDayCalendar()
+          next_date = calendar.add_krx_trading_days(pd.Timestamp(base_date), 1)
+          next_date_str = next_date.date().isoformat() if next_date is not None else None
+          min_generated_at = dt.datetime.fromisoformat(f"{base_date}T{window_start}:00").replace(tzinfo=KST)
+
+          def generated_after_window(payload):
+              value = payload.get("generated_at")
+              if not value:
+                  return False
+              try:
+                  generated = dt.datetime.fromisoformat(str(value).replace("Z", "+00:00"))
+              except ValueError:
+                  return False
+              if generated.tzinfo is None:
+                  generated = generated.replace(tzinfo=KST)
+              return generated.astimezone(KST) >= min_generated_at
+
+          def report_ok(date_str, report_name):
+              path = data_root / date_str / f"{report_name}.json"
+              if not path.exists():
+                  print(f"missing {path}")
+                  return False
+              try:
+                  payload = json.loads(path.read_text(encoding="utf-8"))
+              except Exception as exc:
+                  print(f"cannot read {path}: {exc}")
+                  return False
+              if payload.get("status") != "ok":
+                  print(f"{path} status={payload.get('status')}")
+                  return False
+              if not generated_after_window(payload):
+                  print(f"{path} generated_at is older than {min_generated_at.isoformat()}")
+                  return False
+              if report_name == "investor_flow":
+                  summary = payload.get("summary") or {}
+                  if int(summary.get("institution_count") or 0) <= 0 and int(summary.get("foreigner_count") or 0) <= 0:
+                      print(f"{path} has empty investor flow rows")
+                      return False
+              return True
+
+          if group == "morning_us_ipo":
+              checks = [(base_date, "us_market"), (base_date, "ipo")]
+              if next_date_str:
+                  checks.append((next_date_str, "ipo"))
+          elif group == "investor_flow":
+              checks = [(base_date, "investor_flow")]
+              if next_date_str:
+                  checks.append((next_date_str, "investor_flow"))
+          elif group == "risk_auxiliary":
+              checks = [(base_date, "krx_alert"), (base_date, "liquidity"), (base_date, "nxt_market")]
+              if next_date_str:
+                  checks.extend((next_date_str, report) for report in ["krx_alert", "liquidity", "nxt_market"])
+          else:
+              print(f"unknown group {group}")
+              raise SystemExit(1)
+
+          if all(report_ok(date_str, report_name) for date_str, report_name in checks):
+              print(f"{group} is already fresh for {base_date}")
+              raise SystemExit(0)
+          raise SystemExit(1)
+          PY
+          }
+          run_group_once_if_stale() {
+            GROUP="$1"
+            WINDOW_START="$2"
+            BASE_DATE="$3"
+            shift 3
+            if group_is_fresh "$GROUP" "$BASE_DATE" "$WINDOW_START"; then
+              echo "[$GROUP] fresh data already exists; skipping this scheduled attempt"
+              return 0
+            fi
+            echo "[$GROUP] fresh data missing; running scheduled fetch attempt"
+            "$@" "$BASE_DATE"
+          }
           refresh_ipo_today_and_next() {
             BASE_DATE="$1"
             NEXT_DATE=$(krx_next_session "$BASE_DATE")
@@ -131,21 +233,21 @@ jobs:
           fi
           if [ "$EVENT_NAME" = "schedule" ]; then
             case "$EVENT_SCHEDULE" in
-              "5 21 * * 0-4") REPORTS="morning_us_ipo" ;;
-              "1 9 * * 1-5") REPORTS="investor_flow" ;;
-              "3 11 * * 1-5") REPORTS="risk_auxiliary" ;;
+              "5 21 * * 0-4"|"8 21 * * 0-4"|"11 21 * * 0-4"|"14 21 * * 0-4"|"17 21 * * 0-4") REPORTS="morning_us_ipo" ;;
+              "1 9 * * 1-5"|"4 9 * * 1-5"|"7 9 * * 1-5"|"10 9 * * 1-5"|"13 9 * * 1-5") REPORTS="investor_flow" ;;
+              "3 11 * * 1-5"|"6 11 * * 1-5"|"9 11 * * 1-5"|"12 11 * * 1-5"|"15 11 * * 1-5") REPORTS="risk_auxiliary" ;;
             esac
           fi
           BASE_DATE=$(kst_today)
           case "$REPORTS" in
             morning_us_ipo)
-              retry_group morning_us_ipo refresh_morning_us_ipo "$BASE_DATE"
+              run_group_once_if_stale morning_us_ipo 06:05 "$BASE_DATE" refresh_morning_us_ipo
               ;;
             investor_flow)
-              retry_group investor_flow refresh_investor_flow "$BASE_DATE"
+              run_group_once_if_stale investor_flow 18:01 "$BASE_DATE" refresh_investor_flow
               ;;
             risk_auxiliary)
-              retry_group risk_auxiliary refresh_risk_and_auxiliary "$BASE_DATE"
+              run_group_once_if_stale risk_auxiliary 20:03 "$BASE_DATE" refresh_risk_and_auxiliary
               ;;
             default)
               python codex_web/update_reports.py --reports default --fail-fast --verbose

@@ -134,10 +134,7 @@ function preferredCurrentDate() {
   if (now.hour < 6) {
     return previousAvailableDate(now.date) || latestDateOnOrBefore(now.date) || appIndex?.latest_date || now.date;
   }
-  const [year, month, day] = now.date.split("-").map(Number);
-  const dayOfWeek = new Date(Date.UTC(year, month - 1, day)).getUTCDay();
-  const isWeekday = dayOfWeek >= 1 && dayOfWeek <= 5;
-  return availableDates().includes(now.date) || isWeekday
+  return availableDates().includes(now.date)
     ? now.date
     : latestDateOnOrBefore(now.date) || appIndex?.latest_date || now.date;
 }
@@ -164,8 +161,8 @@ function shiftDateString(dateStr, days) {
   return date.toISOString().slice(0, 10);
 }
 
-function nextCalendarDate(dateStr) {
-  return shiftDateString(dateStr, 1);
+function nextTradingDate(dateStr) {
+  return nextAvailableDate(dateStr);
 }
 
 function selectedDay() {
@@ -211,7 +208,7 @@ function dailyMemoSourceDate() {
   if (!currentDate) return null;
   const currentValue = localStorage.getItem(dailyMemoKey(currentDate));
   if (currentValue) return currentDate;
-  const previousDate = shiftDateString(currentDate, -1);
+  const previousDate = previousAvailableDate(currentDate) || shiftDateString(currentDate, -1);
   const previousValue = previousDate ? localStorage.getItem(dailyMemoKey(previousDate)) : null;
   return previousValue ? previousDate : currentDate;
 }
@@ -838,9 +835,9 @@ async function renderAll() {
   $("briefTitle").textContent = currentDate === preferredCurrentDate() ? "오늘 요약" : "선택일 요약";
   const nextButton = $("nextDayButton");
   if (nextButton) {
-    const nextDate = nextCalendarDate(currentDate);
+    const nextDate = nextTradingDate(currentDate);
     nextButton.disabled = !nextDate;
-    nextButton.title = nextDate ? `다음 날짜 ${nextDate}` : "다음 날짜로 이동";
+    nextButton.title = nextDate ? `다음 거래일 ${nextDate}` : "다음 거래일로 이동";
   }
   await loadCurrentPayloads();
   const workflowStatus = await loadWorkflowStatus();
@@ -874,7 +871,7 @@ $("todayButton").addEventListener("click", async () => {
 });
 
 $("nextDayButton").addEventListener("click", async () => {
-  const nextDate = nextCalendarDate(currentDate);
+  const nextDate = nextTradingDate(currentDate);
   if (!nextDate) return;
   currentDate = nextDate;
   $("dateInput").value = currentDate;
