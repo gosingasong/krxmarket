@@ -44,53 +44,59 @@ class DashboardStaticTests(unittest.TestCase):
         self.assertIn('name="KST"', workflow)
         self.assertIn("dt.datetime.now(KST).isoformat()", workflow)
 
-    def test_workflow_has_redundant_us_market_morning_refreshes(self):
+    def test_workflow_uses_user_requested_three_retry_windows(self):
         workflow = WORKFLOW.read_text(encoding="utf-8")
-        for cron in ['"30 21 * * 0-4"', '"39 21 * * 0-4"', '"50 21 * * 0-4"']:
+        expected_crons = {
+            '"5 21 * * 0-4"': "06:05 KST, US market + IPO",
+            '"1 9 * * 1-5"': "18:01 KST, investor flow",
+            '"3 11 * * 1-5"': "20:03 KST, KRX alert + liquidity / NXT",
+        }
+        for cron, comment in expected_crons.items():
             self.assertIn(cron, workflow)
-        self.assertRegex(workflow, r'"30 21 \* \* 0-4"\|"39 21 \* \* 0-4"\|"50 21 \* \* 0-4"\) REPORTS="us_market"')
-
-    def test_workflow_has_redundant_krx_alert_after_8pm_and_today_date_args(self):
-        workflow = WORKFLOW.read_text(encoding="utf-8")
-        for cron in [
-            '"25 11 * * 1-5"',
-            '"45 11 * * 1-5"',
-            '"5 12 * * 1-5"',
-            '"25 12 * * 1-5"',
-            '"45 12 * * 1-5"',
-        ]:
-            self.assertIn(cron, workflow)
-        self.assertRegex(
-            workflow,
-            r'"25 11 \* \* 1-5"\|"45 11 \* \* 1-5"\|"5 12 \* \* 1-5"\|"25 12 \* \* 1-5"\|"45 12 \* \* 1-5"\) REPORTS="krx_alert"',
-        )
-        self.assertIn('REPORTS="krx_alert"', workflow)
-        self.assertIn('DATE_ARGS="--date $BASE_DATE"', workflow)
-
-    def test_workflow_retries_and_evening_catchup_cover_all_krx_reports(self):
-        workflow = WORKFLOW.read_text(encoding="utf-8")
-        for cron in [
+            self.assertIn(comment, workflow)
+        removed_old_retries = [
+            '"30 21 * * 0-4"',
+            '"39 21 * * 0-4"',
+            '"50 21 * * 0-4"',
             '"20 6 * * 1-5"',
             '"40 6 * * 1-5"',
             '"0 7 * * 1-5"',
-            '"1 9 * * 1-5"',
             '"20 9 * * 1-5"',
             '"40 9 * * 1-5"',
             '"10 11 * * 1-5"',
             '"30 11 * * 1-5"',
             '"50 11 * * 1-5"',
+            '"25 11 * * 1-5"',
+            '"45 11 * * 1-5"',
+            '"5 12 * * 1-5"',
+            '"25 12 * * 1-5"',
+            '"45 12 * * 1-5"',
             '"5 13 * * 1-5"',
-        ]:
-            self.assertIn(cron, workflow)
-        self.assertRegex(workflow, r'"20 6 \* \* 1-5"\|"40 6 \* \* 1-5"\|"0 7 \* \* 1-5"\) REPORTS="ipo"')
-        self.assertRegex(workflow, r'"1 9 \* \* 1-5"\|"20 9 \* \* 1-5"\|"40 9 \* \* 1-5"\) REPORTS="investor_flow"')
-        self.assertRegex(workflow, r'"10 11 \* \* 1-5"\|"30 11 \* \* 1-5"\|"50 11 \* \* 1-5"\) REPORTS="liquidity,nxt_market"')
-        self.assertIn('REPORTS="evening_krx"', workflow)
-        self.assertIn('refresh_evening_krx "$BASE_DATE"', workflow)
+        ]
+        for cron in removed_old_retries:
+            self.assertNotIn(cron, workflow)
+
+    def test_workflow_retries_five_times_in_one_run_and_stops_on_success(self):
+        workflow = WORKFLOW.read_text(encoding="utf-8")
+        self.assertIn("for attempt in 1 2 3 4 5", workflow)
+        self.assertIn("sleep 180", workflow)
+        self.assertIn("fetch succeeded on attempt $attempt; stopping retries", workflow)
+        self.assertRegex(workflow, r'if "\$@"; then\n\s+echo "\[\$NAME\] fetch succeeded on attempt \$attempt; stopping retries"\n\s+return 0')
+        self.assertIn('retry_group morning_us_ipo refresh_morning_us_ipo "$BASE_DATE"', workflow)
+        self.assertIn('retry_group investor_flow refresh_investor_flow "$BASE_DATE"', workflow)
+        self.assertIn('retry_group risk_auxiliary refresh_risk_and_auxiliary "$BASE_DATE"', workflow)
+        self.assertIn('--fail-fast', workflow)
+
+    def test_workflow_maps_requested_report_groups(self):
+        workflow = WORKFLOW.read_text(encoding="utf-8")
+        self.assertRegex(workflow, r'"5 21 \* \* 0-4"\) REPORTS="morning_us_ipo"')
+        self.assertRegex(workflow, r'"1 9 \* \* 1-5"\) REPORTS="investor_flow"')
+        self.assertRegex(workflow, r'"3 11 \* \* 1-5"\) REPORTS="risk_auxiliary"')
+        self.assertIn('python codex_web/update_reports.py --date "$BASE_DATE" --reports us_market --fail-fast --verbose', workflow)
         self.assertIn('refresh_ipo_today_and_next "$BASE_DATE"', workflow)
-        self.assertIn('--flow-source-date "$BASE_DATE" --flow-rollover-next', workflow)
-        self.assertIn('--risk-rollover-next', workflow)
-        self.assertIn('--extra-rollover-next', workflow)
+        self.assertIn('--flow-source-date "$BASE_DATE" --flow-rollover-next --fail-fast', workflow)
+        self.assertIn('--reports krx_alert --risk-rollover-next --fail-fast', workflow)
+        self.assertIn('--reports liquidity,nxt_market --extra-rollover-next --fail-fast', workflow)
 
     def test_risk_and_extra_roll_over_to_next_trading_day_like_flow(self):
         reports = (ROOT / "src" / "codex_web" / "reports.py").read_text(encoding="utf-8")
@@ -108,6 +114,7 @@ class DashboardStaticTests(unittest.TestCase):
         self.assertIn("--risk-rollover-next", workflow)
         self.assertIn("--extra-rollover-next", workflow)
         self.assertNotIn("화면용 Risk Watch 데이터가 아직 없습니다", app)
+
     def test_daily_memo_rolls_to_next_day_and_clear_buttons_exist(self):
         app = APP_JS.read_text(encoding="utf-8")
         html = (ROOT / "docs" / "index.html").read_text(encoding="utf-8")

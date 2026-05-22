@@ -6,25 +6,10 @@ on:
     branches:
       - main
   schedule:
-    # UTC cron. KST = UTC+9.
-    - cron: "30 21 * * 0-4" # 06:30 KST, US market
-    - cron: "39 21 * * 0-4" # 06:39 KST, US market retry
-    - cron: "50 21 * * 0-4" # 06:50 KST, US market retry
-    - cron: "20 6 * * 1-5"  # 15:20 KST, IPO
-    - cron: "40 6 * * 1-5"  # 15:40 KST, IPO retry
-    - cron: "0 7 * * 1-5"   # 16:00 KST, IPO retry
+    # UTC cron. KST = UTC+9. Each scheduled run retries internally 5 times at 3-minute intervals.
+    - cron: "5 21 * * 0-4"  # 06:05 KST, US market + IPO
     - cron: "1 9 * * 1-5"   # 18:01 KST, investor flow
-    - cron: "20 9 * * 1-5"  # 18:20 KST, investor flow retry
-    - cron: "40 9 * * 1-5"  # 18:40 KST, investor flow retry
-    - cron: "10 11 * * 1-5" # 20:10 KST, liquidity / NXT
-    - cron: "30 11 * * 1-5" # 20:30 KST, liquidity / NXT retry
-    - cron: "50 11 * * 1-5" # 20:50 KST, liquidity / NXT retry
-    - cron: "25 11 * * 1-5" # 20:25 KST, KRX alert
-    - cron: "45 11 * * 1-5" # 20:45 KST, KRX alert retry
-    - cron: "5 12 * * 1-5"  # 21:05 KST, KRX alert retry
-    - cron: "25 12 * * 1-5" # 21:25 KST, KRX alert retry
-    - cron: "45 12 * * 1-5" # 21:45 KST, KRX alert retry
-    - cron: "5 13 * * 1-5"  # 22:05 KST, all KRX evening catch-up
+    - cron: "3 11 * * 1-5"  # 20:03 KST, KRX alert + liquidity / NXT
 
 permissions:
   contents: write
@@ -38,7 +23,7 @@ concurrency:
 jobs:
   update:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 45
     steps:
       - uses: actions/checkout@v4
 
@@ -89,76 +74,87 @@ jobs:
           print(next_day.date().isoformat())
           PY
           }
+          retry_group() {
+            NAME="$1"
+            shift
+            for attempt in 1 2 3 4 5; do
+              echo "[$NAME] fetch attempt $attempt/5"
+              if "$@"; then
+                echo "[$NAME] fetch succeeded on attempt $attempt; stopping retries"
+                return 0
+              fi
+              if [ "$attempt" -lt 5 ]; then
+                echo "[$NAME] fetch failed on attempt $attempt; retrying in 3 minutes"
+                sleep 180
+              fi
+            done
+            echo "[$NAME] fetch failed after 5 attempts"
+            return 1
+          }
           refresh_ipo_today_and_next() {
             BASE_DATE="$1"
             NEXT_DATE=$(krx_next_session "$BASE_DATE")
-            python codex_web/update_reports.py --date "$BASE_DATE" --reports ipo --verbose
-            python codex_web/update_reports.py --date "$NEXT_DATE" --reports ipo --verbose
+            python codex_web/update_reports.py --date "$BASE_DATE" --reports ipo --fail-fast --verbose
+            python codex_web/update_reports.py --date "$NEXT_DATE" --reports ipo --fail-fast --verbose
           }
-          refresh_evening_krx() {
+          refresh_morning_us_ipo() {
             BASE_DATE="$1"
+            python codex_web/update_reports.py --date "$BASE_DATE" --reports us_market --fail-fast --verbose
             refresh_ipo_today_and_next "$BASE_DATE"
-            python codex_web/update_reports.py --date "$BASE_DATE" --reports investor_flow --flow-source-date "$BASE_DATE" --flow-rollover-next --verbose
-            python codex_web/update_reports.py --date "$BASE_DATE" --reports krx_alert --risk-rollover-next --verbose
-            python codex_web/update_reports.py --date "$BASE_DATE" --reports liquidity,nxt_market --extra-rollover-next --verbose
+          }
+          refresh_investor_flow() {
+            BASE_DATE="$1"
+            python codex_web/update_reports.py --date "$BASE_DATE" --reports investor_flow --flow-source-date "$BASE_DATE" --flow-rollover-next --fail-fast --verbose
+          }
+          refresh_risk_and_auxiliary() {
+            BASE_DATE="$1"
+            python codex_web/update_reports.py --date "$BASE_DATE" --reports krx_alert --risk-rollover-next --fail-fast --verbose
+            python codex_web/update_reports.py --date "$BASE_DATE" --reports liquidity,nxt_market --extra-rollover-next --fail-fast --verbose
           }
 
           REPORTS="default"
           if [ "$EVENT_NAME" = "push" ]; then
             TODAY_KST=$(kst_today)
             BASE_DATE=$(krx_prev_session "$TODAY_KST")
-            python codex_web/update_reports.py --date "$BASE_DATE" --reports krx_alert --risk-rollover-next --verbose
+            python codex_web/update_reports.py --date "$BASE_DATE" --reports krx_alert --risk-rollover-next --fail-fast --verbose
             HOUR_KST=$(TZ=Asia/Seoul date +%H)
-            if [ "$HOUR_KST" -ge 15 ]; then
-              refresh_ipo_today_and_next "$TODAY_KST"
+            if [ "$HOUR_KST" -ge 6 ]; then
+              retry_group morning_us_ipo refresh_morning_us_ipo "$TODAY_KST"
             fi
             if [ "$HOUR_KST" -ge 18 ]; then
-              python codex_web/update_reports.py --date "$TODAY_KST" --reports investor_flow --flow-source-date "$TODAY_KST" --flow-rollover-next --verbose
+              retry_group investor_flow refresh_investor_flow "$TODAY_KST"
             fi
             if [ "$HOUR_KST" -ge 20 ]; then
-              python codex_web/update_reports.py --date "$TODAY_KST" --reports krx_alert --risk-rollover-next --verbose
-              python codex_web/update_reports.py --date "$TODAY_KST" --reports liquidity,nxt_market --extra-rollover-next --verbose
+              retry_group risk_auxiliary refresh_risk_and_auxiliary "$TODAY_KST"
             fi
             exit 0
           fi
           if [ "$EVENT_NAME" = "schedule" ]; then
             case "$EVENT_SCHEDULE" in
-              "30 21 * * 0-4"|"39 21 * * 0-4"|"50 21 * * 0-4") REPORTS="us_market" ;;
-              "20 6 * * 1-5"|"40 6 * * 1-5"|"0 7 * * 1-5") REPORTS="ipo" ;;
-              "1 9 * * 1-5"|"20 9 * * 1-5"|"40 9 * * 1-5") REPORTS="investor_flow" ;;
-              "10 11 * * 1-5"|"30 11 * * 1-5"|"50 11 * * 1-5") REPORTS="liquidity,nxt_market" ;;
-              "25 11 * * 1-5"|"45 11 * * 1-5"|"5 12 * * 1-5"|"25 12 * * 1-5"|"45 12 * * 1-5") REPORTS="krx_alert" ;;
-              "5 13 * * 1-5") REPORTS="evening_krx" ;;
+              "5 21 * * 0-4") REPORTS="morning_us_ipo" ;;
+              "1 9 * * 1-5") REPORTS="investor_flow" ;;
+              "3 11 * * 1-5") REPORTS="risk_auxiliary" ;;
             esac
           fi
-          if [ "$EVENT_NAME" = "schedule" ] && [ "$REPORTS" = "evening_krx" ]; then
-            BASE_DATE=$(kst_today)
-            refresh_evening_krx "$BASE_DATE"
-            exit 0
-          fi
-          if [ "$EVENT_NAME" = "schedule" ] && [ "$REPORTS" = "ipo" ]; then
-            BASE_DATE=$(kst_today)
-            refresh_ipo_today_and_next "$BASE_DATE"
-            exit 0
-          fi
-          DATE_ARGS=""
-          FLOW_ARGS=""
-          RISK_ARGS=""
-          EXTRA_ARGS=""
-          if [ "$EVENT_NAME" = "schedule" ] && [ "$REPORTS" = "investor_flow" ]; then
-            BASE_DATE=$(kst_today)
-            DATE_ARGS="--date $BASE_DATE"
-            FLOW_ARGS="--flow-source-date $BASE_DATE --flow-rollover-next"
-          elif [ "$EVENT_NAME" = "schedule" ] && [ "$REPORTS" = "liquidity,nxt_market" ]; then
-            BASE_DATE=$(kst_today)
-            DATE_ARGS="--date $BASE_DATE"
-            EXTRA_ARGS="--extra-rollover-next"
-          elif [ "$EVENT_NAME" = "schedule" ] && [ "$REPORTS" = "krx_alert" ]; then
-            BASE_DATE=$(kst_today)
-            DATE_ARGS="--date $BASE_DATE"
-            RISK_ARGS="--risk-rollover-next"
-          fi
-          python codex_web/update_reports.py $DATE_ARGS $FLOW_ARGS $RISK_ARGS $EXTRA_ARGS --reports "$REPORTS" --verbose
+          BASE_DATE=$(kst_today)
+          case "$REPORTS" in
+            morning_us_ipo)
+              retry_group morning_us_ipo refresh_morning_us_ipo "$BASE_DATE"
+              ;;
+            investor_flow)
+              retry_group investor_flow refresh_investor_flow "$BASE_DATE"
+              ;;
+            risk_auxiliary)
+              retry_group risk_auxiliary refresh_risk_and_auxiliary "$BASE_DATE"
+              ;;
+            default)
+              python codex_web/update_reports.py --reports default --fail-fast --verbose
+              ;;
+            *)
+              echo "Unknown report group: $REPORTS"
+              exit 1
+              ;;
+          esac
 
       - name: Record workflow status
         if: always()
