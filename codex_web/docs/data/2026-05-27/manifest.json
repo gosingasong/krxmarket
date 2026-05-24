@@ -1,6 +1,7 @@
 {
+  "schema_version": 1,
   "date": "2026-05-27",
-  "manifest": "2026-05-27/manifest.json",
+  "generated_at": "2026-05-24T22:05:38.455521+00:00",
   "reports": {
     "ipo": {
       "file": "ipo.json",

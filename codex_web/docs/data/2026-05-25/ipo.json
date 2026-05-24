@@ -1,0 +1,14 @@
+{
+  "schema_version": 1,
+  "report": "ipo",
+  "status": "skipped",
+  "date": "2026-05-25",
+  "generated_at": "2026-05-25T07:05:25.908424+09:00",
+  "source": {
+    "module": "codex_web"
+  },
+  "data": {
+    "reason": "KRX 휴장일"
+  },
+  "summary": {}
+}

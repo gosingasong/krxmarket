@@ -1,0 +1,24 @@
+{
+  "schema_version": 1,
+  "report": "ipo",
+  "status": "ok",
+  "date": "2026-05-27",
+  "generated_at": "2026-05-25T07:05:38.454355+09:00",
+  "source": {
+    "module": "codex_web"
+  },
+  "data": {
+    "source_date": "2026-05-27",
+    "today_listing_date": "2026.05.27",
+    "next_listing_date": "2026.05.28",
+    "target_listing_date": "2026.05.28",
+    "today_items": [],
+    "next_items": [],
+    "items": []
+  },
+  "summary": {
+    "today_item_count": 0,
+    "next_item_count": 0,
+    "item_count": 0
+  }
+}
