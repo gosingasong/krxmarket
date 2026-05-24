@@ -1,13 +1,13 @@
 {
   "schema_version": 1,
   "date": "2026-05-27",
-  "generated_at": "2026-05-24T22:08:34.744169+00:00",
+  "generated_at": "2026-05-24T22:11:37.758376+00:00",
   "reports": {
     "ipo": {
       "file": "ipo.json",
       "report": "ipo",
       "status": "ok",
-      "generated_at": "2026-05-25T07:08:34.743014+09:00",
+      "generated_at": "2026-05-25T07:11:37.757205+09:00",
       "summary": {
         "today_item_count": 0,
         "next_item_count": 0,
