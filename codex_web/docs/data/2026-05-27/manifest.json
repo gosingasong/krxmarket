@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "date": "2026-05-27",
-  "generated_at": "2026-05-24T22:14:20.510744+00:00",
+  "generated_at": "2026-05-25T14:16:24.969004+00:00",
   "reports": {
     "ipo": {
       "file": "ipo.json",
@@ -12,6 +12,28 @@
         "today_item_count": 0,
         "next_item_count": 0,
         "item_count": 0,
+        "status": "ok"
+      }
+    },
+    "liquidity": {
+      "file": "liquidity.json",
+      "report": "liquidity",
+      "status": "ok",
+      "generated_at": "2026-05-25T23:16:24.455582+09:00",
+      "summary": {
+        "upper_count": 30,
+        "lower_count": 30,
+        "latest_credit_date": "2026-05-21",
+        "latest_liquidity_date": "2026-05-22",
+        "status": "ok"
+      }
+    },
+    "nxt_market": {
+      "file": "nxt_market.json",
+      "report": "nxt_market",
+      "status": "ok",
+      "generated_at": "2026-05-25T23:16:24.966245+09:00",
+      "summary": {
         "status": "ok"
       }
     }
