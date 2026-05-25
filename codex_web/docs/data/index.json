@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "generated_at": "2026-05-24T22:14:20.511793+00:00",
+  "generated_at": "2026-05-25T12:31:23.236164+00:00",
   "latest_date": "2026-05-27",
   "dates": [
     {
@@ -91,6 +91,15 @@
       "date": "2026-05-25",
       "manifest": "2026-05-25/manifest.json",
       "reports": {
+        "investor_flow": {
+          "file": "investor_flow.json",
+          "report": "investor_flow",
+          "status": "skipped",
+          "generated_at": "2026-05-25T21:31:23.233952+09:00",
+          "summary": {
+            "status": "skipped"
+          }
+        },
         "ipo": {
           "file": "ipo.json",
           "report": "ipo",
