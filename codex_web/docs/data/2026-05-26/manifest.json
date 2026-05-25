@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "date": "2026-05-26",
-  "generated_at": "2026-05-22T13:37:50.446037+00:00",
+  "generated_at": "2026-05-25T22:15:45.380901+00:00",
   "reports": {
     "investor_flow": {
       "file": "investor_flow.json",
@@ -20,7 +20,7 @@
       "file": "ipo.json",
       "report": "ipo",
       "status": "ok",
-      "generated_at": "2026-05-22T19:16:57.945974+09:00",
+      "generated_at": "2026-05-26T07:15:45.379102+09:00",
       "summary": {
         "today_item_count": 0,
         "next_item_count": 0,
@@ -60,6 +60,19 @@
       "status": "ok",
       "generated_at": "2026-05-22T22:37:50.442758+09:00",
       "summary": {
+        "status": "ok"
+      }
+    },
+    "us_market": {
+      "file": "us_market.json",
+      "report": "us_market",
+      "status": "ok",
+      "generated_at": "2026-05-26T07:15:27.550810+09:00",
+      "summary": {
+        "fixed_count": 9,
+        "top_traded_value_count": 11,
+        "target_session_date": "2026-05-25",
+        "market_date": "2026-05-22",
         "status": "ok"
       }
     }
