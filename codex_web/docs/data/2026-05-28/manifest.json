@@ -1,8 +1,21 @@
 {
   "schema_version": 1,
   "date": "2026-05-28",
-  "generated_at": "2026-05-26T22:37:27.409325+00:00",
+  "generated_at": "2026-05-27T12:21:45.786377+00:00",
   "reports": {
+    "investor_flow": {
+      "file": "investor_flow.json",
+      "report": "investor_flow",
+      "status": "ok",
+      "generated_at": "2026-05-27T21:21:45.781236+09:00",
+      "summary": {
+        "institution_count": 10,
+        "institution_total_count": 2411,
+        "foreigner_count": 10,
+        "foreigner_total_count": 2573,
+        "status": "ok"
+      }
+    },
     "ipo": {
       "file": "ipo.json",
       "report": "ipo",
