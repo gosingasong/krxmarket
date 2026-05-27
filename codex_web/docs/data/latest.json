@@ -26,6 +26,41 @@
         "item_count": 0,
         "status": "ok"
       }
+    },
+    "krx_alert": {
+      "file": "krx_alert.json",
+      "report": "krx_alert",
+      "status": "ok",
+      "generated_at": "2026-05-27T23:35:03.745467+09:00",
+      "summary": {
+        "release_count": 4,
+        "designation_count": 8,
+        "redesignation_count": 1,
+        "target_date": "2026-05-28",
+        "status": "ok"
+      }
+    },
+    "liquidity": {
+      "file": "liquidity.json",
+      "report": "liquidity",
+      "status": "ok",
+      "generated_at": "2026-05-27T23:35:29.336953+09:00",
+      "summary": {
+        "upper_count": 30,
+        "lower_count": 30,
+        "latest_credit_date": "2026-05-26",
+        "latest_liquidity_date": "2026-05-26",
+        "status": "ok"
+      }
+    },
+    "nxt_market": {
+      "file": "nxt_market.json",
+      "report": "nxt_market",
+      "status": "ok",
+      "generated_at": "2026-05-27T23:35:30.475550+09:00",
+      "summary": {
+        "status": "ok"
+      }
     }
   }
 }
