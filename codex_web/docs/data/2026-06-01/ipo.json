@@ -2,16 +2,16 @@
   "schema_version": 1,
   "report": "ipo",
   "status": "ok",
-  "date": "2026-05-29",
-  "generated_at": "2026-05-29T07:44:43.039070+09:00",
+  "date": "2026-06-01",
+  "generated_at": "2026-05-29T07:44:56.627991+09:00",
   "source": {
     "module": "codex_web"
   },
   "data": {
-    "source_date": "2026-05-29",
-    "today_listing_date": "2026.05.29",
-    "next_listing_date": "2026.06.01",
-    "target_listing_date": "2026.06.01",
+    "source_date": "2026-06-01",
+    "today_listing_date": "2026.06.01",
+    "next_listing_date": "2026.06.02",
+    "target_listing_date": "2026.06.02",
     "today_items": [],
     "next_items": [],
     "items": []
