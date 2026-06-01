@@ -1,0 +1,33 @@
+{
+  "schema_version": 1,
+  "report": "investor_flow",
+  "status": "ok",
+  "date": "2026-06-02",
+  "generated_at": "2026-06-02T00:21:25.088675+09:00",
+  "source": {
+    "module": "codex_web"
+  },
+  "data": {
+    "trade_date": "20260602",
+    "flow_limit": 10,
+    "sector_lookup_limit": 10,
+    "sector_map": {},
+    "institution": [],
+    "foreigner": [],
+    "institution_sector_counts": [],
+    "foreigner_sector_counts": [],
+    "institution_total_count": 0,
+    "foreigner_total_count": 0
+  },
+  "summary": {
+    "institution_count": 0,
+    "institution_total_count": 0,
+    "foreigner_count": 0,
+    "foreigner_total_count": 0
+  },
+  "display_date": "2026-06-02",
+  "display_dates": [
+    "2026-06-02",
+    "2026-06-03"
+  ]
+}

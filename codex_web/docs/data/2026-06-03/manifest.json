@@ -1,6 +1,7 @@
 {
+  "schema_version": 1,
   "date": "2026-06-03",
-  "manifest": "2026-06-03/manifest.json",
+  "generated_at": "2026-06-01T15:21:25.090832+00:00",
   "reports": {
     "investor_flow": {
       "file": "investor_flow.json",

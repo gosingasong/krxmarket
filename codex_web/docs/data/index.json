@@ -1,12 +1,44 @@
 {
   "schema_version": 1,
-  "generated_at": "2026-05-31T22:10:45.622388+00:00",
-  "latest_date": "2026-06-02",
+  "generated_at": "2026-06-01T15:21:25.126296+00:00",
+  "latest_date": "2026-06-03",
   "dates": [
+    {
+      "date": "2026-06-03",
+      "manifest": "2026-06-03/manifest.json",
+      "reports": {
+        "investor_flow": {
+          "file": "investor_flow.json",
+          "report": "investor_flow",
+          "status": "ok",
+          "generated_at": "2026-06-02T00:21:25.088675+09:00",
+          "summary": {
+            "institution_count": 0,
+            "institution_total_count": 0,
+            "foreigner_count": 0,
+            "foreigner_total_count": 0,
+            "status": "ok"
+          }
+        }
+      }
+    },
     {
       "date": "2026-06-02",
       "manifest": "2026-06-02/manifest.json",
       "reports": {
+        "investor_flow": {
+          "file": "investor_flow.json",
+          "report": "investor_flow",
+          "status": "ok",
+          "generated_at": "2026-06-02T00:21:25.088675+09:00",
+          "summary": {
+            "institution_count": 0,
+            "institution_total_count": 0,
+            "foreigner_count": 0,
+            "foreigner_total_count": 0,
+            "status": "ok"
+          }
+        },
         "ipo": {
           "file": "ipo.json",
           "report": "ipo",
