@@ -15,6 +15,18 @@
         "status": "ok"
       }
     },
+    "ipo": {
+      "file": "ipo.json",
+      "report": "ipo",
+      "status": "ok",
+      "generated_at": "2026-06-02T08:07:21.583208+09:00",
+      "summary": {
+        "today_item_count": 0,
+        "next_item_count": 0,
+        "item_count": 0,
+        "status": "ok"
+      }
+    },
     "krx_alert": {
       "file": "krx_alert.json",
       "report": "krx_alert",
