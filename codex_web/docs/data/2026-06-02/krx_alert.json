@@ -1,0 +1,48 @@
+{
+  "schema_version": 1,
+  "report": "krx_alert",
+  "status": "ok",
+  "date": "2026-06-02",
+  "generated_at": "2026-06-02T01:46:34.665616+09:00",
+  "source": {
+    "module": "codex_web"
+  },
+  "data": {
+    "target_date": "2026-06-03",
+    "source_date": "2026-06-02",
+    "avg_trade_value_threshold": 10000000000,
+    "release": [],
+    "designation": [],
+    "redesignation": [
+      {
+        "code": "014910",
+        "name": "성문전자",
+        "release_date": "2026-05-29",
+        "valid_until": "2026-06-12",
+        "current_price": 3050,
+        "trigger_price": 3900,
+        "diff_pct": 27.86885245901639,
+        "avg_trade_value_5d": 13316995216.25
+      }
+    ],
+    "diagnostics": {
+      "ticker_set_count": 0,
+      "warning_fetched_count": 0,
+      "warning_old_enough_count": 0,
+      "caution_fetched_count": 0,
+      "candidate_map_count": 17,
+      "rewarn_map_count": 13
+    }
+  },
+  "summary": {
+    "release_count": 0,
+    "designation_count": 0,
+    "redesignation_count": 1,
+    "target_date": "2026-06-03"
+  },
+  "display_date": "2026-06-03",
+  "display_dates": [
+    "2026-06-02",
+    "2026-06-03"
+  ]
+}

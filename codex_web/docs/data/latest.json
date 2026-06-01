@@ -14,6 +14,41 @@
         "foreigner_total_count": 0,
         "status": "ok"
       }
+    },
+    "krx_alert": {
+      "file": "krx_alert.json",
+      "report": "krx_alert",
+      "status": "ok",
+      "generated_at": "2026-06-02T01:46:34.665616+09:00",
+      "summary": {
+        "release_count": 0,
+        "designation_count": 0,
+        "redesignation_count": 1,
+        "target_date": "2026-06-03",
+        "status": "ok"
+      }
+    },
+    "liquidity": {
+      "file": "liquidity.json",
+      "report": "liquidity",
+      "status": "ok",
+      "generated_at": "2026-06-02T01:46:57.202001+09:00",
+      "summary": {
+        "upper_count": 30,
+        "lower_count": 30,
+        "latest_credit_date": "2026-05-29",
+        "latest_liquidity_date": "2026-05-29",
+        "status": "ok"
+      }
+    },
+    "nxt_market": {
+      "file": "nxt_market.json",
+      "report": "nxt_market",
+      "status": "ok",
+      "generated_at": "2026-06-02T01:46:57.680352+09:00",
+      "summary": {
+        "status": "ok"
+      }
     }
   }
 }
