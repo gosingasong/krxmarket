@@ -1,6 +1,7 @@
 {
+  "schema_version": 1,
   "date": "2026-06-04",
-  "manifest": "2026-06-04/manifest.json",
+  "generated_at": "2026-06-02T15:03:49.900332+00:00",
   "reports": {
     "krx_alert": {
       "file": "krx_alert.json",
