@@ -1,8 +1,20 @@
 {
   "schema_version": 1,
   "date": "2026-06-04",
-  "generated_at": "2026-06-02T15:15:51.676681+00:00",
+  "generated_at": "2026-06-02T23:07:40.843353+00:00",
   "reports": {
+    "ipo": {
+      "file": "ipo.json",
+      "report": "ipo",
+      "status": "ok",
+      "generated_at": "2026-06-03T08:07:40.841541+09:00",
+      "summary": {
+        "today_item_count": 0,
+        "next_item_count": 1,
+        "item_count": 1,
+        "status": "ok"
+      }
+    },
     "krx_alert": {
       "file": "krx_alert.json",
       "report": "krx_alert",

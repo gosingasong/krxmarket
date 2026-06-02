@@ -1,0 +1,82 @@
+{
+  "schema_version": 1,
+  "report": "ipo",
+  "status": "ok",
+  "date": "2026-06-04",
+  "generated_at": "2026-06-03T08:07:40.841541+09:00",
+  "source": {
+    "module": "codex_web"
+  },
+  "data": {
+    "source_date": "2026-06-04",
+    "today_listing_date": "2026.06.04",
+    "next_listing_date": "2026.06.05",
+    "target_listing_date": "2026.06.05",
+    "today_items": [],
+    "next_items": [
+      {
+        "name": "대신밸런스제..",
+        "code": "B202602021",
+        "source_href": "/view_pg/view_01.asp?code=B202602021&schk=2",
+        "target_listing_date": "2026.06.05",
+        "main_product": "금융 지원 서비스업",
+        "lead_manager": "대신증권",
+        "subscription_competition": "1468 대 1",
+        "total_shares": 6740000,
+        "offer_price": 2000,
+        "market_cap": 13480000000,
+        "floating_ratio": 86.42,
+        "floating_amount": 11649416000,
+        "old_owner_ratio": 0.0,
+        "old_owner_amount": 0,
+        "detail": {
+          "주요제품": "금융 지원 서비스업",
+          "주간사": "대신증권",
+          "상장예정주식수": "6,740,000 주",
+          "기타기존주주_str": "-",
+          "유통가능주식_str": "86.42 %",
+          "확정공모가격": "-",
+          "확정공모가": "-",
+          "공모가격": "2,000 원 ~ 2,000 원",
+          "공모가": "2,000 원 ~ 2,000 원",
+          "청약경쟁률": "1468 대 1"
+        }
+      }
+    ],
+    "items": [
+      {
+        "name": "대신밸런스제..",
+        "code": "B202602021",
+        "source_href": "/view_pg/view_01.asp?code=B202602021&schk=2",
+        "target_listing_date": "2026.06.05",
+        "main_product": "금융 지원 서비스업",
+        "lead_manager": "대신증권",
+        "subscription_competition": "1468 대 1",
+        "total_shares": 6740000,
+        "offer_price": 2000,
+        "market_cap": 13480000000,
+        "floating_ratio": 86.42,
+        "floating_amount": 11649416000,
+        "old_owner_ratio": 0.0,
+        "old_owner_amount": 0,
+        "detail": {
+          "주요제품": "금융 지원 서비스업",
+          "주간사": "대신증권",
+          "상장예정주식수": "6,740,000 주",
+          "기타기존주주_str": "-",
+          "유통가능주식_str": "86.42 %",
+          "확정공모가격": "-",
+          "확정공모가": "-",
+          "공모가격": "2,000 원 ~ 2,000 원",
+          "공모가": "2,000 원 ~ 2,000 원",
+          "청약경쟁률": "1468 대 1"
+        }
+      }
+    ]
+  },
+  "summary": {
+    "today_item_count": 0,
+    "next_item_count": 1,
+    "item_count": 1
+  }
+}
