@@ -1,18 +1,18 @@
 {
   "schema_version": 1,
   "date": "2026-06-03",
-  "generated_at": "2026-06-01T23:07:21.584808+00:00",
+  "generated_at": "2026-06-02T12:42:40.412418+00:00",
   "reports": {
     "investor_flow": {
       "file": "investor_flow.json",
       "report": "investor_flow",
       "status": "ok",
-      "generated_at": "2026-06-02T00:34:12.788659+09:00",
+      "generated_at": "2026-06-02T21:42:40.406825+09:00",
       "summary": {
-        "institution_count": 0,
-        "institution_total_count": 0,
-        "foreigner_count": 0,
-        "foreigner_total_count": 0,
+        "institution_count": 10,
+        "institution_total_count": 2500,
+        "foreigner_count": 10,
+        "foreigner_total_count": 2596,
         "status": "ok"
       }
     },
