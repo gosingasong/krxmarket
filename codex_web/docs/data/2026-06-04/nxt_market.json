@@ -3,16 +3,16 @@
   "report": "nxt_market",
   "status": "ok",
   "date": "2026-06-03",
-  "generated_at": "2026-06-03T00:03:49.897631+09:00",
+  "generated_at": "2026-06-03T00:08:59.476692+09:00",
   "source": {
     "module": "codex_web"
   },
   "data": {
     "source": "nextrade_official_refreshMarketData",
     "language": "eng",
-    "as_of": "2026-06-03 00:03",
+    "as_of": "2026-06-03 00:08",
     "trade_date": "20260603",
-    "trade_time": "0003",
+    "trade_time": "0008",
     "market_watch_total_count": 0,
     "market_watch_kospi_count": 0,
     "market_watch_kosdaq_count": 0,
