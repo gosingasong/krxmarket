@@ -5,6 +5,9 @@ on:
   push:
     branches:
       - main
+    paths-ignore:
+      - "codex_web/docs/data/**"
+      - "codex_web/state/**"
   schedule:
     # UTC cron. KST = UTC+9. Five 3-minute attempts per group; later runs skip fetch if fresh data already exists.
     - cron: "5 21 * * 0-4"  # 06:05 KST, US market + IPO attempt 1/5
@@ -29,7 +32,7 @@ permissions:
   id-token: write
 
 concurrency:
-  group: pages
+  group: update-codex-web-data
   cancel-in-progress: false
 
 jobs:
@@ -47,6 +50,16 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install -r codex_web/requirements.txt
+
+      - name: Restore generated data cache
+        uses: actions/cache/restore@v4
+        with:
+          path: |
+            codex_web/docs/data
+            codex_web/state
+          key: krxmarket-generated-data-${{ github.run_id }}
+          restore-keys: |
+            krxmarket-generated-data-
 
       - name: Generate JSON reports
         id: generate
@@ -286,13 +299,14 @@ jobs:
           path.write_text(json.dumps(payload, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
           PY
 
-      - name: Commit updated data
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add codex_web/docs/data codex_web/state || true
-          git diff --cached --quiet || git commit -m "Update Codex Web data"
-          git push
+      - name: Save generated data cache
+        if: always()
+        uses: actions/cache/save@v4
+        with:
+          path: |
+            codex_web/docs/data
+            codex_web/state
+          key: krxmarket-generated-data-${{ github.run_id }}
 
       - uses: actions/configure-pages@v5
 

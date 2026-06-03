@@ -4,7 +4,6 @@ const REPORT_ORDER = ["investor_flow", "ipo", "krx_alert", "us_market", "nxt_mar
 let appIndex = null;
 let currentDate = null;
 let currentPayloads = {};
-let activeDailyMemoDate = null;
 
 const $ = (id) => document.getElementById(id);
 
@@ -192,33 +191,58 @@ async function loadWorkflowStatus() {
   }
 }
 
-function globalMemoKey() {
-  return "krxmarket:memo:global";
+const MEMO_REPO = "gosingasong/krxmarket";
+const MEMO_BRANCH = "main";
+const MEMO_CONTENT_PATH = "codex_web/docs/data/memos.json";
+const MEMO_RAW_URL = `https://raw.githubusercontent.com/${MEMO_REPO}/${MEMO_BRANCH}/${MEMO_CONTENT_PATH}`;
+const MEMO_TOKEN_KEY = "krxmarket:memo:githubToken";
+
+let memoState = { schema_version: 1, global: "", daily: {}, updated_at: null };
+let memoFileSha = null;
+let activeDailyMemoDate = null;
+
+function emptyMemoState() {
+  return { schema_version: 1, global: "", daily: {}, updated_at: null };
 }
 
-function dailyMemoKey(dateStr = currentDate) {
-  return `krxmarket:memo:daily:${dateStr || "none"}`;
+function normalizeMemoState(payload) {
+  const state = payload && typeof payload === "object" ? payload : {};
+  return {
+    schema_version: 1,
+    global: String(state.global || ""),
+    daily: state.daily && typeof state.daily === "object" ? { ...state.daily } : {},
+    updated_at: state.updated_at || null,
+  };
 }
 
-function dailyMemoIdleText(dateStr = activeDailyMemoDate || currentDate) {
-  return dateStr ? `${dateStr} 저장` : "선택일에 저장";
+function memoToken() {
+  return localStorage.getItem(MEMO_TOKEN_KEY) || "";
 }
 
-function dailyMemoSourceDate() {
-  if (!currentDate) return null;
-  const currentValue = localStorage.getItem(dailyMemoKey(currentDate));
-  if (currentValue) return currentDate;
-  const previousDate = previousAvailableDate(currentDate) || shiftDateString(currentDate, -1);
-  const previousValue = previousDate ? localStorage.getItem(dailyMemoKey(previousDate)) : null;
-  return previousValue ? previousDate : currentDate;
+function canEditRemoteMemo() {
+  return Boolean(memoToken());
 }
 
-function loadMemo() {
-  activeDailyMemoDate = dailyMemoSourceDate();
-  $("globalMemoBox").value = localStorage.getItem(globalMemoKey()) || "";
-  $("dailyMemoBox").value = localStorage.getItem(dailyMemoKey(activeDailyMemoDate)) || "";
-  $("globalNoteStatus").textContent = "브라우저에 저장";
-  $("dailyNoteStatus").textContent = dailyMemoIdleText();
+function setMemoEditable(enabled) {
+  ["globalMemoBox", "dailyMemoBox"].forEach((id) => {
+    const box = $(id);
+    box.readOnly = !enabled;
+    box.classList.toggle("memoReadOnly", !enabled);
+  });
+  ["clearGlobalMemo", "clearDailyMemo"].forEach((id) => {
+    const button = $(id);
+    if (button) button.disabled = !enabled;
+  });
+}
+
+function memoStatusText(prefix = "공유 메모") {
+  if (!canEditRemoteMemo()) return `${prefix}: 읽기 전용 · 토큰 설정 필요`;
+  return `${prefix}: GitHub 동기화`;
+}
+
+function setMemoStatus(id, text) {
+  const target = $(id);
+  if (target) target.textContent = text;
 }
 
 function showSavedStatus(id, idleText) {
@@ -229,37 +253,172 @@ function showSavedStatus(id, idleText) {
   }, 1200);
 }
 
+function dailyMemoIdleText(dateStr = activeDailyMemoDate || currentDate) {
+  const suffix = dateStr ? `${dateStr}` : "선택일";
+  return canEditRemoteMemo() ? `${suffix} GitHub 동기화` : `${suffix} 읽기 전용`;
+}
+
+function dailyMemoSourceDate(state = memoState) {
+  if (!currentDate) return null;
+  if (state.daily?.[currentDate]) return currentDate;
+  const previousDate = previousAvailableDate(currentDate) || shiftDateString(currentDate, -1);
+  return previousDate && state.daily?.[previousDate] ? previousDate : currentDate;
+}
+
+async function fetchMemoFileMetadata() {
+  if (!canEditRemoteMemo()) return null;
+  const response = await fetch(`https://api.github.com/repos/${MEMO_REPO}/contents/${encodeURIComponent(MEMO_CONTENT_PATH).replaceAll("%2F", "/")}?ref=${MEMO_BRANCH}`, {
+    headers: {
+      Accept: "application/vnd.github+json",
+      Authorization: `Bearer ${memoToken()}`,
+      "X-GitHub-Api-Version": "2022-11-28",
+    },
+  });
+  if (response.status === 404) return null;
+  if (!response.ok) throw new Error(`GitHub memo metadata ${response.status}`);
+  const payload = await response.json();
+  memoFileSha = payload.sha || memoFileSha;
+  if (payload.content) {
+    const decoded = decodeURIComponent(escape(window.atob(String(payload.content).replace(/\s/g, ""))));
+    memoState = normalizeMemoState(JSON.parse(decoded));
+  }
+  return payload;
+}
+
+async function loadRemoteMemo() {
+  try {
+    if (canEditRemoteMemo()) {
+      await fetchMemoFileMetadata();
+      return memoState;
+    }
+    const response = await fetch(`${MEMO_RAW_URL}?v=${Date.now()}`, { cache: "no-store" });
+    if (!response.ok) throw new Error(`${response.status} ${response.statusText}`);
+    memoState = normalizeMemoState(await response.json());
+  } catch (error) {
+    console.warn("memo sync load failed", error);
+    memoState = emptyMemoState();
+  }
+  return memoState;
+}
+
+function encodeBase64Utf8(value) {
+  return window.btoa(unescape(encodeURIComponent(value)));
+}
+
+async function saveRemoteMemo(reason = "Update shared memo", retry = true) {
+  if (!canEditRemoteMemo()) {
+    setMemoStatus("globalNoteStatus", memoStatusText());
+    setMemoStatus("dailyNoteStatus", dailyMemoIdleText());
+    return false;
+  }
+  memoState.updated_at = new Date().toISOString();
+  const body = {
+    message: `Update KRX Market shared memo: ${reason}`,
+    content: encodeBase64Utf8(JSON.stringify(memoState, null, 2) + "\n"),
+    branch: MEMO_BRANCH,
+  };
+  if (memoFileSha) body.sha = memoFileSha;
+  const response = await fetch(`https://api.github.com/repos/${MEMO_REPO}/contents/${encodeURIComponent(MEMO_CONTENT_PATH).replaceAll("%2F", "/")}`, {
+    method: "PUT",
+    headers: {
+      Accept: "application/vnd.github+json",
+      Authorization: `Bearer ${memoToken()}`,
+      "Content-Type": "application/json",
+      "X-GitHub-Api-Version": "2022-11-28",
+    },
+    body: JSON.stringify(body),
+  });
+  if (response.status === 409 && retry) {
+    await fetchMemoFileMetadata();
+    return saveRemoteMemo(reason, false);
+  }
+  if (!response.ok) throw new Error(`GitHub memo save ${response.status}`);
+  const payload = await response.json();
+  memoFileSha = payload.content?.sha || memoFileSha;
+  return true;
+}
+
+function scheduleMemoSave(reason) {
+  window.clearTimeout(scheduleMemoSave.timer);
+  setMemoStatus("globalNoteStatus", "저장 중...");
+  setMemoStatus("dailyNoteStatus", "저장 중...");
+  scheduleMemoSave.timer = window.setTimeout(async () => {
+    try {
+      await saveRemoteMemo(reason);
+      showSavedStatus("globalNoteStatus", memoStatusText());
+      showSavedStatus("dailyNoteStatus", dailyMemoIdleText(currentDate));
+    } catch (error) {
+      console.error(error);
+      setMemoStatus("globalNoteStatus", `저장 실패: ${error.message}`);
+      setMemoStatus("dailyNoteStatus", `저장 실패: ${error.message}`);
+    }
+  }, 700);
+}
+
+async function loadMemo() {
+  await loadRemoteMemo();
+  setMemoEditable(canEditRemoteMemo());
+  activeDailyMemoDate = dailyMemoSourceDate(memoState);
+  $("globalMemoBox").value = memoState.global || "";
+  $("dailyMemoBox").value = memoState.daily?.[activeDailyMemoDate] || "";
+  setMemoStatus("globalNoteStatus", memoStatusText());
+  setMemoStatus("dailyNoteStatus", dailyMemoIdleText());
+}
+
 function saveGlobalMemo() {
-  localStorage.setItem(globalMemoKey(), $("globalMemoBox").value);
-  showSavedStatus("globalNoteStatus", "브라우저에 저장");
+  if (!canEditRemoteMemo()) return;
+  memoState.global = $("globalMemoBox").value;
+  scheduleMemoSave("global");
 }
 
 function saveDailyMemo() {
+  if (!canEditRemoteMemo()) return;
   const value = $("dailyMemoBox").value;
-  if (!value) {
-    const sourceDate = activeDailyMemoDate || currentDate;
-    if (sourceDate) localStorage.removeItem(dailyMemoKey(sourceDate));
-    activeDailyMemoDate = currentDate;
-    showSavedStatus("dailyNoteStatus", dailyMemoIdleText(currentDate));
-    return;
-  }
   activeDailyMemoDate = currentDate;
-  localStorage.setItem(dailyMemoKey(currentDate), value);
-  showSavedStatus("dailyNoteStatus", dailyMemoIdleText(currentDate));
+  if (!value) {
+    delete memoState.daily[currentDate];
+  } else {
+    memoState.daily[currentDate] = value;
+  }
+  scheduleMemoSave(`daily ${currentDate}`);
 }
 
 function clearGlobalMemo() {
+  if (!canEditRemoteMemo()) return;
   $("globalMemoBox").value = "";
-  localStorage.removeItem(globalMemoKey());
-  showSavedStatus("globalNoteStatus", "브라우저에 저장");
+  memoState.global = "";
+  scheduleMemoSave("clear global");
 }
 
 function clearDailyMemo() {
+  if (!canEditRemoteMemo()) return;
   const sourceDate = activeDailyMemoDate || currentDate;
   $("dailyMemoBox").value = "";
-  if (sourceDate) localStorage.removeItem(dailyMemoKey(sourceDate));
+  if (sourceDate) delete memoState.daily[sourceDate];
   activeDailyMemoDate = currentDate;
-  showSavedStatus("dailyNoteStatus", dailyMemoIdleText(currentDate));
+  scheduleMemoSave(`clear daily ${sourceDate || "none"}`);
+}
+
+async function refreshMemo() {
+  await loadMemo();
+  showSavedStatus("globalNoteStatus", memoStatusText());
+  showSavedStatus("dailyNoteStatus", dailyMemoIdleText());
+}
+
+async function configureMemoToken() {
+  const current = memoToken();
+  const value = window.prompt(
+    "GitHub fine-grained token을 입력하세요. repo gosingasong/krxmarket의 Contents Read/Write 권한만 부여한 토큰을 권장합니다. 빈 값으로 확인하면 이 기기의 토큰을 제거합니다.",
+    current ? "" : ""
+  );
+  if (value === null) return;
+  const trimmed = value.trim();
+  if (trimmed) {
+    localStorage.setItem(MEMO_TOKEN_KEY, trimmed);
+  } else {
+    localStorage.removeItem(MEMO_TOKEN_KEY);
+  }
+  await loadMemo();
 }
 
 function renderWorkflowAlert(status) {
@@ -841,7 +1000,7 @@ async function renderAll() {
   }
   await loadCurrentPayloads();
   const workflowStatus = await loadWorkflowStatus();
-  loadMemo();
+  await loadMemo();
   renderWorkflowAlert(workflowStatus);
   renderSummary();
   renderUsMarket();
@@ -882,6 +1041,8 @@ $("globalMemoBox").addEventListener("input", saveGlobalMemo);
 $("dailyMemoBox").addEventListener("input", saveDailyMemo);
 $("clearGlobalMemo").addEventListener("click", clearGlobalMemo);
 $("clearDailyMemo").addEventListener("click", clearDailyMemo);
+$("memoRefreshButton").addEventListener("click", refreshMemo);
+$("memoTokenButton").addEventListener("click", configureMemoToken);
 
 init().catch((error) => {
   $("summaryCards").innerHTML = `<div class="empty">${escapeHtml(error.message)}</div>`;
