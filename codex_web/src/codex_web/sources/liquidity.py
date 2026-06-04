@@ -5,16 +5,19 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 
 import pandas as pd
 import requests
+from bs4 import BeautifulSoup
 
 from .common import USER_AGENT, parse_number
 
 
 KOFIA_URL = "https://freesis.kofia.or.kr/meta/getMetaDataList.do"
+NAVER_INDEX_URL = "https://finance.naver.com/sise/sise_index.naver?code=%s"
 NXT_DAILY_PAGE_URL = "https://www.nextrade.co.kr/menu/en/transactionStatusDaily/menuList.do"
 NXT_GRID_URL = "https://www.nextrade.co.kr/brdinfoTime/brdinfoTimeList.do"
 DISPLAY_ROWS = 30
 NXT_GRID_PAGE_UNIT = 1000
 MAX_WORKERS = 6
+NAVER_INDEX_CODES = {"KOSPI": "KOSPI", "KOSDAQ": "KOSDAQ"}
 
 
 def fetch_kofia_dataset(obj_nm, start_str, end_str, field_map, unit_map):
@@ -136,15 +139,62 @@ def fetch_nxt_trade_overlay_df(date_list):
     return pd.DataFrame(rows)
 
 
-def build_lower_df(df_kospi, df_kosdaq, df_deposit, nxt_df=None):
-    if df_kospi.empty or df_kosdaq.empty:
-        return pd.DataFrame()
-    lower = pd.merge(
-        df_kospi[["Date", "KOSPI_Trade", "KOSPI_Close"]],
-        df_kosdaq[["Date", "KOSDAQ_Trade"]],
-        on="Date",
-        how="inner",
+def fetch_naver_index_snapshot(index_code):
+    response = requests.get(
+        NAVER_INDEX_URL % index_code,
+        headers={"User-Agent": USER_AGENT},
+        timeout=10,
     )
+    response.raise_for_status()
+    response.encoding = "euc-kr"
+
+    import re
+
+    soup = BeautifulSoup(response.text, "html.parser")
+    plain = soup.get_text("|", strip=True)
+    trade_match = re.search(r"거래대금\(백만\)\|+([0-9,]+)", plain)
+    if not trade_match:
+        raise ValueError(f"Naver index trade value not found: {index_code}")
+    value_tag = soup.select_one("#now_value")
+    return {
+        "trade_value_eok": parse_number(trade_match.group(1)) / 100.0,
+        "close": parse_number(value_tag.get_text(strip=True) if value_tag else None),
+    }
+
+
+def fetch_krx_current_trade_df(base_date):
+    base_ts = pd.Timestamp(base_date).normalize()
+    today_kst = pd.Timestamp(dt.datetime.now(dt.timezone(dt.timedelta(hours=9))).date())
+    if base_ts != today_kst:
+        return pd.DataFrame()
+    kospi = fetch_naver_index_snapshot(NAVER_INDEX_CODES["KOSPI"])
+    kosdaq = fetch_naver_index_snapshot(NAVER_INDEX_CODES["KOSDAQ"])
+    return pd.DataFrame(
+        [
+            {
+                "Date": base_ts,
+                "KOSPI_Trade": float(kospi["trade_value_eok"]),
+                "KOSDAQ_Trade": float(kosdaq["trade_value_eok"]),
+                "KOSPI_Close": float(kospi.get("close") or 0),
+            }
+        ]
+    )
+
+
+def build_lower_df(df_kospi, df_kosdaq, df_deposit, nxt_df=None, krx_trade_df=None):
+    if df_kospi.empty or df_kosdaq.empty:
+        lower = pd.DataFrame(columns=["Date", "KOSPI_Trade", "KOSPI_Close", "KOSDAQ_Trade"])
+    else:
+        lower = pd.merge(
+            df_kospi[["Date", "KOSPI_Trade", "KOSPI_Close"]],
+            df_kosdaq[["Date", "KOSDAQ_Trade"]],
+            on="Date",
+            how="inner",
+        )
+    if krx_trade_df is not None and not krx_trade_df.empty:
+        krx_rows = krx_trade_df[["Date", "KOSPI_Trade", "KOSPI_Close", "KOSDAQ_Trade"]].copy()
+        lower = lower[~lower["Date"].isin(krx_rows["Date"])]
+        lower = pd.concat([lower, krx_rows], ignore_index=True)
     if not df_deposit.empty:
         lower = pd.merge(lower, df_deposit[["Date", "Deposit_Value"]], on="Date", how="left")
     else:
@@ -211,8 +261,20 @@ def fetch_liquidity_data(base_date):
     except Exception as exc:
         logging.warning("[Liquidity] NXT overlay unavailable: %s", exc)
         nxt_df = pd.DataFrame()
+    try:
+        krx_trade_df = fetch_krx_current_trade_df(base_date)
+    except Exception as exc:
+        logging.warning("[Liquidity] current KRX trade unavailable: %s", exc)
+        krx_trade_df = pd.DataFrame()
+    if not krx_trade_df.empty:
+        current_trade_dates = [pd.Timestamp(date).strftime("%Y%m%d") for date in krx_trade_df["Date"].tolist()]
+        try:
+            current_nxt_df = fetch_nxt_trade_overlay_df(current_trade_dates)
+            nxt_df = pd.concat([nxt_df, current_nxt_df], ignore_index=True) if not nxt_df.empty else current_nxt_df
+        except Exception as exc:
+            logging.warning("[Liquidity] current NXT overlay unavailable: %s", exc)
     return {
         "range": {"start": start_str, "end": end_str},
         "upper": build_upper_df(df_kospi, df_kosdaq, df_credit),
-        "lower": build_lower_df(df_kospi, df_kosdaq, df_deposit, nxt_df),
+        "lower": build_lower_df(df_kospi, df_kosdaq, df_deposit, nxt_df, krx_trade_df),
     }

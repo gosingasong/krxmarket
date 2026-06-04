@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "generated_at": "2026-06-02T23:07:40.844969+00:00",
+  "generated_at": "2026-06-04T13:03:58.374884+00:00",
   "latest_date": "2026-06-04",
   "dates": [
     {
@@ -36,12 +36,12 @@
           "file": "liquidity.json",
           "report": "liquidity",
           "status": "ok",
-          "generated_at": "2026-06-03T00:15:51.224339+09:00",
+          "generated_at": "2026-06-04T22:03:58.364561+09:00",
           "summary": {
             "upper_count": 30,
             "lower_count": 30,
-            "latest_credit_date": "2026-06-01",
-            "latest_liquidity_date": "2026-06-01",
+            "latest_credit_date": "2026-06-02",
+            "latest_liquidity_date": "2026-06-04",
             "status": "ok"
           }
         },

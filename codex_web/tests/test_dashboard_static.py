@@ -57,18 +57,18 @@ class DashboardStaticTests(unittest.TestCase):
             '"7 9 * * 1-5"',
             '"10 9 * * 1-5"',
             '"13 9 * * 1-5"',
-            '"3 11 * * 1-5"',
             '"6 11 * * 1-5"',
             '"9 11 * * 1-5"',
             '"12 11 * * 1-5"',
             '"15 11 * * 1-5"',
+            '"18 11 * * 1-5"',
         ]
         for cron in expected_crons:
             self.assertIn(cron, workflow)
         for comment in [
             "06:05 KST, US market + IPO attempt 1/5",
             "18:13 KST, investor flow attempt 5/5",
-            "20:15 KST, KRX alert + liquidity / NXT attempt 5/5",
+            "20:18 KST, KRX alert + liquidity / NXT attempt 5/5",
         ]:
             self.assertIn(comment, workflow)
 
@@ -81,14 +81,14 @@ class DashboardStaticTests(unittest.TestCase):
         self.assertIn("has empty investor flow rows", workflow)
         self.assertIn('run_group_once_if_stale morning_us_ipo 06:05 "$BASE_DATE" refresh_morning_us_ipo', workflow)
         self.assertIn('run_group_once_if_stale investor_flow 18:01 "$BASE_DATE" refresh_investor_flow', workflow)
-        self.assertIn('run_group_once_if_stale risk_auxiliary 20:03 "$BASE_DATE" refresh_risk_and_auxiliary', workflow)
+        self.assertIn('run_group_once_if_stale risk_auxiliary 20:06 "$BASE_DATE" refresh_risk_and_auxiliary', workflow)
         self.assertIn('--fail-fast', workflow)
 
     def test_workflow_maps_requested_report_groups(self):
         workflow = WORKFLOW.read_text(encoding="utf-8")
         self.assertRegex(workflow, r'"5 21 \* \* 0-4"\|"8 21 \* \* 0-4".*REPORTS="morning_us_ipo"')
         self.assertRegex(workflow, r'"1 9 \* \* 1-5"\|"4 9 \* \* 1-5".*REPORTS="investor_flow"')
-        self.assertRegex(workflow, r'"3 11 \* \* 1-5"\|"6 11 \* \* 1-5".*REPORTS="risk_auxiliary"')
+        self.assertRegex(workflow, r'"6 11 \* \* 1-5"\|"9 11 \* \* 1-5".*REPORTS="risk_auxiliary"')
         self.assertIn('python codex_web/update_reports.py --date "$BASE_DATE" --reports us_market --fail-fast --verbose', workflow)
         self.assertIn('refresh_ipo_today_and_next "$BASE_DATE"', workflow)
         self.assertIn('--flow-source-date "$BASE_DATE" --flow-rollover-next --fail-fast', workflow)
