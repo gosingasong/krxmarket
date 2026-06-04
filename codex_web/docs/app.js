@@ -405,20 +405,48 @@ async function refreshMemo() {
   showSavedStatus("dailyNoteStatus", dailyMemoIdleText());
 }
 
+async function validateMemoToken(token) {
+  const response = await fetch(`https://api.github.com/repos/${MEMO_REPO}/contents/${encodeURIComponent(MEMO_CONTENT_PATH).replaceAll("%2F", "/")}?ref=${MEMO_BRANCH}`, {
+    headers: {
+      Accept: "application/vnd.github+json",
+      Authorization: `Bearer ${token}`,
+      "X-GitHub-Api-Version": "2022-11-28",
+    },
+  });
+  if (!response.ok) throw new Error(`GitHub token check ${response.status}`);
+  return response.json();
+}
+
 async function configureMemoToken() {
-  const current = memoToken();
   const value = window.prompt(
-    "GitHub fine-grained token을 입력하세요. repo gosingasong/krxmarket의 Contents Read/Write 권한만 부여한 토큰을 권장합니다. 빈 값으로 확인하면 이 기기의 토큰을 제거합니다.",
-    current ? "" : ""
+    [
+      "동기화 토큰을 입력하세요.",
+      "주의: github_token.txt에 있는 넓은 권한 토큰을 그대로 넣는 것은 권장하지 않습니다.",
+      "repo gosingasong/krxmarket 하나에만 Contents Read/Write 권한을 준 fine-grained token을 새로 만들어 넣어주세요.",
+      "빈 값으로 확인하면 이 기기의 토큰을 제거합니다.",
+    ].join("\n\n"),
+    ""
   );
   if (value === null) return;
   const trimmed = value.trim();
-  if (trimmed) {
-    localStorage.setItem(MEMO_TOKEN_KEY, trimmed);
-  } else {
+  if (!trimmed) {
     localStorage.removeItem(MEMO_TOKEN_KEY);
+    await loadMemo();
+    return;
   }
-  await loadMemo();
+  setMemoStatus("globalNoteStatus", "토큰 확인 중...");
+  setMemoStatus("dailyNoteStatus", "토큰 확인 중...");
+  try {
+    localStorage.setItem(MEMO_TOKEN_KEY, trimmed);
+    const payload = await validateMemoToken(trimmed);
+    memoFileSha = payload.sha || memoFileSha;
+    await loadMemo();
+  } catch (error) {
+    localStorage.removeItem(MEMO_TOKEN_KEY);
+    setMemoEditable(false);
+    setMemoStatus("globalNoteStatus", `토큰 확인 실패: ${error.message}`);
+    setMemoStatus("dailyNoteStatus", "읽기 전용 · 토큰을 다시 확인하세요");
+  }
 }
 
 function renderWorkflowAlert(status) {
