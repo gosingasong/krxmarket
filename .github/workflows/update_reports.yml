@@ -234,7 +234,7 @@ jobs:
             BASE_DATE="$1"
             HOUR_KST=$(TZ=Asia/Seoul date +%H)
             STATUS=0
-            if [ "$HOUR_KST" -ge 6 ]; then
+            if [ "$HOUR_KST" -ge 6 ] && [ "$HOUR_KST" -lt 18 ]; then
               run_group_once_if_stale morning_us_ipo 06:05 "$BASE_DATE" refresh_morning_us_ipo || STATUS=1
             fi
             if [ "$HOUR_KST" -ge 18 ]; then
@@ -249,18 +249,7 @@ jobs:
           REPORTS="default"
           if [ "$EVENT_NAME" = "push" ]; then
             TODAY_KST=$(kst_today)
-            BASE_DATE=$(krx_prev_session "$TODAY_KST")
-            python codex_web/update_reports.py --date "$BASE_DATE" --reports krx_alert --risk-rollover-next --fail-fast --verbose
-            HOUR_KST=$(TZ=Asia/Seoul date +%H)
-            if [ "$HOUR_KST" -ge 6 ]; then
-              retry_group morning_us_ipo refresh_morning_us_ipo "$TODAY_KST"
-            fi
-            if [ "$HOUR_KST" -ge 18 ]; then
-              retry_group investor_flow refresh_investor_flow "$TODAY_KST"
-            fi
-            if [ "$HOUR_KST" -ge 20 ]; then
-              retry_group risk_auxiliary refresh_risk_and_auxiliary "$TODAY_KST"
-            fi
+            run_staleness_watchdog "$TODAY_KST"
             exit 0
           fi
           if [ "$EVENT_NAME" = "schedule" ]; then
