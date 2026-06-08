@@ -44,7 +44,7 @@ class DashboardStaticTests(unittest.TestCase):
         self.assertIn('name="KST"', workflow)
         self.assertIn("dt.datetime.now(KST).isoformat()", workflow)
 
-    def test_workflow_uses_user_requested_five_three_minute_scheduled_attempts(self):
+    def test_workflow_uses_scheduled_attempts_and_watchdog_backstops(self):
         workflow = WORKFLOW.read_text(encoding="utf-8")
         expected_crons = [
             '"5 21 * * 0-4"',
@@ -62,6 +62,7 @@ class DashboardStaticTests(unittest.TestCase):
             '"12 11 * * 1-5"',
             '"15 11 * * 1-5"',
             '"18 11 * * 1-5"',
+            '"31 9-13 * * 1-5"',
         ]
         for cron in expected_crons:
             self.assertIn(cron, workflow)
@@ -69,8 +70,17 @@ class DashboardStaticTests(unittest.TestCase):
             "06:05 KST, US market + IPO attempt 1/5",
             "18:13 KST, investor flow attempt 5/5",
             "20:18 KST, KRX alert + liquidity / NXT attempt 5/5",
+            "18:31-22:31 KST, stale-data watchdog",
         ]:
             self.assertIn(comment, workflow)
+
+    def test_memo_pushes_are_not_ignored_so_user_activity_can_refresh_stale_data(self):
+        workflow = WORKFLOW.read_text(encoding="utf-8")
+        self.assertIn("paths-ignore:", workflow)
+        self.assertIn('"codex_web/docs/data/20*/**"', workflow)
+        self.assertIn('"codex_web/docs/data/index.json"', workflow)
+        self.assertIn('"codex_web/docs/data/latest.json"', workflow)
+        self.assertNotIn('"codex_web/docs/data/**"', workflow)
 
     def test_workflow_scheduled_attempts_skip_after_fresh_success(self):
         workflow = WORKFLOW.read_text(encoding="utf-8")
@@ -89,6 +99,8 @@ class DashboardStaticTests(unittest.TestCase):
         self.assertRegex(workflow, r'"5 21 \* \* 0-4"\|"8 21 \* \* 0-4".*REPORTS="morning_us_ipo"')
         self.assertRegex(workflow, r'"1 9 \* \* 1-5"\|"4 9 \* \* 1-5".*REPORTS="investor_flow"')
         self.assertRegex(workflow, r'"6 11 \* \* 1-5"\|"9 11 \* \* 1-5".*REPORTS="risk_auxiliary"')
+        self.assertIn('"31 9-13 * * 1-5") REPORTS="stale_watchdog"', workflow)
+        self.assertIn('run_staleness_watchdog "$BASE_DATE"', workflow)
         self.assertIn('python codex_web/update_reports.py --date "$BASE_DATE" --reports us_market --fail-fast --verbose', workflow)
         self.assertIn('refresh_ipo_today_and_next "$BASE_DATE"', workflow)
         self.assertIn('--flow-source-date "$BASE_DATE" --flow-rollover-next --fail-fast', workflow)
@@ -154,7 +166,10 @@ class DashboardStaticTests(unittest.TestCase):
         self.assertIn("actions/cache/save@v4", workflow)
         self.assertIn("krxmarket-generated-data-${{ github.run_id }}", workflow)
         self.assertIn("paths-ignore:", workflow)
-        self.assertIn('"codex_web/docs/data/**"', workflow)
+        self.assertIn('"codex_web/docs/data/20*/**"', workflow)
+        self.assertIn('"codex_web/docs/data/index.json"', workflow)
+        self.assertIn('"codex_web/docs/data/latest.json"', workflow)
+        self.assertNotIn('"codex_web/docs/data/**"', workflow)
         self.assertIn('"codex_web/state/**"', workflow)
         self.assertIn("actions/upload-pages-artifact@v4", workflow)
         self.assertIn("actions/deploy-pages@v4", workflow)

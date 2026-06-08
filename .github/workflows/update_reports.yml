@@ -6,7 +6,10 @@ on:
     branches:
       - main
     paths-ignore:
-      - "codex_web/docs/data/**"
+      - "codex_web/docs/data/20*/**"
+      - "codex_web/docs/data/index.json"
+      - "codex_web/docs/data/latest.json"
+      - "codex_web/docs/data/workflow_status.json"
       - "codex_web/state/**"
   schedule:
     # UTC cron. KST = UTC+9. Five 3-minute attempts per group; later runs skip fetch if fresh data already exists.
@@ -25,6 +28,7 @@ on:
     - cron: "12 11 * * 1-5" # 20:12 KST, KRX alert + liquidity / NXT attempt 3/5
     - cron: "15 11 * * 1-5" # 20:15 KST, KRX alert + liquidity / NXT attempt 4/5
     - cron: "18 11 * * 1-5" # 20:18 KST, KRX alert + liquidity / NXT attempt 5/5
+    - cron: "31 9-13 * * 1-5" # 18:31-22:31 KST, stale-data watchdog
 
 permissions:
   contents: write
@@ -226,6 +230,21 @@ jobs:
             python codex_web/update_reports.py --date "$BASE_DATE" --reports krx_alert --risk-rollover-next --fail-fast --verbose
             python codex_web/update_reports.py --date "$BASE_DATE" --reports liquidity,nxt_market --extra-rollover-next --fail-fast --verbose
           }
+          run_staleness_watchdog() {
+            BASE_DATE="$1"
+            HOUR_KST=$(TZ=Asia/Seoul date +%H)
+            STATUS=0
+            if [ "$HOUR_KST" -ge 6 ]; then
+              run_group_once_if_stale morning_us_ipo 06:05 "$BASE_DATE" refresh_morning_us_ipo || STATUS=1
+            fi
+            if [ "$HOUR_KST" -ge 18 ]; then
+              run_group_once_if_stale investor_flow 18:01 "$BASE_DATE" refresh_investor_flow || STATUS=1
+            fi
+            if [ "$HOUR_KST" -ge 20 ]; then
+              run_group_once_if_stale risk_auxiliary 20:06 "$BASE_DATE" refresh_risk_and_auxiliary || STATUS=1
+            fi
+            return "$STATUS"
+          }
 
           REPORTS="default"
           if [ "$EVENT_NAME" = "push" ]; then
@@ -249,6 +268,7 @@ jobs:
               "5 21 * * 0-4"|"8 21 * * 0-4"|"11 21 * * 0-4"|"14 21 * * 0-4"|"17 21 * * 0-4") REPORTS="morning_us_ipo" ;;
               "1 9 * * 1-5"|"4 9 * * 1-5"|"7 9 * * 1-5"|"10 9 * * 1-5"|"13 9 * * 1-5") REPORTS="investor_flow" ;;
               "6 11 * * 1-5"|"9 11 * * 1-5"|"12 11 * * 1-5"|"15 11 * * 1-5"|"18 11 * * 1-5") REPORTS="risk_auxiliary" ;;
+              "31 9-13 * * 1-5") REPORTS="stale_watchdog" ;;
             esac
           fi
           BASE_DATE=$(kst_today)
@@ -261,6 +281,9 @@ jobs:
               ;;
             risk_auxiliary)
               run_group_once_if_stale risk_auxiliary 20:06 "$BASE_DATE" refresh_risk_and_auxiliary
+              ;;
+            stale_watchdog)
+              run_staleness_watchdog "$BASE_DATE"
               ;;
             default)
               python codex_web/update_reports.py --reports default --fail-fast --verbose
