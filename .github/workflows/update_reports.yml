@@ -2,6 +2,18 @@ name: Update Codex Web Data
 
 on:
   workflow_dispatch:
+    inputs:
+      report_group:
+        description: "Report group to run manually"
+        required: false
+        default: "stale_watchdog"
+        type: choice
+        options:
+          - stale_watchdog
+          - morning_us_ipo
+          - investor_flow
+          - risk_auxiliary
+          - default
   push:
     branches:
       - main
@@ -71,6 +83,7 @@ jobs:
         env:
           EVENT_NAME: ${{ github.event_name }}
           EVENT_SCHEDULE: ${{ github.event.schedule }}
+          EVENT_REPORT_GROUP: ${{ github.event.inputs.report_group }}
         run: |
           kst_today() {
             TZ=Asia/Seoul date +%F
@@ -251,6 +264,9 @@ jobs:
             TODAY_KST=$(kst_today)
             run_staleness_watchdog "$TODAY_KST"
             exit 0
+          fi
+          if [ "$EVENT_NAME" = "workflow_dispatch" ] && [ -n "$EVENT_REPORT_GROUP" ]; then
+            REPORTS="$EVENT_REPORT_GROUP"
           fi
           if [ "$EVENT_NAME" = "schedule" ]; then
             case "$EVENT_SCHEDULE" in

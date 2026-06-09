@@ -7,6 +7,14 @@ from .serialization import json_safe
 
 
 DATE_DIR_RE = re.compile(r"^\d{4}-\d{2}-\d{2}$")
+DEFAULT_REPORT_NAMES = {
+    "investor_flow",
+    "ipo",
+    "krx_alert",
+    "us_market",
+    "nxt_market",
+    "liquidity",
+}
 
 
 def write_json(path, payload):
@@ -100,16 +108,24 @@ def build_global_index(data_root):
                 }
             )
 
+    latest_complete = next((item for item in dates if day_has_complete_reports(item)), dates[0] if dates else None)
     index = {
         "schema_version": 1,
         "generated_at": dt.datetime.now(dt.timezone.utc).isoformat(),
-        "latest_date": dates[0]["date"] if dates else None,
+        "latest_date": latest_complete["date"] if latest_complete else None,
         "dates": dates,
     }
     write_json(data_root / "index.json", index)
-    if dates:
-        write_json(data_root / "latest.json", dates[0])
+    if latest_complete:
+        write_json(data_root / "latest.json", latest_complete)
     return index
+
+
+def day_has_complete_reports(index_item):
+    reports = index_item.get("reports") or {}
+    if not DEFAULT_REPORT_NAMES.issubset(reports):
+        return False
+    return all((reports.get(name) or {}).get("status") == "ok" for name in DEFAULT_REPORT_NAMES)
 
 
 
