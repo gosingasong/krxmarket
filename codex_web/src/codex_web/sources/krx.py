@@ -1,4 +1,5 @@
 import logging
+import math
 import re
 import time
 from pathlib import Path
@@ -14,6 +15,8 @@ from .common import USER_AGENT, TradingDayCalendar, parse_int, parse_number, pct
 TOP10_KRX_BLD = "dbms/MDC_OUT/STAT/standard/MDCSTAT02401_OUT"
 INVESTOR_CODE_MAP = {"기관합계": "7050", "외국인": "9000"}
 OHLCV_CACHE = {}
+INDEX_CACHE = {}
+MARKET_CACHE = {}
 
 
 def _post_krx_json(url, headers, data, label, attempts=4):
@@ -228,39 +231,61 @@ def get_non_halt_shifted_date(calendar, ticker, target_date, trading_days_back):
     return None
 
 
-def calculate_release_ceiling(calendar, ticker, check_date):
-    date_t5 = calendar.shift_krx_session(check_date, -5)
-    date_t15 = calendar.shift_krx_session(check_date, -15)
-    start = calendar.shift_krx_session(check_date, -15)
-    end = calendar.shift_krx_session(check_date, -1)
-    if date_t5 is None or date_t15 is None or start is None or end is None:
-        return {"error": "날짜 데이터 부족"}
-    p5 = get_close_price(ticker, date_t5)
-    p15 = get_close_price(ticker, date_t15)
-    max_close = get_max_close_price(ticker, start, end)
-    if p5 == 0 or p15 == 0:
-        return {"error": "가격 정보 없음"}
-    return {"release_ceiling": int(min(int(p5 * 1.6), int(p15 * 2.0), max_close))}
+def get_krx_tick_size(price):
+    price = int(price)
+    if price < 2000:
+        return 1
+    if price < 5000:
+        return 5
+    if price < 20000:
+        return 10
+    if price < 50000:
+        return 50
+    if price < 200000:
+        return 100
+    if price < 500000:
+        return 500
+    return 1000
 
 
-def calculate_warning_trigger_price(p5, p15):
-    return min((int(p5) * 16 + 9) // 10, int(p15) * 2)
+def floor_to_tick(price):
+    price = int(price)
+    if price <= 0:
+        return 0
+    tick = get_krx_tick_size(price)
+    return (price // tick) * tick
 
 
-def calculate_designation_trigger(calendar, ticker, target_date):
-    date_t5 = get_non_halt_shifted_date(calendar, ticker, target_date, 5)
-    date_t15 = get_non_halt_shifted_date(calendar, ticker, target_date, 15)
-    if date_t5 is None:
-        date_t5 = calendar.shift_krx_session(target_date, -5)
-    if date_t15 is None:
-        date_t15 = calendar.shift_krx_session(target_date, -15)
-    if date_t5 is None or date_t15 is None:
-        return {"error": "날짜 부족"}
-    p5 = get_close_price(ticker, date_t5)
-    p15 = get_close_price(ticker, date_t15)
-    if p5 == 0 or p15 == 0:
-        return {"error": "가격 정보 없음"}
-    return {"trigger_price": int(calculate_warning_trigger_price(p5, p15))}
+def ceil_to_tick(price):
+    price = int(price)
+    if price <= 0:
+        return 0
+    tick = get_krx_tick_size(price)
+    return ((price + tick - 1) // tick) * tick
+
+
+def next_tick_price(price):
+    price = int(price)
+    if price <= 0:
+        return 0
+    return ceil_to_tick(price + get_krx_tick_size(price))
+
+
+def prev_tick_price(price):
+    price = int(price)
+    if price <= 1:
+        return 0
+    return floor_to_tick(price - 1)
+
+
+def ceil_tick_ratio(base_price, numerator, denominator):
+    raw = (int(base_price) * int(numerator) + int(denominator) - 1) // int(denominator)
+    return ceil_to_tick(raw)
+
+
+def floor_tick_below_ratio(base_price, numerator, denominator):
+    raw = (int(base_price) * int(numerator) - 1) // int(denominator)
+    return floor_to_tick(raw)
 
 
 def safe_get_market_ticker_list(date_str, market):
@@ -274,10 +299,172 @@ def safe_get_market_ticker_list(date_str, market):
 def get_ticker_set_for_date(date_ts):
     date_str = pd.Timestamp(date_ts).strftime("%Y%m%d")
     tickers = set()
-    for market in ("KOSPI", "KOSDAQ", "KONEX"):
+    for market in ("KOSPI", "KOSDAQ"):
         tickers.update(safe_get_market_ticker_list(date_str, market))
     return tickers
 
+
+def get_ticker_market(ticker, ref_date):
+    ref_ts = pd.Timestamp(ref_date).normalize()
+    today_ts = pd.Timestamp.today().normalize()
+    if ref_ts > today_ts:
+        ref_ts = today_ts
+    date_str = ref_ts.strftime("%Y%m%d")
+    if MARKET_CACHE.get("date") != date_str:
+        MARKET_CACHE.clear()
+        MARKET_CACHE.update(
+            {
+                "date": date_str,
+                "KOSPI": set(safe_get_market_ticker_list(date_str, "KOSPI")),
+                "KOSDAQ": set(safe_get_market_ticker_list(date_str, "KOSDAQ")),
+            }
+        )
+    if ticker in MARKET_CACHE.get("KOSPI", set()):
+        return "KOSPI"
+    if ticker in MARKET_CACHE.get("KOSDAQ", set()):
+        return "KOSDAQ"
+    return "UNKNOWN"
+
+
+def fetch_index_close_from_naver(index_code, target_date, max_pages=20):
+    target_ts = pd.Timestamp(target_date).normalize()
+    cache_key = (index_code, target_ts.strftime("%Y%m%d"))
+    if cache_key in INDEX_CACHE:
+        return INDEX_CACHE[cache_key]
+
+    rows = []
+    for page in range(1, max_pages + 1):
+        try:
+            response = requests.get(
+                "https://finance.naver.com/sise/sise_index_day.naver",
+                params={"code": index_code, "page": str(page)},
+                headers={"User-Agent": USER_AGENT, "Referer": "https://finance.naver.com/sise/"},
+                timeout=6,
+            )
+            response.raise_for_status()
+            tables = pd.read_html(response.text)
+            if not tables:
+                continue
+            df = tables[0].dropna().copy()
+            if "날짜" not in df.columns or "체결가" not in df.columns:
+                continue
+            df["날짜"] = pd.to_datetime(df["날짜"], errors="coerce")
+            df["체결가"] = pd.to_numeric(df["체결가"].astype(str).str.replace(",", "", regex=False), errors="coerce")
+            df = df.dropna(subset=["날짜", "체결가"])
+            if df.empty:
+                continue
+            rows.append(df[["날짜", "체결가"]])
+            if df["날짜"].min() <= target_ts:
+                break
+        except Exception as exc:
+            logging.warning("[Index] Naver index fetch failed %s page=%s: %s", index_code, page, exc)
+            break
+
+    if not rows:
+        INDEX_CACHE[cache_key] = 0.0
+        return 0.0
+    merged = pd.concat(rows, ignore_index=True).drop_duplicates(subset=["날짜"]).sort_values("날짜")
+    exact = merged[merged["날짜"] == target_ts]
+    if not exact.empty:
+        value = float(exact.iloc[-1]["체결가"])
+    else:
+        prev = merged[merged["날짜"] <= target_ts]
+        value = float(prev.iloc[-1]["체결가"]) if not prev.empty else 0.0
+    INDEX_CACHE[cache_key] = value
+    return value
+
+
+def get_market_index_code(ticker, ref_date):
+    market = get_ticker_market(ticker, ref_date)
+    if market == "KOSPI":
+        return "KOSPI"
+    if market == "KOSDAQ":
+        return "KOSDAQ"
+    return ""
+
+
+def get_index_adjusted_trigger(base_price, base_date, target_date, index_code, multiple, min_numerator, min_denominator):
+    base_price = int(base_price)
+    if base_price <= 0:
+        return 0
+    min_trigger = ceil_tick_ratio(base_price, min_numerator, min_denominator)
+    if not index_code:
+        return min_trigger
+    idx_base = fetch_index_close_from_naver(index_code, base_date)
+    idx_target = fetch_index_close_from_naver(index_code, target_date)
+    if idx_base <= 0 or idx_target <= 0:
+        return min_trigger
+    idx_rate = (idx_target - idx_base) / idx_base
+    if idx_rate <= 0:
+        return min_trigger
+    idx_trigger = ceil_to_tick(math.ceil(base_price * (1.0 + idx_rate * int(multiple))))
+    return max(min_trigger, idx_trigger)
+
+
+def calculate_release_ceiling(calendar, ticker, check_date):
+    date_t5 = calendar.shift_krx_session(check_date, -5)
+    date_t15 = calendar.shift_krx_session(check_date, -15)
+    start = calendar.shift_krx_session(check_date, -15)
+    end = calendar.shift_krx_session(check_date, -1)
+    if date_t5 is None or date_t15 is None or start is None or end is None:
+        return {"error": "날짜 데이터 부족"}
+    p5 = get_close_price(ticker, date_t5)
+    p15 = get_close_price(ticker, date_t15)
+    max_close = get_max_close_price(ticker, start, end)
+    if p5 == 0 or p15 == 0 or max_close == 0:
+        return {"error": "가격 정보 없음"}
+    c1 = floor_tick_below_ratio(p5, 16, 10)
+    c2 = floor_tick_below_ratio(p15, 2, 1)
+    c3 = prev_tick_price(max_close)
+    return {"release_ceiling": int(min(c1, c2, c3))}
+
+
+def calculate_warning_trigger_price(p5, p15):
+    return min(ceil_tick_ratio(p5, 16, 10), ceil_tick_ratio(p15, 2, 1))
+
+
+def calculate_designation_trigger(calendar, ticker, target_date):
+    date_t5 = get_non_halt_shifted_date(calendar, ticker, target_date, 5)
+    date_t15 = get_non_halt_shifted_date(calendar, ticker, target_date, 15)
+    if date_t5 is None:
+        date_t5 = calendar.shift_krx_session(target_date, -5)
+    if date_t15 is None:
+        date_t15 = calendar.shift_krx_session(target_date, -15)
+    start = calendar.shift_krx_session(target_date, -15)
+    end = calendar.shift_krx_session(target_date, -1)
+    if date_t5 is None or date_t15 is None or start is None or end is None:
+        return {"error": "날짜 부족"}
+    p5 = get_close_price(ticker, date_t5)
+    p15 = get_close_price(ticker, date_t15)
+    max_close = get_max_close_price(ticker, start, end)
+    if p5 == 0 or p15 == 0 or max_close == 0:
+        return {"error": "가격 정보 없음"}
+    index_code = get_market_index_code(ticker, target_date)
+    trigger_5d = max(get_index_adjusted_trigger(p5, date_t5, target_date, index_code, 5, 16, 10), ceil_to_tick(max_close))
+    trigger_15d = max(get_index_adjusted_trigger(p15, date_t15, target_date, index_code, 3, 2, 1), ceil_to_tick(max_close))
+    return {"trigger_price": int(min(trigger_5d, trigger_15d))}
+
+
+def calculate_redesignation_trigger(calendar, ticker, target_date, dsgn_date, release_date):
+    try:
+        dsgn_ts = pd.to_datetime(dsgn_date)
+        release_ts = pd.to_datetime(release_date)
+    except Exception:
+        return {"error": "재지정 기준일 오류"}
+    date_dsgn_prev = calendar.shift_krx_session(dsgn_ts, -1)
+    date_release_prev = calendar.shift_krx_session(release_ts, -1)
+    date_t2 = get_non_halt_shifted_date(calendar, ticker, target_date, 2)
+    if date_t2 is None:
+        date_t2 = calendar.shift_krx_session(target_date, -2)
+    if date_dsgn_prev is None or date_release_prev is None or date_t2 is None:
+        return {"error": "재지정 날짜 부족"}
+    p_dsgn_prev = get_close_price(ticker, date_dsgn_prev)
+    p_release_prev = get_close_price(ticker, date_release_prev)
+    p2 = get_close_price(ticker, date_t2)
+    if p_dsgn_prev == 0 or p_release_prev == 0 or p2 == 0:
+        return {"error": "재지정 가격 정보 없음"}
+    trigger = max(next_tick_price(p_dsgn_prev), next_tick_price(p_release_prev), ceil_tick_ratio(p2, 14, 10))
+    return {"trigger_price": int(trigger)}
 
 def probe_ticker_by_ohlcv(ticker, ref_date_ts):
     start = (pd.Timestamp(ref_date_ts) - pd.Timedelta(days=7)).strftime("%Y%m%d")
@@ -364,17 +551,28 @@ def _read_state(path, next_trading_day, kind):
     if not path.exists():
         return result
     for line in path.read_text(encoding="utf-8").splitlines():
-        parts = line.strip().split("\t")
-        if len(parts) < 4:
+        parts = line.strip().split("	")
+        if kind == "rewarn" and len(parts) >= 5:
+            dsgn_date, release_date, valid_until, name, code = parts[:5]
+        elif len(parts) >= 4:
+            first_date, valid_until, name, code = parts[:4]
+            dsgn_date = first_date
+            release_date = first_date
+        else:
             continue
-        first_date, valid_until, name, code = parts[:4]
         valid_ts = pd.to_datetime(valid_until)
         if next_trading_day > valid_ts:
             continue
         if kind == "rewarn":
-            result[code] = {"code": code, "name": name, "release_date": first_date, "valid_until": valid_ts}
+            result[code] = {
+                "code": code,
+                "name": name,
+                "dsgn_date": dsgn_date,
+                "release_date": release_date,
+                "valid_until": valid_ts,
+            }
         else:
-            result[code] = {"code": code, "name": name, "dsgn_date": first_date, "valid_until": valid_ts}
+            result[code] = {"code": code, "name": name, "dsgn_date": dsgn_date, "valid_until": valid_ts}
     return result
 
 
@@ -387,6 +585,41 @@ def _write_state(path, rows, first_date_key):
                 % (item[first_date_key], item["valid_until"].strftime("%Y-%m-%d"), item["name"], item["code"])
             )
 
+
+def _write_rewarn_state(path, rows):
+    path.parent.mkdir(parents=True, exist_ok=True)
+    with path.open("w", encoding="utf-8") as handle:
+        for item in rows:
+            handle.write(
+                "%s\t%s\t%s\t%s\t%s\n"
+                % (
+                    item.get("dsgn_date", item["release_date"]),
+                    item["release_date"],
+                    item["valid_until"].strftime("%Y-%m-%d"),
+                    item["name"],
+                    item["code"],
+                )
+            )
+
+
+def _read_warning_history(path):
+    result = {}
+    if not path.exists():
+        return result
+    for line in path.read_text(encoding="utf-8").splitlines():
+        parts = line.strip().split("	")
+        if len(parts) >= 3:
+            dsgn_date, name, code = parts[:3]
+            result[code] = {"name": name, "dsgn_date": dsgn_date}
+    return result
+
+
+def _write_warning_history(path, warning_history, active_warning_codes, rewarn_codes):
+    path.parent.mkdir(parents=True, exist_ok=True)
+    with path.open("w", encoding="utf-8") as handle:
+        for code, info in warning_history.items():
+            if code in active_warning_codes or code in rewarn_codes:
+                handle.write("%s\t%s\t%s\n" % (info["dsgn_date"], info["name"], code))
 
 def analyze_krx_alerts(base_date, state_dir):
     OHLCV_CACHE.clear()
@@ -408,6 +641,10 @@ def analyze_krx_alerts(base_date, state_dir):
     state_dir = Path(state_dir)
     candidate_map = _read_state(state_dir / "krx_caution_candidates.txt", next_trading_day, "candidate")
     rewarn_map = _read_state(state_dir / "krx_rewarn_candidates.txt", next_trading_day, "rewarn")
+    warning_history_path = state_dir / "krx_warning_history.txt"
+    warning_history = _read_warning_history(warning_history_path)
+    for item in all_warning:
+        warning_history[item["code"]] = {"name": item["name"], "dsgn_date": item["raw_date_str"]}
 
     caution_rows = fetch_kind_data_rows("invstcautnisu_sub", next_date_str, ticker_set, today_ts)
     for item in caution_rows:
@@ -424,9 +661,11 @@ def analyze_krx_alerts(base_date, state_dir):
         elif "투자경고" in remarks and "해제" in remarks:
             valid_until = calendar.add_krx_trading_days(item["dsgn_date"], 10)
             if valid_until is not None:
+                prev_warning = warning_history.get(item["code"], {})
                 rewarn_map[item["code"]] = {
                     "code": item["code"],
                     "name": item["name"],
+                    "dsgn_date": prev_warning.get("dsgn_date", item["raw_date_str"]),
                     "release_date": item["raw_date_str"],
                     "valid_until": valid_until,
                 }
@@ -457,7 +696,8 @@ def analyze_krx_alerts(base_date, state_dir):
         valid_rewarn.append(info)
 
     _write_state(state_dir / "krx_caution_candidates.txt", valid_candidates, "dsgn_date")
-    _write_state(state_dir / "krx_rewarn_candidates.txt", valid_rewarn, "release_date")
+    _write_rewarn_state(state_dir / "krx_rewarn_candidates.txt", valid_rewarn)
+    _write_warning_history(warning_history_path, warning_history, all_warning_codes, set(rewarn_map.keys()))
 
     release, designation, redesignation = [], [], []
     for item in warn_list:
@@ -504,7 +744,13 @@ def analyze_krx_alerts(base_date, state_dir):
 
     for item in redesignation_list:
         current = get_closest_price(item["code"], today_ts)
-        result = calculate_designation_trigger(calendar, item["code"], next_trading_day)
+        result = calculate_redesignation_trigger(
+            calendar,
+            item["code"],
+            next_trading_day,
+            item.get("dsgn_date", item.get("release_date")),
+            item.get("release_date"),
+        )
         if "error" in result or not current:
             continue
         trigger = int(result["trigger_price"])
