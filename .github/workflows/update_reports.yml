@@ -77,6 +77,12 @@ jobs:
           restore-keys: |
             krxmarket-generated-data-
 
+      - name: Restore committed sector concentration assets
+        run: |
+          git ls-tree -r --name-only HEAD codex_web/docs/data \
+            | grep 'sector_concentration' \
+            | xargs -r git checkout HEAD --
+
       - name: Generate JSON reports
         id: generate
         continue-on-error: true
