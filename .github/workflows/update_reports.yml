@@ -79,9 +79,29 @@ jobs:
 
       - name: Restore committed sector concentration assets
         run: |
-          git ls-tree -r --name-only HEAD codex_web/docs/data \
-            | grep 'sector_concentration' \
-            | xargs -r git checkout HEAD --
+          python - <<'PY'
+          import subprocess
+          import sys
+          from pathlib import Path
+
+          data_root = Path("codex_web/docs/data")
+          paths = subprocess.check_output(
+              ["git", "ls-tree", "-r", "--name-only", "HEAD", str(data_root)],
+              text=True,
+          ).splitlines()
+          targets = [path for path in paths if "sector_concentration" in path]
+          if not targets:
+              raise SystemExit(0)
+          subprocess.check_call(["git", "checkout", "HEAD", "--", *targets])
+
+          sys.path.insert(0, "codex_web/src")
+          from codex_web.storage import build_day_manifest, build_global_index
+
+          dates = sorted({Path(path).parts[3] for path in targets if len(Path(path).parts) >= 5})
+          for date_str in dates:
+              build_day_manifest(data_root, date_str)
+          build_global_index(data_root)
+          PY
 
       - name: Generate JSON reports
         id: generate
