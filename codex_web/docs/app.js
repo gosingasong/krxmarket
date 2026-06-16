@@ -1,5 +1,5 @@
 const DATA_ROOT = "data";
-const REPORT_ORDER = ["investor_flow", "ipo", "krx_alert", "us_market", "nxt_market", "liquidity"];
+const REPORT_ORDER = ["investor_flow", "ipo", "sector_concentration", "krx_alert", "us_market", "nxt_market", "liquidity"];
 
 let appIndex = null;
 let currentDate = null;
@@ -619,6 +619,16 @@ function chartShell(title, subtitle, body) {
   `;
 }
 
+function sectorImageCard(title, item) {
+  if (!item?.image) return "";
+  const src = `${DATA_ROOT}/${currentDate}/${item.image}?v=${encodeURIComponent(item.generated_at || Date.now())}`;
+  return chartShell(
+    title,
+    item.latest_date ? `${item.latest_date} 기준` : "Sector Concentration",
+    `<div class="sectorImageWrap"><img class="sectorImage" src="${escapeHtml(src)}" alt="${escapeHtml(title)}" loading="lazy" /></div>`
+  );
+}
+
 function tradeBarsSvg(rows, options = {}) {
   const data = (rows || []).slice(-24);
   if (!data.length) return "";
@@ -929,12 +939,14 @@ function renderUsMarket() {
     { key: "Body", label: "Body", numeric: true, format: formatPct, className: signedClass },
   ];
   const marketDate = payload.data.market_date || payload.data.target_session_date || shiftDateString(payload.date || currentDate, -1) || "Latest";
+  const sectorUs = currentPayloads.sector_concentration?.data?.us;
   $("us").innerHTML = `
     <div class="sectionHeader"><div><span class="eyebrow">US Market</span><h2>미국장</h2></div><span class="dateBadge">${escapeHtml(marketDate)}</span></div>
     <div class="twoCol">
       ${tablePanel("주요 지수·섹터", payload.data.fixed || [], cols)}
       ${tablePanel("거래대금 상위", payload.data.top_traded_value || [], cols)}
     </div>
+    ${sectorImageCard("US Sector Concentration", sectorUs)}
   `;
 }
 
@@ -996,6 +1008,19 @@ function renderIpo() {
   `;
 }
 
+function renderSectorConcentration() {
+  const payload = currentPayloads.sector_concentration;
+  const korea = payload?.data?.korea;
+  if (!korea?.image) {
+    $("sector").innerHTML = sectionEmpty("업종쏠림지수", payload?.data?.reason || "데이터 없음");
+    return;
+  }
+  $("sector").innerHTML = `
+    <div class="sectionHeader"><div><span class="eyebrow">Sector Concentration</span><h2>업종쏠림지수</h2></div><span class="dateBadge">${escapeHtml(korea.latest_date || "")}</span></div>
+    ${sectorImageCard("Korea Sector Concentration", korea)}
+  `;
+}
+
 function renderExtra() {
   const liquidity = currentPayloads.liquidity;
   const lowerRows = liquidity?.data?.lower || [];
@@ -1035,6 +1060,7 @@ async function renderAll() {
   renderAlerts();
   renderFlow();
   renderIpo();
+  renderSectorConcentration();
   renderExtra();
 }
 

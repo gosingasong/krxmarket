@@ -1,16 +1,29 @@
 {
-  "date": "2026-06-04",
-  "manifest": "2026-06-04/manifest.json",
+  "date": "2026-06-03",
+  "manifest": "2026-06-03/manifest.json",
   "reports": {
+    "investor_flow": {
+      "file": "investor_flow.json",
+      "report": "investor_flow",
+      "status": "ok",
+      "generated_at": "2026-06-02T21:42:40.406825+09:00",
+      "summary": {
+        "institution_count": 10,
+        "institution_total_count": 2500,
+        "foreigner_count": 10,
+        "foreigner_total_count": 2596,
+        "status": "ok"
+      }
+    },
     "ipo": {
       "file": "ipo.json",
       "report": "ipo",
       "status": "ok",
-      "generated_at": "2026-06-03T08:07:40.841541+09:00",
+      "generated_at": "2026-06-03T08:07:22.794256+09:00",
       "summary": {
         "today_item_count": 0,
-        "next_item_count": 1,
-        "item_count": 1,
+        "next_item_count": 0,
+        "item_count": 0,
         "status": "ok"
       }
     },
@@ -31,12 +44,12 @@
       "file": "liquidity.json",
       "report": "liquidity",
       "status": "ok",
-      "generated_at": "2026-06-04T22:03:58.364561+09:00",
+      "generated_at": "2026-06-03T00:15:51.224339+09:00",
       "summary": {
         "upper_count": 30,
         "lower_count": 30,
-        "latest_credit_date": "2026-06-02",
-        "latest_liquidity_date": "2026-06-04",
+        "latest_credit_date": "2026-06-01",
+        "latest_liquidity_date": "2026-06-01",
         "status": "ok"
       }
     },
@@ -46,6 +59,19 @@
       "status": "ok",
       "generated_at": "2026-06-03T00:15:51.673897+09:00",
       "summary": {
+        "status": "ok"
+      }
+    },
+    "us_market": {
+      "file": "us_market.json",
+      "report": "us_market",
+      "status": "ok",
+      "generated_at": "2026-06-03T08:07:05.024102+09:00",
+      "summary": {
+        "fixed_count": 9,
+        "top_traded_value_count": 11,
+        "target_session_date": "2026-06-02",
+        "market_date": "2026-06-02",
         "status": "ok"
       }
     }

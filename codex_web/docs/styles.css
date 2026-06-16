@@ -552,6 +552,19 @@ tbody tr:hover {
   padding: 8px 10px 12px;
 }
 
+.sectorImageWrap {
+  padding: 12px;
+}
+
+.sectorImage {
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: 8px;
+  border: 1px solid #243140;
+  background: #0b1220;
+}
+
 .chartStackInner {
   position: relative;
 }

@@ -1,0 +1,27 @@
+{
+  "schema_version": 1,
+  "report": "sector_concentration",
+  "status": "ok",
+  "date": "2026-06-16",
+  "generated_at": "2026-06-16T11:20:41.835977+09:00",
+  "source": {
+    "module": "sector_concentration",
+    "workbooks": "~/JS/sector-concentration"
+  },
+  "data": {
+    "korea": {
+      "image": "sector_concentration_korea.png",
+      "latest_date": "2026-06-15",
+      "generated_at": "2026-06-16T11:20:41.835977+09:00"
+    },
+    "us": {
+      "image": "sector_concentration_us.png",
+      "latest_date": "2026-06-15",
+      "generated_at": "2026-06-16T11:18:17.573038+09:00"
+    }
+  },
+  "summary": {
+    "korea_latest_date": "2026-06-15",
+    "us_latest_date": "2026-06-15"
+  }
+}
