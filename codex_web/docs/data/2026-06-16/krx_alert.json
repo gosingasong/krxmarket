@@ -1,0 +1,37 @@
+{
+  "schema_version": 1,
+  "report": "krx_alert",
+  "status": "ok",
+  "date": "2026-06-16",
+  "generated_at": "2026-06-16T11:22:59.054225+09:00",
+  "source": {
+    "module": "codex_web"
+  },
+  "data": {
+    "target_date": "2026-06-17",
+    "source_date": "2026-06-16",
+    "avg_trade_value_threshold": 10000000000,
+    "release": [],
+    "designation": [],
+    "redesignation": [],
+    "diagnostics": {
+      "ticker_set_count": 0,
+      "warning_fetched_count": 12,
+      "warning_old_enough_count": 0,
+      "caution_fetched_count": 0,
+      "candidate_map_count": 0,
+      "rewarn_map_count": 0
+    }
+  },
+  "summary": {
+    "release_count": 0,
+    "designation_count": 0,
+    "redesignation_count": 0,
+    "target_date": "2026-06-17"
+  },
+  "display_date": "2026-06-17",
+  "display_dates": [
+    "2026-06-16",
+    "2026-06-17"
+  ]
+}
