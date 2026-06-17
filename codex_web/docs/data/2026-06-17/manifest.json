@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "date": "2026-06-17",
-  "generated_at": "2026-06-16T21:51:54.235909+00:00",
+  "generated_at": "2026-06-17T11:32:02.784221+00:00",
   "reports": {
     "investor_flow": {
       "file": "investor_flow.json",
@@ -55,9 +55,10 @@
       "file": "sector_concentration.json",
       "report": "sector_concentration",
       "status": "ok",
-      "generated_at": "2026-06-17T06:51:54.234456+09:00",
+      "generated_at": "2026-06-17T20:32:02.782656+09:00",
       "summary": {
         "us_latest_date": "2026-06-16",
+        "korea_latest_date": "2026-06-17",
         "status": "ok"
       }
     },
