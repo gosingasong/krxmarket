@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "generated_at": "2026-06-17T21:43:33.350482+00:00",
+  "generated_at": "2026-06-17T21:47:42.634270+00:00",
   "latest_date": "2026-06-16",
   "dates": [
     {
@@ -11,7 +11,7 @@
           "file": "sector_concentration.json",
           "report": "sector_concentration",
           "status": "ok",
-          "generated_at": "2026-06-18T06:43:33.347837+09:00",
+          "generated_at": "2026-06-18T06:47:42.631662+09:00",
           "summary": {
             "us_latest_date": "2026-06-17",
             "status": "ok"
@@ -21,7 +21,7 @@
           "file": "us_market.json",
           "report": "us_market",
           "status": "ok",
-          "generated_at": "2026-06-18T06:41:48.102052+09:00",
+          "generated_at": "2026-06-18T06:45:57.981182+09:00",
           "summary": {
             "fixed_count": 10,
             "top_traded_value_count": 11,
