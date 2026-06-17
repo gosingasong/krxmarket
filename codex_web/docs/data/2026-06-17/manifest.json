@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "date": "2026-06-17",
-  "generated_at": "2026-06-17T11:32:02.784221+00:00",
+  "generated_at": "2026-06-17T12:08:39.286435+00:00",
   "reports": {
     "investor_flow": {
       "file": "investor_flow.json",
@@ -55,9 +55,9 @@
       "file": "sector_concentration.json",
       "report": "sector_concentration",
       "status": "ok",
-      "generated_at": "2026-06-17T20:32:02.782656+09:00",
+      "generated_at": "2026-06-17T21:08:39.284802+09:00",
       "summary": {
-        "us_latest_date": "2026-06-16",
+        "us_latest_date": "2026-06-15",
         "korea_latest_date": "2026-06-17",
         "status": "ok"
       }
@@ -66,7 +66,7 @@
       "file": "us_market.json",
       "report": "us_market",
       "status": "ok",
-      "generated_at": "2026-06-17T06:50:09.592080+09:00",
+      "generated_at": "2026-06-17T21:06:55.890287+09:00",
       "summary": {
         "fixed_count": 10,
         "top_traded_value_count": 11,
