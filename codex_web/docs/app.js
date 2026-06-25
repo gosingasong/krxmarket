@@ -168,12 +168,48 @@ function selectedDay() {
   return appIndex?.dates?.find((item) => item.date === currentDate);
 }
 
-async function loadReport(name) {
+async function loadReport(name, dateStr = currentDate) {
   try {
-    return await fetchJson(`${DATA_ROOT}/${currentDate}/${name}.json`);
+    const payload = await fetchJson(`${DATA_ROOT}/${dateStr}/${name}.json`);
+    return { ...payload, source_date: dateStr };
   } catch (error) {
-    return { report: name, status: "missing", data: { error: error.message }, summary: {} };
+    return { report: name, status: "missing", date: dateStr, source_date: dateStr, data: { error: error.message }, summary: {} };
   }
+}
+
+function sectorItemWithSourceDate(item, dateStr) {
+  return item?.image ? { ...item, source_date: item.source_date || dateStr } : null;
+}
+
+async function findSectorItemOnOrBefore(kind, dateStr) {
+  const dates = sortedDates().filter((date) => date <= dateStr).reverse();
+  for (const date of dates) {
+    let payload = date === currentDate ? currentPayloads.sector_concentration : null;
+    if (!payload || payload.status === "missing") {
+      const day = appIndex?.dates?.find((item) => item.date === date);
+      if (!day?.reports?.sector_concentration) continue;
+      payload = await loadReport("sector_concentration", date);
+    }
+    const item = sectorItemWithSourceDate(payload?.data?.[kind], date);
+    if (item) return item;
+  }
+  return null;
+}
+
+async function applySectorConcentrationRollover() {
+  const payload = currentPayloads.sector_concentration || {
+    schema_version: 1,
+    report: "sector_concentration",
+    status: "missing",
+    date: currentDate,
+    source_date: currentDate,
+    data: {},
+    summary: {},
+  };
+  const data = { ...(payload.data || {}) };
+  data.us = sectorItemWithSourceDate(data.us, payload.source_date || currentDate) || await findSectorItemOnOrBefore("us", currentDate);
+  data.korea = sectorItemWithSourceDate(data.korea, payload.source_date || currentDate) || await findSectorItemOnOrBefore("korea", currentDate);
+  currentPayloads.sector_concentration = { ...payload, status: data.us || data.korea ? "ok" : payload.status, data };
 }
 
 async function loadCurrentPayloads() {
@@ -181,6 +217,7 @@ async function loadCurrentPayloads() {
   const names = day ? REPORT_ORDER.filter((name) => day.reports?.[name]) : REPORT_ORDER;
   const entries = await Promise.all(names.map(async (name) => [name, await loadReport(name)]));
   currentPayloads = Object.fromEntries(entries);
+  await applySectorConcentrationRollover();
 }
 
 async function loadWorkflowStatus() {
@@ -621,10 +658,12 @@ function chartShell(title, subtitle, body) {
 
 function sectorImageCard(title, item) {
   if (!item?.image) return "";
-  const src = `${DATA_ROOT}/${currentDate}/${item.image}?v=${encodeURIComponent(item.generated_at || Date.now())}`;
+  const imageDate = item.source_date || currentDate;
+  const src = `${DATA_ROOT}/${imageDate}/${item.image}?v=${encodeURIComponent(item.generated_at || Date.now())}`;
+  const sourceNote = imageDate !== currentDate ? ` · ${imageDate} 이미지` : "";
   return chartShell(
     title,
-    item.latest_date ? `${item.latest_date} 기준` : "Sector Concentration",
+    item.latest_date ? `${item.latest_date} 기준${sourceNote}` : `Sector Concentration${sourceNote}`,
     `<div class="sectorImageWrap"><img class="sectorImage" src="${escapeHtml(src)}" alt="${escapeHtml(title)}" loading="lazy" /></div>`
   );
 }
