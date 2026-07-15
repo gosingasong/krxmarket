@@ -1,0 +1,180 @@
+{
+  "schema_version": 1,
+  "report": "us_market",
+  "status": "ok",
+  "date": "2026-07-16",
+  "generated_at": "2026-07-16T06:31:24.630497+09:00",
+  "source": {
+    "module": "codex_web"
+  },
+  "data": {
+    "fixed": [
+      {
+        "Ticker": "^GSPC",
+        "Name": "S&P 500",
+        "Chg": 0.38191443583878903,
+        "Body": 0.008976658945579198,
+        "Open": 7571.72021484375,
+        "High": 7581.5,
+        "Low": 7526.9501953125,
+        "Close": 7572.39990234375,
+        "Volume": 3094327000,
+        "MarketDate": "2026-07-15",
+        "IsTop10": false,
+        "Status": "OK"
+      },
+      {
+        "Ticker": "^IXIC",
+        "Name": "NASDAQ",
+        "Chg": 0.6213534155435535,
+        "Body": 0.03062683264555592,
+        "Open": 26261.18359375,
+        "High": 26316.814453125,
+        "Low": 26041.126953125,
+        "Close": 26269.2265625,
+        "Volume": 6328537000,
+        "MarketDate": "2026-07-15",
+        "IsTop10": false,
+        "Status": "OK"
+      },
+      {
+        "Ticker": "^DJI",
+        "Name": "Dow Jones",
+        "Chg": 0.2863760224672944,
+        "Body": 0.10349251021503081,
+        "Open": 52604.19921875,
+        "High": 52823.94921875,
+        "Low": 52428.5390625,
+        "Close": 52658.640625,
+        "Volume": 508443319,
+        "MarketDate": "2026-07-15",
+        "IsTop10": false,
+        "Status": "OK"
+      },
+      {
+        "Ticker": "IWO",
+        "Name": "Russell 2k Growth",
+        "Chg": 0.14923220676786195,
+        "Body": -0.08358556069402959,
+        "Open": 382.8500061035156,
+        "High": 383.9849853515625,
+        "Low": 379.05999755859375,
+        "Close": 382.5299987792969,
+        "Volume": 231839,
+        "MarketDate": "2026-07-15",
+        "IsTop10": false,
+        "Status": "OK"
+      },
+      {
+        "Ticker": "XBI",
+        "Name": "S&P Biotech (XBI)",
+        "Chg": 0.49533887911063396,
+        "Body": 1.275174656560286,
+        "Open": 154.2530059814453,
+        "High": 156.3300018310547,
+        "Low": 152.89999389648438,
+        "Close": 156.22000122070312,
+        "Volume": 5603463,
+        "MarketDate": "2026-07-15",
+        "IsTop10": false,
+        "Status": "OK"
+      },
+      {
+        "Ticker": "SOXX",
+        "Name": "PHLX Semi (SOXX)",
+        "Chg": -2.227420016827872,
+        "Body": -3.5771920330291698,
+        "Open": 575.8699951171875,
+        "High": 575.8699951171875,
+        "Low": 538.530029296875,
+        "Close": 555.27001953125,
+        "Volume": 10011523,
+        "MarketDate": "2026-07-15",
+        "IsTop10": false,
+        "Status": "OK"
+      },
+      {
+        "Ticker": "EWY",
+        "Name": "MSCI Korea (EWY)",
+        "Chg": -3.0172880928935926,
+        "Body": -2.3441028936919195,
+        "Open": 175.75999450683594,
+        "High": 176.14999389648438,
+        "Low": 165.75,
+        "Close": 171.63999938964844,
+        "Volume": 28208671,
+        "MarketDate": "2026-07-15",
+        "IsTop10": false,
+        "Status": "OK"
+      },
+      {
+        "Ticker": "CL=F",
+        "Name": "WTI Crude Oil",
+        "Chg": 1.1343604328465162,
+        "Body": 0.6270378898858471,
+        "Open": 79.73999786376953,
+        "High": 80.93000030517578,
+        "Low": 78.19000244140625,
+        "Close": 80.23999786376953,
+        "Volume": 216363,
+        "MarketDate": "2026-07-15",
+        "IsTop10": false,
+        "Status": "OK"
+      },
+      {
+        "Ticker": "KRW=X",
+        "Name": "USD/KRW",
+        "Chg": -0.7418031457415415,
+        "Body": -0.1095271475252672,
+        "Open": 1488.219970703125,
+        "High": 1496.5,
+        "Low": 1484.280029296875,
+        "Close": 1486.5899658203125,
+        "Volume": 0,
+        "MarketDate": "2026-07-15",
+        "IsTop10": false,
+        "Status": "OK"
+      },
+      {
+        "Ticker": "K_NIGHTLY",
+        "Name": "KOSPI200 야간선물",
+        "Chg": -4.521776259607177,
+        "Body": -3.4165514858327537,
+        "Open": 1157.6,
+        "High": 1162.55,
+        "Low": 1079.4,
+        "Close": 1118.05,
+        "Volume": 39988,
+        "MarketDate": "2026-07-16",
+        "IsTop10": false,
+        "Status": "OK",
+        "Source": "KRED KOSPI200 night futures"
+      }
+    ],
+    "top_traded_value": [
+      {
+        "Ticker": "MMU",
+        "Name": "MMU",
+        "Chg": 0.3846150319251659,
+        "Body": 0.0,
+        "Open": 10.4399995803833,
+        "High": 10.45359992980957,
+        "Low": 10.395000457763672,
+        "Close": 10.4399995803833,
+        "Volume": 105280,
+        "MarketDate": "2026-07-15",
+        "IsTop10": true,
+        "Status": "OK"
+      }
+    ],
+    "target_session_date": "2026-07-15",
+    "market_date": "2026-07-15",
+    "note": "US rows use the latest yfinance session on or before the KST base date minus one day; Finviz ranking is the latest available screener order."
+  },
+  "summary": {
+    "fixed_count": 10,
+    "top_traded_value_count": 1,
+    "target_session_date": "2026-07-15",
+    "market_date": "2026-07-15"
+  }
+}
