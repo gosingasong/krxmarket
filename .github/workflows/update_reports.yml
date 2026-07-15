@@ -77,6 +77,37 @@ jobs:
           restore-keys: |
             krxmarket-generated-data-
 
+      - name: Restore generated data files changed by this push
+        if: github.event_name == 'push'
+        env:
+          BEFORE_SHA: ${{ github.event.before }}
+          HEAD_SHA: ${{ github.sha }}
+        run: |
+          python - <<'PY'
+          import os
+          import subprocess
+
+          before_sha = os.environ["BEFORE_SHA"]
+          head_sha = os.environ["HEAD_SHA"]
+          paths = subprocess.check_output(
+              [
+                  "git",
+                  "diff",
+                  "--name-only",
+                  "--diff-filter=ACMRT",
+                  before_sha,
+                  head_sha,
+                  "--",
+                  "codex_web/docs/data",
+                  "codex_web/state",
+              ],
+              text=True,
+          ).splitlines()
+          if paths:
+              subprocess.check_call(["git", "checkout", head_sha, "--", *paths])
+              print("Restored pushed generated files:", *paths, sep="\n- ")
+          PY
+
       - name: Restore committed sector concentration assets
         run: |
           python - <<'PY'

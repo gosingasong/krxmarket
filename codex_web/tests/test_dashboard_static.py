@@ -183,6 +183,22 @@ class DashboardStaticTests(unittest.TestCase):
         self.assertNotIn("git push", workflow)
         self.assertNotIn("git commit", workflow)
 
+    def test_workflow_restores_generated_data_changed_by_push_after_cache_restore(self):
+        workflow = WORKFLOW.read_text(encoding="utf-8")
+        cache_restore = workflow.index("actions/cache/restore@v4")
+        self.assertIn("Restore generated data files changed by this push", workflow)
+        pushed_data_restore = workflow.index("Restore generated data files changed by this push")
+        generate_reports = workflow.index("Generate JSON reports")
+
+        self.assertLess(cache_restore, pushed_data_restore)
+        self.assertLess(pushed_data_restore, generate_reports)
+        self.assertIn("github.event.before", workflow)
+        self.assertIn('"git",', workflow)
+        self.assertIn('"diff",', workflow)
+        self.assertIn('"--name-only",', workflow)
+        self.assertIn('"--diff-filter=ACMRT",', workflow)
+        self.assertIn('subprocess.check_call(["git", "checkout", head_sha, "--", *paths])', workflow)
+
     def test_favicon_links_and_assets_exist(self):
         html = (ROOT / "docs" / "index.html").read_text(encoding="utf-8")
         for rel in [
