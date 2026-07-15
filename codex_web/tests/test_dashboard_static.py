@@ -193,6 +193,7 @@ class DashboardStaticTests(unittest.TestCase):
         self.assertLess(cache_restore, pushed_data_restore)
         self.assertLess(pushed_data_restore, generate_reports)
         self.assertIn("github.event.before", workflow)
+        self.assertRegex(workflow, r"actions/checkout@v4\s+with:\s+fetch-depth:\s+2")
         self.assertIn('"git",', workflow)
         self.assertIn('"diff",', workflow)
         self.assertIn('"--name-only",', workflow)
