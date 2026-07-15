@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "generated_at": "2026-07-15T21:33:31.299490+00:00",
+  "generated_at": "2026-07-15T22:21:32.357406+00:00",
   "latest_date": "2026-06-16",
   "dates": [
     {
@@ -21,10 +21,10 @@
           "file": "us_market.json",
           "report": "us_market",
           "status": "ok",
-          "generated_at": "2026-07-16T06:31:24.630497+09:00",
+          "generated_at": "2026-07-16T07:21:32.344107+09:00",
           "summary": {
             "fixed_count": 10,
-            "top_traded_value_count": 1,
+            "top_traded_value_count": 11,
             "target_session_date": "2026-07-15",
             "market_date": "2026-07-15",
             "status": "ok"

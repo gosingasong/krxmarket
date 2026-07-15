@@ -52,7 +52,14 @@ def _parse_finviz_rows(html):
         cells = tr.find_all("td")
         if len(cells) < 11:
             continue
-        ticker = cells[1].get_text(strip=True).replace(".", "-")
+        ticker_cell = cells[1]
+        ticker_link = ticker_cell.select_one("a.tab-link")
+        ticker_value = (
+            ticker_cell.get("data-boxover-ticker")
+            or (ticker_link.get_text(strip=True) if ticker_link else "")
+            or ticker_cell.get_text(strip=True)
+        )
+        ticker = str(ticker_value).replace(".", "-")
         industry = cells[4].get_text(" ", strip=True)
         price = parse_number(cells[8].get_text(strip=True), default=None)
         volume = parse_number(cells[10].get_text(strip=True), default=None)
