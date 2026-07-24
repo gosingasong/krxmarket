@@ -183,6 +183,18 @@ class DashboardStaticTests(unittest.TestCase):
         self.assertNotIn("git push", workflow)
         self.assertNotIn("git commit", workflow)
 
+    def test_workflow_restores_latest_shared_memos_before_cache_and_deploy(self):
+        workflow = WORKFLOW.read_text(encoding="utf-8")
+        restore_memos = workflow.index("Restore latest shared memos before cache and deploy")
+        save_cache = workflow.index("Save generated data cache")
+        upload_pages = workflow.index("actions/upload-pages-artifact@v4")
+
+        self.assertIn("git fetch --no-tags origin main", workflow)
+        self.assertIn('MEMO_PATH="codex_web/docs/data/memos.json"', workflow)
+        self.assertIn('git checkout origin/main -- "$MEMO_PATH"', workflow)
+        self.assertLess(restore_memos, save_cache)
+        self.assertLess(restore_memos, upload_pages)
+
     def test_workflow_restores_generated_data_changed_by_push_after_cache_restore(self):
         workflow = WORKFLOW.read_text(encoding="utf-8")
         cache_restore = workflow.index("actions/cache/restore@v4")

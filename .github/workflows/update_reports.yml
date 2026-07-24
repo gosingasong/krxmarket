@@ -386,6 +386,17 @@ jobs:
           path.write_text(json.dumps(payload, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
           PY
 
+      - name: Restore latest shared memos before cache and deploy
+        if: always()
+        run: |
+          git fetch --no-tags origin main
+          MEMO_PATH="codex_web/docs/data/memos.json"
+          if git cat-file -e "origin/main:$MEMO_PATH"; then
+            git checkout origin/main -- "$MEMO_PATH"
+          else
+            echo "No committed shared memo file found; leaving the current file unchanged"
+          fi
+
       - name: Save generated data cache
         if: always()
         uses: actions/cache/save@v4
