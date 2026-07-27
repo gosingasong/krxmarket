@@ -233,10 +233,12 @@ const MEMO_BRANCH = "main";
 const MEMO_CONTENT_PATH = "codex_web/docs/data/memos.json";
 const MEMO_RAW_URL = `https://raw.githubusercontent.com/${MEMO_REPO}/${MEMO_BRANCH}/${MEMO_CONTENT_PATH}`;
 const MEMO_TOKEN_KEY = "krxmarket:memo:githubToken";
+const MEMO_DRAFT_KEY = "krxmarket:memo:unsyncedDraft";
 
 let memoState = { schema_version: 1, global: "", daily: {}, updated_at: null };
 let memoFileSha = null;
 let activeDailyMemoDate = null;
+let memoAuthIssue = null;
 
 function emptyMemoState() {
   return { schema_version: 1, global: "", daily: {}, updated_at: null };
@@ -257,7 +259,56 @@ function memoToken() {
 }
 
 function canEditRemoteMemo() {
-  return Boolean(memoToken());
+  return Boolean(memoToken()) && !memoAuthIssue;
+}
+
+function loadMemoDraft() {
+  try {
+    const value = localStorage.getItem(MEMO_DRAFT_KEY);
+    return value ? normalizeMemoState(JSON.parse(value)) : null;
+  } catch (error) {
+    console.warn("memo draft load failed", error);
+    localStorage.removeItem(MEMO_DRAFT_KEY);
+    return null;
+  }
+}
+
+function persistMemoDraft() {
+  localStorage.setItem(MEMO_DRAFT_KEY, JSON.stringify(normalizeMemoState(memoState)));
+}
+
+function clearMemoDraft() {
+  localStorage.removeItem(MEMO_DRAFT_KEY);
+}
+
+function hasMemoDraft() {
+  return Boolean(localStorage.getItem(MEMO_DRAFT_KEY));
+}
+
+function memoAuthFailureText(status = memoAuthIssue) {
+  const draftPrefix = hasMemoDraft() ? "이 기기에 임시저장됨 · " : "";
+  if (status === 401) return `${draftPrefix}동기화 토큰 재설정 필요 (401)`;
+  if (status === 403) return `${draftPrefix}토큰 Contents 쓰기 권한 확인 필요 (403)`;
+  return `${draftPrefix}GitHub 동기화 확인 필요`;
+}
+
+function markMemoAuthIssue(error) {
+  memoAuthIssue = error?.status || null;
+  if (memoAuthIssue === 401) localStorage.removeItem(MEMO_TOKEN_KEY);
+  setMemoEditable(false);
+}
+
+async function githubMemoError(action, response) {
+  let detail = "";
+  try {
+    const payload = await response.json();
+    detail = payload?.message ? `: ${payload.message}` : "";
+  } catch (error) {
+    // A status and action are sufficient when GitHub did not return JSON.
+  }
+  const error = new Error(`GitHub memo ${action} ${response.status}${detail}`);
+  error.status = response.status;
+  return error;
 }
 
 function setMemoEditable(enabled) {
@@ -273,7 +324,9 @@ function setMemoEditable(enabled) {
 }
 
 function memoStatusText(prefix = "공유 메모") {
+  if (memoAuthIssue) return memoAuthFailureText();
   if (!canEditRemoteMemo()) return `${prefix}: 읽기 전용 · 토큰 설정 필요`;
+  if (hasMemoDraft()) return `${prefix}: 임시저장 복구됨 · 동기화 대기`;
   return `${prefix}: GitHub 동기화`;
 }
 
@@ -312,7 +365,7 @@ async function fetchMemoFileMetadata() {
     },
   });
   if (response.status === 404) return null;
-  if (!response.ok) throw new Error(`GitHub memo metadata ${response.status}`);
+  if (!response.ok) throw await githubMemoError("metadata", response);
   const payload = await response.json();
   memoFileSha = payload.sha || memoFileSha;
   if (payload.content) {
@@ -323,18 +376,28 @@ async function fetchMemoFileMetadata() {
 }
 
 async function loadRemoteMemo() {
+  let loadedState = null;
   try {
     if (canEditRemoteMemo()) {
       await fetchMemoFileMetadata();
-      return memoState;
+      memoAuthIssue = null;
+      loadedState = memoState;
     }
-    const response = await fetch(`${MEMO_RAW_URL}?v=${Date.now()}`, { cache: "no-store" });
-    if (!response.ok) throw new Error(`${response.status} ${response.statusText}`);
-    memoState = normalizeMemoState(await response.json());
   } catch (error) {
-    console.warn("memo sync load failed", error);
-    memoState = emptyMemoState();
+    console.warn("memo authenticated load failed", error);
+    if (error?.status === 401 || error?.status === 403) markMemoAuthIssue(error);
   }
+  if (!loadedState) {
+    try {
+      const response = await fetch(`${MEMO_RAW_URL}?v=${Date.now()}`, { cache: "no-store" });
+      if (!response.ok) throw new Error(`${response.status} ${response.statusText}`);
+      loadedState = normalizeMemoState(await response.json());
+    } catch (error) {
+      console.warn("memo public load failed", error);
+    }
+  }
+  const draft = loadMemoDraft();
+  memoState = draft || loadedState || emptyMemoState();
   return memoState;
 }
 
@@ -348,6 +411,7 @@ async function saveRemoteMemo(reason = "Update shared memo", retry = true) {
     setMemoStatus("dailyNoteStatus", dailyMemoIdleText());
     return false;
   }
+  persistMemoDraft();
   memoState.updated_at = new Date().toISOString();
   const body = {
     message: `Update KRX Market shared memo: ${reason}`,
@@ -366,12 +430,16 @@ async function saveRemoteMemo(reason = "Update shared memo", retry = true) {
     body: JSON.stringify(body),
   });
   if (response.status === 409 && retry) {
+    const pendingState = normalizeMemoState(memoState);
     await fetchMemoFileMetadata();
+    memoState = pendingState;
     return saveRemoteMemo(reason, false);
   }
-  if (!response.ok) throw new Error(`GitHub memo save ${response.status}`);
+  if (!response.ok) throw await githubMemoError("save", response);
   const payload = await response.json();
   memoFileSha = payload.content?.sha || memoFileSha;
+  memoAuthIssue = null;
+  clearMemoDraft();
   return true;
 }
 
@@ -386,8 +454,14 @@ function scheduleMemoSave(reason) {
       showSavedStatus("dailyNoteStatus", dailyMemoIdleText(currentDate));
     } catch (error) {
       console.error(error);
-      setMemoStatus("globalNoteStatus", `저장 실패: ${error.message}`);
-      setMemoStatus("dailyNoteStatus", `저장 실패: ${error.message}`);
+      if (error?.status === 401 || error?.status === 403) {
+        markMemoAuthIssue(error);
+        setMemoStatus("globalNoteStatus", memoAuthFailureText(error.status));
+        setMemoStatus("dailyNoteStatus", memoAuthFailureText(error.status));
+      } else {
+        setMemoStatus("globalNoteStatus", `이 기기에 임시저장됨 · 저장 실패: ${error.message}`);
+        setMemoStatus("dailyNoteStatus", `이 기기에 임시저장됨 · 저장 실패: ${error.message}`);
+      }
     }
   }, 700);
 }
@@ -405,6 +479,7 @@ async function loadMemo() {
 function saveGlobalMemo() {
   if (!canEditRemoteMemo()) return;
   memoState.global = $("globalMemoBox").value;
+  persistMemoDraft();
   scheduleMemoSave("global");
 }
 
@@ -417,6 +492,7 @@ function saveDailyMemo() {
   } else {
     memoState.daily[currentDate] = value;
   }
+  persistMemoDraft();
   scheduleMemoSave(`daily ${currentDate}`);
 }
 
@@ -424,6 +500,7 @@ function clearGlobalMemo() {
   if (!canEditRemoteMemo()) return;
   $("globalMemoBox").value = "";
   memoState.global = "";
+  persistMemoDraft();
   scheduleMemoSave("clear global");
 }
 
@@ -433,6 +510,7 @@ function clearDailyMemo() {
   $("dailyMemoBox").value = "";
   if (sourceDate) delete memoState.daily[sourceDate];
   activeDailyMemoDate = currentDate;
+  persistMemoDraft();
   scheduleMemoSave(`clear daily ${sourceDate || "none"}`);
 }
 
@@ -450,7 +528,7 @@ async function validateMemoToken(token) {
       "X-GitHub-Api-Version": "2022-11-28",
     },
   });
-  if (!response.ok) throw new Error(`GitHub token check ${response.status}`);
+  if (!response.ok) throw await githubMemoError("token check", response);
   return response.json();
 }
 
@@ -468,21 +546,31 @@ async function configureMemoToken() {
   const trimmed = value.trim();
   if (!trimmed) {
     localStorage.removeItem(MEMO_TOKEN_KEY);
+    memoAuthIssue = null;
     await loadMemo();
     return;
   }
   setMemoStatus("globalNoteStatus", "토큰 확인 중...");
   setMemoStatus("dailyNoteStatus", "토큰 확인 중...");
   try {
+    memoAuthIssue = null;
     localStorage.setItem(MEMO_TOKEN_KEY, trimmed);
     const payload = await validateMemoToken(trimmed);
     memoFileSha = payload.sha || memoFileSha;
     await loadMemo();
+    if (hasMemoDraft()) {
+      await saveRemoteMemo("recover unsynced browser draft");
+      await loadMemo();
+    }
   } catch (error) {
     localStorage.removeItem(MEMO_TOKEN_KEY);
+    memoAuthIssue = error?.status || null;
     setMemoEditable(false);
-    setMemoStatus("globalNoteStatus", `토큰 확인 실패: ${error.message}`);
-    setMemoStatus("dailyNoteStatus", "읽기 전용 · 토큰을 다시 확인하세요");
+    const guidance = error?.status === 403
+      ? "토큰 확인 실패 · Contents Read/Write 권한을 확인하세요"
+      : `토큰 확인 실패: ${error.message}`;
+    setMemoStatus("globalNoteStatus", guidance);
+    setMemoStatus("dailyNoteStatus", hasMemoDraft() ? memoAuthFailureText(error?.status) : "읽기 전용 · 토큰을 다시 확인하세요");
   }
 }
 
