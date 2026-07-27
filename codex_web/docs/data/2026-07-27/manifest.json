@@ -1,0 +1,17 @@
+{
+  "schema_version": 1,
+  "date": "2026-07-27",
+  "generated_at": "2026-07-27T11:33:06.304466+00:00",
+  "reports": {
+    "sector_concentration": {
+      "file": "sector_concentration.json",
+      "report": "sector_concentration",
+      "status": "ok",
+      "generated_at": "2026-07-27T20:33:06.303836+09:00",
+      "summary": {
+        "korea_latest_date": "2026-07-27",
+        "status": "ok"
+      }
+    }
+  }
+}
