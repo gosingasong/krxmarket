@@ -239,6 +239,9 @@ let memoState = { schema_version: 1, global: "", daily: {}, updated_at: null };
 let memoFileSha = null;
 let activeDailyMemoDate = null;
 let memoAuthIssue = null;
+let memoSaveInFlight = false;
+let memoSaveQueued = false;
+let memoSaveQueuedReason = "";
 
 function emptyMemoState() {
   return { schema_version: 1, global: "", daily: {}, updated_at: null };
@@ -355,7 +358,7 @@ function dailyMemoSourceDate(state = memoState) {
   return previousDate && state.daily?.[previousDate] ? previousDate : currentDate;
 }
 
-async function fetchMemoFileMetadata() {
+async function fetchMemoFileMetadata(updateState = true) {
   if (!canEditRemoteMemo()) return null;
   const response = await fetch(`https://api.github.com/repos/${MEMO_REPO}/contents/${encodeURIComponent(MEMO_CONTENT_PATH).replaceAll("%2F", "/")}?ref=${MEMO_BRANCH}`, {
     headers: {
@@ -364,11 +367,14 @@ async function fetchMemoFileMetadata() {
       "X-GitHub-Api-Version": "2022-11-28",
     },
   });
-  if (response.status === 404) return null;
+  if (response.status === 404) {
+    memoFileSha = null;
+    return null;
+  }
   if (!response.ok) throw await githubMemoError("metadata", response);
   const payload = await response.json();
   memoFileSha = payload.sha || memoFileSha;
-  if (payload.content) {
+  if (updateState && payload.content) {
     const decoded = decodeURIComponent(escape(window.atob(String(payload.content).replace(/\s/g, ""))));
     memoState = normalizeMemoState(JSON.parse(decoded));
   }
@@ -405,17 +411,26 @@ function encodeBase64Utf8(value) {
   return window.btoa(unescape(encodeURIComponent(value)));
 }
 
-async function saveRemoteMemo(reason = "Update shared memo", retry = true) {
+function memoDraftSnapshot() {
+  return localStorage.getItem(MEMO_DRAFT_KEY) || JSON.stringify(normalizeMemoState(memoState));
+}
+
+function waitForMemoRetry(delayMs) {
+  return new Promise((resolve) => window.setTimeout(resolve, delayMs));
+}
+
+async function saveRemoteMemo(reason = "Update shared memo", attempt = 0, draftSnapshot = null) {
   if (!canEditRemoteMemo()) {
     setMemoStatus("globalNoteStatus", memoStatusText());
     setMemoStatus("dailyNoteStatus", dailyMemoIdleText());
     return false;
   }
-  persistMemoDraft();
-  memoState.updated_at = new Date().toISOString();
+  const snapshot = draftSnapshot || memoDraftSnapshot();
+  const stateToSave = normalizeMemoState(JSON.parse(snapshot));
+  stateToSave.updated_at = new Date().toISOString();
   const body = {
     message: `Update KRX Market shared memo: ${reason}`,
-    content: encodeBase64Utf8(JSON.stringify(memoState, null, 2) + "\n"),
+    content: encodeBase64Utf8(JSON.stringify(stateToSave, null, 2) + "\n"),
     branch: MEMO_BRANCH,
   };
   if (memoFileSha) body.sha = memoFileSha;
@@ -429,41 +444,72 @@ async function saveRemoteMemo(reason = "Update shared memo", retry = true) {
     },
     body: JSON.stringify(body),
   });
-  if (response.status === 409 && retry) {
-    const pendingState = normalizeMemoState(memoState);
-    await fetchMemoFileMetadata();
-    memoState = pendingState;
-    return saveRemoteMemo(reason, false);
+  if (response.status === 409 && attempt < 4) {
+    const retryNumber = attempt + 1;
+    setMemoStatus("globalNoteStatus", `동기화 충돌 조정 중... (${retryNumber}/4)`);
+    setMemoStatus("dailyNoteStatus", `동기화 충돌 조정 중... (${retryNumber}/4)`);
+    await waitForMemoRetry(200 * retryNumber);
+    await fetchMemoFileMetadata(false);
+    return saveRemoteMemo(reason, retryNumber, snapshot);
   }
   if (!response.ok) throw await githubMemoError("save", response);
   const payload = await response.json();
   memoFileSha = payload.content?.sha || memoFileSha;
   memoAuthIssue = null;
-  clearMemoDraft();
+  if (localStorage.getItem(MEMO_DRAFT_KEY) === snapshot) {
+    memoState = stateToSave;
+    clearMemoDraft();
+  }
   return true;
+}
+
+async function flushMemoSave(reason) {
+  if (memoSaveInFlight) {
+    memoSaveQueued = true;
+    memoSaveQueuedReason = reason;
+    setMemoStatus("globalNoteStatus", "추가 변경사항 저장 대기...");
+    setMemoStatus("dailyNoteStatus", "추가 변경사항 저장 대기...");
+    return;
+  }
+  memoSaveInFlight = true;
+  try {
+    await saveRemoteMemo(reason);
+    if (hasMemoDraft()) {
+      setMemoStatus("globalNoteStatus", "추가 변경사항 저장 대기...");
+      setMemoStatus("dailyNoteStatus", "추가 변경사항 저장 대기...");
+    } else {
+      showSavedStatus("globalNoteStatus", memoStatusText());
+      showSavedStatus("dailyNoteStatus", dailyMemoIdleText(currentDate));
+    }
+  } catch (error) {
+    console.error(error);
+    if (error?.status === 401 || error?.status === 403) {
+      markMemoAuthIssue(error);
+      setMemoStatus("globalNoteStatus", memoAuthFailureText(error.status));
+      setMemoStatus("dailyNoteStatus", memoAuthFailureText(error.status));
+    } else {
+      setMemoStatus("globalNoteStatus", `이 기기에 임시저장됨 · 저장 실패: ${error.message}`);
+      setMemoStatus("dailyNoteStatus", `이 기기에 임시저장됨 · 저장 실패: ${error.message}`);
+    }
+  } finally {
+    memoSaveInFlight = false;
+    if (memoSaveQueued && canEditRemoteMemo()) {
+      const queuedReason = memoSaveQueuedReason || reason;
+      memoSaveQueued = false;
+      memoSaveQueuedReason = "";
+      await flushMemoSave(queuedReason);
+    } else if (!canEditRemoteMemo()) {
+      memoSaveQueued = false;
+      memoSaveQueuedReason = "";
+    }
+  }
 }
 
 function scheduleMemoSave(reason) {
   window.clearTimeout(scheduleMemoSave.timer);
   setMemoStatus("globalNoteStatus", "저장 중...");
   setMemoStatus("dailyNoteStatus", "저장 중...");
-  scheduleMemoSave.timer = window.setTimeout(async () => {
-    try {
-      await saveRemoteMemo(reason);
-      showSavedStatus("globalNoteStatus", memoStatusText());
-      showSavedStatus("dailyNoteStatus", dailyMemoIdleText(currentDate));
-    } catch (error) {
-      console.error(error);
-      if (error?.status === 401 || error?.status === 403) {
-        markMemoAuthIssue(error);
-        setMemoStatus("globalNoteStatus", memoAuthFailureText(error.status));
-        setMemoStatus("dailyNoteStatus", memoAuthFailureText(error.status));
-      } else {
-        setMemoStatus("globalNoteStatus", `이 기기에 임시저장됨 · 저장 실패: ${error.message}`);
-        setMemoStatus("dailyNoteStatus", `이 기기에 임시저장됨 · 저장 실패: ${error.message}`);
-      }
-    }
-  }, 700);
+  scheduleMemoSave.timer = window.setTimeout(() => flushMemoSave(reason), 700);
 }
 
 async function loadMemo() {
