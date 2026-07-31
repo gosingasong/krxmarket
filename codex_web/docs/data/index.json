@@ -1,8 +1,37 @@
 {
   "schema_version": 1,
-  "generated_at": "2026-07-31T11:32:26.413503+00:00",
+  "generated_at": "2026-07-31T21:33:01.801443+00:00",
   "latest_date": "2026-06-16",
   "dates": [
+    {
+      "date": "2026-08-01",
+      "manifest": "2026-08-01/manifest.json",
+      "reports": {
+        "sector_concentration": {
+          "file": "sector_concentration.json",
+          "report": "sector_concentration",
+          "status": "ok",
+          "generated_at": "2026-08-01T06:33:01.797274+09:00",
+          "summary": {
+            "us_latest_date": "2026-07-31",
+            "status": "ok"
+          }
+        },
+        "us_market": {
+          "file": "us_market.json",
+          "report": "us_market",
+          "status": "ok",
+          "generated_at": "2026-08-01T06:30:44.277972+09:00",
+          "summary": {
+            "fixed_count": 10,
+            "top_traded_value_count": 11,
+            "target_session_date": "2026-07-31",
+            "market_date": "2026-07-31",
+            "status": "ok"
+          }
+        }
+      }
+    },
     {
       "date": "2026-07-31",
       "manifest": "2026-07-31/manifest.json",
@@ -1369,85 +1398,6 @@
             "top_traded_value_count": 11,
             "target_session_date": "2026-06-01",
             "market_date": "2026-06-01",
-            "status": "ok"
-          }
-        }
-      }
-    },
-    {
-      "date": "2026-06-01",
-      "manifest": "2026-06-01/manifest.json",
-      "reports": {
-        "investor_flow": {
-          "file": "investor_flow.json",
-          "report": "investor_flow",
-          "status": "ok",
-          "generated_at": "2026-05-29T21:16:41.616677+09:00",
-          "summary": {
-            "institution_count": 10,
-            "institution_total_count": 2447,
-            "foreigner_count": 10,
-            "foreigner_total_count": 2597,
-            "status": "ok"
-          }
-        },
-        "ipo": {
-          "file": "ipo.json",
-          "report": "ipo",
-          "status": "ok",
-          "generated_at": "2026-06-01T07:10:33.723231+09:00",
-          "summary": {
-            "today_item_count": 0,
-            "next_item_count": 0,
-            "item_count": 0,
-            "status": "ok"
-          }
-        },
-        "krx_alert": {
-          "file": "krx_alert.json",
-          "report": "krx_alert",
-          "status": "ok",
-          "generated_at": "2026-05-29T23:15:33.832972+09:00",
-          "summary": {
-            "release_count": 3,
-            "designation_count": 2,
-            "redesignation_count": 1,
-            "target_date": "2026-06-01",
-            "status": "ok"
-          }
-        },
-        "liquidity": {
-          "file": "liquidity.json",
-          "report": "liquidity",
-          "status": "ok",
-          "generated_at": "2026-05-29T23:15:57.088201+09:00",
-          "summary": {
-            "upper_count": 30,
-            "lower_count": 30,
-            "latest_credit_date": "2026-05-28",
-            "latest_liquidity_date": "2026-05-28",
-            "status": "ok"
-          }
-        },
-        "nxt_market": {
-          "file": "nxt_market.json",
-          "report": "nxt_market",
-          "status": "ok",
-          "generated_at": "2026-05-29T23:15:57.788107+09:00",
-          "summary": {
-            "status": "ok"
-          }
-        },
-        "us_market": {
-          "file": "us_market.json",
-          "report": "us_market",
-          "status": "ok",
-          "generated_at": "2026-06-01T07:10:17.309376+09:00",
-          "summary": {
-            "fixed_count": 9,
-            "top_traded_value_count": 11,
-            "target_session_date": "2026-05-31",
-            "market_date": "2026-05-29",
             "status": "ok"
           }
         }
