@@ -10,7 +10,6 @@ on:
         type: choice
         options:
           - stale_watchdog
-          - live_market
           - morning_us_ipo
           - investor_flow
           - risk_auxiliary
@@ -42,7 +41,6 @@ on:
     - cron: "15 11 * * 1-5" # 20:15 KST, KRX alert + liquidity / NXT attempt 4/5
     - cron: "18 11 * * 1-5" # 20:18 KST, KRX alert + liquidity / NXT attempt 5/5
     - cron: "31 9-13 * * 1-5" # 18:31-22:31 KST, stale-data watchdog
-    - cron: "*/15 * * * 1-5"   # Weekdays: refresh free dashboard quotes every 15 minutes
 
 permissions:
   contents: write
@@ -111,6 +109,9 @@ jobs:
               subprocess.check_call(["git", "checkout", head_sha, "--", *paths])
               print("Restored pushed generated files:", *paths, sep="\n- ")
           PY
+
+      - name: Remove retired live-market cache
+        run: rm -f codex_web/docs/data/live_market.json
 
       - name: Restore committed sector concentration assets
         run: |
@@ -304,9 +305,6 @@ jobs:
             python codex_web/update_reports.py --date "$BASE_DATE" --reports krx_alert --risk-rollover-next --fail-fast --verbose
             python codex_web/update_reports.py --date "$BASE_DATE" --reports liquidity,nxt_market --extra-rollover-next --fail-fast --verbose
           }
-          refresh_live_market() {
-            python codex_web/update_live_market.py
-          }
           run_staleness_watchdog() {
             BASE_DATE="$1"
             HOUR_KST=$(TZ=Asia/Seoul date +%H)
@@ -326,7 +324,6 @@ jobs:
           REPORTS="default"
           if [ "$EVENT_NAME" = "push" ]; then
             TODAY_KST=$(kst_today)
-            refresh_live_market
             run_staleness_watchdog "$TODAY_KST"
             exit 0
           fi
@@ -339,7 +336,6 @@ jobs:
               "1 9 * * 1-5"|"4 9 * * 1-5"|"7 9 * * 1-5"|"10 9 * * 1-5"|"13 9 * * 1-5") REPORTS="investor_flow" ;;
               "6 11 * * 1-5"|"9 11 * * 1-5"|"12 11 * * 1-5"|"15 11 * * 1-5"|"18 11 * * 1-5") REPORTS="risk_auxiliary" ;;
               "31 9-13 * * 1-5") REPORTS="stale_watchdog" ;;
-              "*/15 * * * 1-5") REPORTS="live_market" ;;
             esac
           fi
           BASE_DATE=$(kst_today)
@@ -355,9 +351,6 @@ jobs:
               ;;
             stale_watchdog)
               run_staleness_watchdog "$BASE_DATE"
-              ;;
-            live_market)
-              refresh_live_market
               ;;
             default)
               python codex_web/update_reports.py --reports default --fail-fast --verbose

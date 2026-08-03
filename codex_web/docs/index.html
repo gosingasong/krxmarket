@@ -7,7 +7,7 @@
     <link rel="icon" href="./favicon.ico" sizes="any" />
     <link rel="icon" type="image/png" href="./favicon.png" />
     <link rel="apple-touch-icon" href="./apple-touch-icon.png" />
-    <link rel="stylesheet" href="styles.css?v=20260803-hybrid-live-market" />
+    <link rel="stylesheet" href="styles.css?v=20260803-tradingview-only" />
   </head>
   <body>
     <main class="shell">
@@ -47,10 +47,8 @@
               <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-ticker-tape.js" async>
               {
                 "symbols": [
-                  { "proName": "FOREXCOM:NSXUSD", "title": "NASDAQ 100" },
                   { "proName": "FX:USDKRW", "title": "USD/KRW" },
-                  { "proName": "TVC:USOIL", "title": "WTI" },
-                  { "proName": "INDEX:KSIC", "title": "KOSPI" }
+                  { "proName": "TVC:USOIL", "title": "WTI" }
                 ],
                 "showSymbolLogo": true,
                 "isTransparent": true,
@@ -60,12 +58,6 @@
               }
               </script>
             </div>
-            <div class="liveMarketHeader liveMarketFallbackHeader">
-              <span>보조 시세</span>
-              <small id="liveMarketMeta">시세 불러오는 중</small>
-            </div>
-            <div id="liveMarketGrid" class="liveMarketGrid"><div class="liveMarketLoading">시세 불러오는 중</div></div>
-            <small class="liveMarketNote">* 미국 10년물·한국 종목은 무료 공개 시세, VKOSPI 대신 KOSPI 20일 실현변동성 사용</small>
           </section>
           <div id="quickLists" class="quickLists"></div>
         </section>
@@ -121,6 +113,6 @@
       <section id="extra" class="reportSection"></section>
     </main>
 
-    <script src="app.js?v=20260803-hybrid-live-market"></script>
+    <script src="app.js?v=20260803-tradingview-only"></script>
   </body>
 </html>

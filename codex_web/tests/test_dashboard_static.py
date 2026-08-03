@@ -170,8 +170,8 @@ class DashboardStaticTests(unittest.TestCase):
         self.assertIn("동기화 토큰 재설정 필요 (401)", app)
         self.assertIn("토큰 Contents 쓰기 권한 확인 필요 (403)", app)
         self.assertIn('await saveRemoteMemo("recover unsynced browser draft")', app)
-        self.assertIn('app.js?v=20260803-hybrid-live-market', html)
-        self.assertIn('styles.css?v=20260803-hybrid-live-market', html)
+        self.assertIn('app.js?v=20260803-tradingview-only', html)
+        self.assertIn('styles.css?v=20260803-tradingview-only', html)
         self.assertIn("state.daily?.[previousDate]", app)
         self.assertIn("function clearGlobalMemo", app)
         self.assertIn("function clearDailyMemo", app)
@@ -243,28 +243,28 @@ class DashboardStaticTests(unittest.TestCase):
             self.assertTrue(path.exists(), name)
             self.assertGreater(path.stat().st_size, 0, name)
 
-    def test_live_market_uses_tradingview_with_free_quote_fallbacks(self):
+    def test_live_market_uses_only_supported_tradingview_symbols(self):
         app = APP_JS.read_text(encoding="utf-8")
         html = (ROOT / "docs" / "index.html").read_text(encoding="utf-8")
         css = STYLES.read_text(encoding="utf-8")
         workflow = WORKFLOW.read_text(encoding="utf-8")
-        source = (ROOT / "src" / "codex_web" / "sources" / "live_market.py").read_text(encoding="utf-8")
 
         self.assertNotIn("tv-single-ticker", html)
         self.assertIn("embed-widget-ticker-tape.js", html)
-        for symbol in ["FOREXCOM:NSXUSD", "FX:USDKRW", "TVC:USOIL", "INDEX:KSIC"]:
+        for symbol in ["FX:USDKRW", "TVC:USOIL"]:
             self.assertIn(symbol, html)
-        self.assertIn('id="liveMarketGrid"', html)
-        self.assertIn("function liveQuoteCard", app)
-        self.assertIn("LIVE_MARKET_FALLBACK_TICKERS", app)
-        self.assertRegex(css, r"\.liveMarketGrid\s*\{[^}]*repeat\(5")
-        for ticker in ['"^TNX"', '"KOSDAQ"', '"005930"', '"000660"']:
-            self.assertIn(ticker, source)
-        for ticker in ['"NQ=F"', '"KRW=X"', '"CL=F"']:
-            self.assertNotIn(ticker, source)
-        self.assertIn("KOSPI 변동성*", source)
-        self.assertIn('cron: "*/15 * * * 1-5"', workflow)
-        self.assertIn("python codex_web/update_live_market.py", workflow)
+        for symbol in ["FOREXCOM:NSXUSD", "INDEX:KSIC", "CME_MINI:NQ1!", "TVC:US10Y"]:
+            self.assertNotIn(symbol, html)
+        self.assertNotIn('id="liveMarketGrid"', html)
+        self.assertNotIn("function liveQuoteCard", app)
+        self.assertNotIn("LIVE_MARKET_FALLBACK_TICKERS", app)
+        self.assertNotIn(".liveMarketGrid", css)
+        self.assertNotIn('cron: "*/15 * * * 1-5"', workflow)
+        self.assertNotIn("update_live_market.py", workflow)
+        self.assertIn("rm -f codex_web/docs/data/live_market.json", workflow)
+        self.assertFalse((ROOT / "update_live_market.py").exists())
+        self.assertFalse((ROOT / "src" / "codex_web" / "sources" / "live_market.py").exists())
+        self.assertFalse((ROOT / "docs" / "data" / "live_market.json").exists())
 
 
 if __name__ == "__main__":

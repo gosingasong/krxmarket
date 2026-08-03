@@ -195,73 +195,6 @@ input[type="date"] {
   background: var(--panel-2);
 }
 
-.liveMarketFallbackHeader {
-  margin-top: 9px;
-}
-
-.liveMarketGrid {
-  display: grid;
-  grid-template-columns: repeat(5, minmax(0, 1fr));
-  gap: 8px;
-}
-
-.liveQuote {
-  min-width: 0;
-  min-height: 64px;
-  border: 1px solid #243140;
-  border-radius: 8px;
-  background: var(--panel-2);
-  padding: 8px 9px;
-}
-
-.liveQuote strong,
-.liveQuote small {
-  display: block;
-  overflow: hidden;
-  color: var(--muted);
-  font-size: 10px;
-  line-height: 1.2;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.liveQuoteValue {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: 5px;
-  margin: 7px 0 4px;
-}
-
-.liveQuoteValue span {
-  overflow: hidden;
-  font-size: clamp(15px, 1.4vw, 20px);
-  font-weight: 800;
-  line-height: 1;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.liveQuoteValue em {
-  flex: 0 0 auto;
-  font-size: 10px;
-  font-style: normal;
-  font-weight: 750;
-}
-
-.liveMarketLoading {
-  grid-column: 1 / -1;
-  color: var(--muted);
-  font-size: 12px;
-}
-
-.liveMarketNote {
-  display: block;
-  margin: 6px 2px 0;
-  color: var(--muted);
-  font-size: 10px;
-}
-
 .metric {
   min-height: 86px;
   border: 1px solid #243140;
@@ -798,11 +731,6 @@ tbody tr:hover {
 
   .liveMarket {
     padding: 8px 10px 5px;
-  }
-
-  .liveMarketGrid {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 6px;
   }
 
   .liveMarketHeader {
