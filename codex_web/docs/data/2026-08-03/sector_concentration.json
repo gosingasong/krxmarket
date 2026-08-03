@@ -1,0 +1,21 @@
+{
+  "schema_version": 1,
+  "report": "sector_concentration",
+  "status": "ok",
+  "date": "2026-08-03",
+  "generated_at": "2026-08-03T20:32:45.038485+09:00",
+  "source": {
+    "module": "sector_concentration",
+    "workbooks": "~/JS/sector-concentration"
+  },
+  "data": {
+    "korea": {
+      "image": "sector_concentration_korea.png",
+      "latest_date": "2026-08-03",
+      "generated_at": "2026-08-03T20:32:45.038485+09:00"
+    }
+  },
+  "summary": {
+    "korea_latest_date": "2026-08-03"
+  }
+}
