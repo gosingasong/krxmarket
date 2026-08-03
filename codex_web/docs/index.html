@@ -40,19 +40,10 @@
           <section id="liveMarket" class="liveMarket" aria-label="장중 시세" hidden>
             <div class="liveMarketHeader">
               <span>장중 시세</span>
-              <small>TradingView 제공 · 거래소별 지연 가능</small>
+              <small id="liveMarketMeta">시세 불러오는 중</small>
             </div>
-            <div class="liveMarketGrid">
-              <tv-single-ticker symbol="CME_MINI:NQ1!" theme="dark" locale="kr" hide-market-status-icon></tv-single-ticker>
-              <tv-single-ticker symbol="TVC:US10Y" theme="dark" locale="kr" hide-market-status-icon></tv-single-ticker>
-              <tv-single-ticker symbol="FX:USDKRW" theme="dark" locale="kr" hide-market-status-icon></tv-single-ticker>
-              <tv-single-ticker symbol="TVC:USOIL" theme="dark" locale="kr" hide-market-status-icon></tv-single-ticker>
-              <tv-single-ticker symbol="KRX:VOLATILITY" theme="dark" locale="kr" hide-market-status-icon></tv-single-ticker>
-              <tv-single-ticker symbol="TVC:KOSPI" theme="dark" locale="kr" hide-market-status-icon></tv-single-ticker>
-              <tv-single-ticker symbol="KRX:KOSDAQ" theme="dark" locale="kr" hide-market-status-icon></tv-single-ticker>
-              <tv-single-ticker symbol="KRX:005930" theme="dark" locale="kr" hide-market-status-icon></tv-single-ticker>
-              <tv-single-ticker symbol="KRX:000660" theme="dark" locale="kr" hide-market-status-icon></tv-single-ticker>
-            </div>
+            <div id="liveMarketGrid" class="liveMarketGrid"><div class="liveMarketLoading">시세 불러오는 중</div></div>
+            <small class="liveMarketNote">* VKOSPI 대신 무료 KOSPI 20일 실현변동성 사용</small>
           </section>
           <div id="quickLists" class="quickLists"></div>
         </section>
@@ -108,7 +99,6 @@
       <section id="extra" class="reportSection"></section>
     </main>
 
-    <script type="module" src="https://widgets.tradingview-widget.com/w/en/tv-single-ticker.js"></script>
-    <script src="app.js?v=20260803-live-market"></script>
+    <script src="app.js?v=20260803-free-live-market"></script>
   </body>
 </html>

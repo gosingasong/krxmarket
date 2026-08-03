@@ -170,7 +170,7 @@ class DashboardStaticTests(unittest.TestCase):
         self.assertIn("동기화 토큰 재설정 필요 (401)", app)
         self.assertIn("토큰 Contents 쓰기 권한 확인 필요 (403)", app)
         self.assertIn('await saveRemoteMemo("recover unsynced browser draft")', app)
-        self.assertIn('app.js?v=20260727-memo-conflict-fix', html)
+        self.assertIn('app.js?v=20260803-free-live-market', html)
         self.assertIn("state.daily?.[previousDate]", app)
         self.assertIn("function clearGlobalMemo", app)
         self.assertIn("function clearDailyMemo", app)
@@ -241,6 +241,24 @@ class DashboardStaticTests(unittest.TestCase):
             path = ROOT / "docs" / name
             self.assertTrue(path.exists(), name)
             self.assertGreater(path.stat().st_size, 0, name)
+
+    def test_live_market_uses_compact_free_quote_cards(self):
+        app = APP_JS.read_text(encoding="utf-8")
+        html = (ROOT / "docs" / "index.html").read_text(encoding="utf-8")
+        css = STYLES.read_text(encoding="utf-8")
+        workflow = WORKFLOW.read_text(encoding="utf-8")
+        source = (ROOT / "src" / "codex_web" / "sources" / "live_market.py").read_text(encoding="utf-8")
+
+        self.assertNotIn("tv-single-ticker", html)
+        self.assertNotIn("tradingview-widget", html)
+        self.assertIn('id="liveMarketGrid"', html)
+        self.assertIn("function liveQuoteCard", app)
+        self.assertRegex(css, r"\.liveMarketGrid\s*\{[^}]*repeat\(5")
+        for ticker in ['"NQ=F"', '"^TNX"', '"KRW=X"', '"CL=F"', '"005930"', '"000660"']:
+            self.assertIn(ticker, source)
+        self.assertIn("KOSPI 변동성*", source)
+        self.assertIn('cron: "*/15 * * * 1-5"', workflow)
+        self.assertIn("python codex_web/update_live_market.py", workflow)
 
 
 if __name__ == "__main__":

@@ -4,6 +4,7 @@ const REPORT_ORDER = ["investor_flow", "ipo", "sector_concentration", "krx_alert
 let appIndex = null;
 let currentDate = null;
 let currentPayloads = {};
+let liveMarketPayload = null;
 
 const $ = (id) => document.getElementById(id);
 
@@ -1066,10 +1067,54 @@ function renderSummary() {
   $("quickLists").innerHTML = ipoMessages.map(summaryMessage).join("");
 }
 
+function formatLivePrice(item) {
+  const value = item?.price;
+  if (value === null || value === undefined) return "-";
+  switch (item.format) {
+    case "krw0": return `₩${formatNumber(value)}`;
+    case "krw2": return `₩${formatNumber(value, 2)}`;
+    case "usd2": return `$${formatNumber(value, 2)}`;
+    case "percent2": return `${formatNumber(value, 2)}%`;
+    case "percent3": return `${formatNumber(value, 3)}%`;
+    default: return formatNumber(value, 2);
+  }
+}
+
+function liveQuoteCard(item) {
+  const change = item?.status === "ok" ? formatPct(item.change_pct) : "수집 실패";
+  const source = item?.note || item?.source || "무료 공개 시세";
+  return `
+    <article class="liveQuote">
+      <strong title="${escapeHtml(item?.label || item?.ticker || "-")}">${escapeHtml(item?.label || item?.ticker || "-")}</strong>
+      <div class="liveQuoteValue">
+        <span>${escapeHtml(formatLivePrice(item))}</span>
+        <em class="${signedClass(item?.change_pct)}">${escapeHtml(change)}</em>
+      </div>
+      <small title="${escapeHtml(source)}">${escapeHtml(source)}</small>
+    </article>
+  `;
+}
+
+async function loadLiveMarket() {
+  try {
+    liveMarketPayload = await fetchJson(`${DATA_ROOT}/live_market.json`);
+  } catch (error) {
+    liveMarketPayload = { status: "error", items: [], error: error.message };
+  }
+}
+
 function renderLiveMarket() {
   const liveMarket = $("liveMarket");
   if (!liveMarket) return;
   liveMarket.hidden = currentDate !== preferredCurrentDate();
+  if (liveMarket.hidden) return;
+  const items = liveMarketPayload?.items || [];
+  $("liveMarketGrid").innerHTML = items.length
+    ? items.map(liveQuoteCard).join("")
+    : `<div class="liveMarketLoading">${escapeHtml(liveMarketPayload?.error || "시세 데이터가 아직 없습니다.")}</div>`;
+  $("liveMarketMeta").textContent = liveMarketPayload?.generated_at
+    ? `${formatKstDateTime(liveMarketPayload.generated_at)} · 15분 갱신`
+    : "시세 갱신 대기 중";
 }
 
 function renderAlerts() {
@@ -1233,6 +1278,7 @@ async function renderAll() {
   await loadCurrentPayloads();
   const workflowStatus = await loadWorkflowStatus();
   await loadMemo();
+  if (currentDate === preferredCurrentDate()) await loadLiveMarket();
   renderWorkflowAlert(workflowStatus);
   renderSummary();
   renderLiveMarket();
@@ -1250,6 +1296,11 @@ async function init() {
   currentDate = preferredCurrentDate();
   $("dateInput").value = currentDate;
   await renderAll();
+  window.setInterval(async () => {
+    if (currentDate !== preferredCurrentDate()) return;
+    await loadLiveMarket();
+    renderLiveMarket();
+  }, 60_000);
 }
 
 $("dateInput").addEventListener("change", async (event) => {
