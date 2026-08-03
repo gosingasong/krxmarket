@@ -1066,6 +1066,12 @@ function renderSummary() {
   $("quickLists").innerHTML = ipoMessages.map(summaryMessage).join("");
 }
 
+function renderLiveMarket() {
+  const liveMarket = $("liveMarket");
+  if (!liveMarket) return;
+  liveMarket.hidden = currentDate !== preferredCurrentDate();
+}
+
 function renderAlerts() {
   const payload = currentPayloads.krx_alert;
   if (!payload || payload.status !== "ok") {
@@ -1229,6 +1235,7 @@ async function renderAll() {
   await loadMemo();
   renderWorkflowAlert(workflowStatus);
   renderSummary();
+  renderLiveMarket();
   renderUsMarket();
   renderAlerts();
   renderFlow();
