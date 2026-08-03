@@ -1,5 +1,6 @@
 const DATA_ROOT = "data";
 const REPORT_ORDER = ["investor_flow", "ipo", "sector_concentration", "krx_alert", "us_market", "nxt_market", "liquidity"];
+const LIVE_MARKET_FALLBACK_TICKERS = new Set(["^TNX", "^KS11:RV20", "KOSDAQ", "005930", "000660"]);
 
 let appIndex = null;
 let currentDate = null;
@@ -1108,7 +1109,7 @@ function renderLiveMarket() {
   if (!liveMarket) return;
   liveMarket.hidden = currentDate !== preferredCurrentDate();
   if (liveMarket.hidden) return;
-  const items = liveMarketPayload?.items || [];
+  const items = (liveMarketPayload?.items || []).filter((item) => LIVE_MARKET_FALLBACK_TICKERS.has(item?.ticker));
   $("liveMarketGrid").innerHTML = items.length
     ? items.map(liveQuoteCard).join("")
     : `<div class="liveMarketLoading">${escapeHtml(liveMarketPayload?.error || "시세 데이터가 아직 없습니다.")}</div>`;

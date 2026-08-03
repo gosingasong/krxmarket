@@ -187,6 +187,18 @@ input[type="date"] {
   font-weight: 500;
 }
 
+.liveMarketTradingView {
+  min-height: 46px;
+  overflow: hidden;
+  border: 1px solid #243140;
+  border-radius: 8px;
+  background: var(--panel-2);
+}
+
+.liveMarketFallbackHeader {
+  margin-top: 9px;
+}
+
 .liveMarketGrid {
   display: grid;
   grid-template-columns: repeat(5, minmax(0, 1fr));

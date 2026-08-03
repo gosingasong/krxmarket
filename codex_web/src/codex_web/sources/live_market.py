@@ -11,14 +11,10 @@ from .common import KST, USER_AGENT
 NAVER_REALTIME_ROOT = "https://polling.finance.naver.com/api/realtime/domestic"
 
 YAHOO_QUOTES = [
-    {"ticker": "NQ=F", "label": "NASDAQ100 선물", "format": "number2"},
     {"ticker": "^TNX", "label": "미 10년물 금리", "format": "percent3"},
-    {"ticker": "KRW=X", "label": "원/달러", "format": "krw2"},
-    {"ticker": "CL=F", "label": "WTI", "format": "usd2"},
 ]
 
 NAVER_QUOTES = [
-    {"kind": "index", "ticker": "KOSPI", "label": "KOSPI", "format": "number2"},
     {"kind": "index", "ticker": "KOSDAQ", "label": "KOSDAQ", "format": "number2"},
     {"kind": "stock", "ticker": "005930", "label": "삼성전자", "format": "krw0"},
     {"kind": "stock", "ticker": "000660", "label": "SK하이닉스", "format": "krw0"},
@@ -185,5 +181,5 @@ def fetch_live_market_data():
         "generated_at": now,
         "refresh_minutes": 15,
         "items": items,
-        "note": "무료 공개 시세로 투자 판단용 실시간 원천이 아니며 일부 시장은 지연될 수 있습니다. *VKOSPI가 아닌 KOSPI 20일 실현변동성입니다.",
+        "note": "TradingView 미지원 종목의 무료 공개 보조 시세이며 일부 시장은 지연될 수 있습니다. *VKOSPI가 아닌 KOSPI 20일 실현변동성입니다.",
     }

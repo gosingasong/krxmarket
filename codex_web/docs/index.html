@@ -7,7 +7,7 @@
     <link rel="icon" href="./favicon.ico" sizes="any" />
     <link rel="icon" type="image/png" href="./favicon.png" />
     <link rel="apple-touch-icon" href="./apple-touch-icon.png" />
-    <link rel="stylesheet" href="styles.css" />
+    <link rel="stylesheet" href="styles.css?v=20260803-hybrid-live-market" />
   </head>
   <body>
     <main class="shell">
@@ -37,13 +37,35 @@
             <span id="selectedDateLabel" class="dateBadge">-</span>
           </div>
           <div id="summaryCards" class="summaryCards"></div>
-          <section id="liveMarket" class="liveMarket" aria-label="장중 시세" hidden>
+          <section id="liveMarket" class="liveMarket" aria-label="장중 시세">
             <div class="liveMarketHeader">
-              <span>장중 시세</span>
+              <span>TradingView 실시간</span>
+              <small>제공자 기준 실시간 · 일부 지연 가능</small>
+            </div>
+            <div class="liveMarketTradingView tradingview-widget-container">
+              <div class="tradingview-widget-container__widget"></div>
+              <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-ticker-tape.js" async>
+              {
+                "symbols": [
+                  { "proName": "FOREXCOM:NSXUSD", "title": "NASDAQ 100" },
+                  { "proName": "FX:USDKRW", "title": "USD/KRW" },
+                  { "proName": "TVC:USOIL", "title": "WTI" },
+                  { "proName": "INDEX:KSIC", "title": "KOSPI" }
+                ],
+                "showSymbolLogo": true,
+                "isTransparent": true,
+                "displayMode": "adaptive",
+                "colorTheme": "dark",
+                "locale": "kr"
+              }
+              </script>
+            </div>
+            <div class="liveMarketHeader liveMarketFallbackHeader">
+              <span>보조 시세</span>
               <small id="liveMarketMeta">시세 불러오는 중</small>
             </div>
             <div id="liveMarketGrid" class="liveMarketGrid"><div class="liveMarketLoading">시세 불러오는 중</div></div>
-            <small class="liveMarketNote">* VKOSPI 대신 무료 KOSPI 20일 실현변동성 사용</small>
+            <small class="liveMarketNote">* 미국 10년물·한국 종목은 무료 공개 시세, VKOSPI 대신 KOSPI 20일 실현변동성 사용</small>
           </section>
           <div id="quickLists" class="quickLists"></div>
         </section>
@@ -99,6 +121,6 @@
       <section id="extra" class="reportSection"></section>
     </main>
 
-    <script src="app.js?v=20260803-free-live-market"></script>
+    <script src="app.js?v=20260803-hybrid-live-market"></script>
   </body>
 </html>
