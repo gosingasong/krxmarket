@@ -1,16 +1,15 @@
 {
   "schema_version": 1,
-  "date": "2026-06-26",
-  "generated_at": "2026-06-26T11:32:39.439028+00:00",
+  "date": "2026-08-26",
+  "generated_at": "2026-08-25T21:33:48.185034+00:00",
   "reports": {
     "sector_concentration": {
       "file": "sector_concentration.json",
       "report": "sector_concentration",
       "status": "ok",
-      "generated_at": "2026-06-26T20:32:39.438102+09:00",
+      "generated_at": "2026-08-26T06:33:48.184208+09:00",
       "summary": {
-        "us_latest_date": "2026-06-25",
-        "korea_latest_date": "2026-06-26",
+        "us_latest_date": "2026-08-25",
         "status": "ok"
       }
     },
@@ -18,12 +17,12 @@
       "file": "us_market.json",
       "report": "us_market",
       "status": "ok",
-      "generated_at": "2026-06-26T06:30:53.439713+09:00",
+      "generated_at": "2026-08-26T06:30:57.560613+09:00",
       "summary": {
         "fixed_count": 10,
         "top_traded_value_count": 11,
-        "target_session_date": "2026-06-25",
-        "market_date": "2026-06-25",
+        "target_session_date": "2026-08-25",
+        "market_date": "2026-08-25",
         "status": "ok"
       }
     }
