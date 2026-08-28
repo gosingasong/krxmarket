@@ -1,0 +1,21 @@
+{
+  "schema_version": 1,
+  "report": "sector_concentration",
+  "status": "ok",
+  "date": "2026-08-29",
+  "generated_at": "2026-08-29T06:33:58.053867+09:00",
+  "source": {
+    "module": "sector_concentration",
+    "workbooks": "~/JS/sector-concentration"
+  },
+  "data": {
+    "us": {
+      "image": "sector_concentration_us.png",
+      "latest_date": "2026-08-28",
+      "generated_at": "2026-08-29T06:33:58.053867+09:00"
+    }
+  },
+  "summary": {
+    "us_latest_date": "2026-08-28"
+  }
+}
