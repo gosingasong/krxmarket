@@ -1,6 +1,7 @@
 {
+  "schema_version": 1,
   "date": "2026-08-31",
-  "manifest": "2026-08-31/manifest.json",
+  "generated_at": "2026-08-31T11:33:30.269687+00:00",
   "reports": {
     "sector_concentration": {
       "file": "sector_concentration.json",
