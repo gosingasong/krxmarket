@@ -1,8 +1,37 @@
 {
   "schema_version": 1,
-  "generated_at": "2026-08-31T11:33:30.273744+00:00",
-  "latest_date": "2026-08-31",
+  "generated_at": "2026-08-31T21:33:56.339013+00:00",
+  "latest_date": "2026-09-01",
   "dates": [
+    {
+      "date": "2026-09-01",
+      "manifest": "2026-09-01/manifest.json",
+      "reports": {
+        "sector_concentration": {
+          "file": "sector_concentration.json",
+          "report": "sector_concentration",
+          "status": "ok",
+          "generated_at": "2026-09-01T06:33:56.334409+09:00",
+          "summary": {
+            "us_latest_date": "2026-08-31",
+            "status": "ok"
+          }
+        },
+        "us_market": {
+          "file": "us_market.json",
+          "report": "us_market",
+          "status": "ok",
+          "generated_at": "2026-09-01T06:31:15.675311+09:00",
+          "summary": {
+            "fixed_count": 10,
+            "top_traded_value_count": 11,
+            "target_session_date": "2026-08-31",
+            "market_date": "2026-08-31",
+            "status": "ok"
+          }
+        }
+      }
+    },
     {
       "date": "2026-08-31",
       "manifest": "2026-08-31/manifest.json",
@@ -1348,96 +1377,6 @@
             "top_traded_value_count": 11,
             "target_session_date": "2026-07-02",
             "market_date": "2026-07-02",
-            "status": "ok"
-          }
-        }
-      }
-    },
-    {
-      "date": "2026-07-02",
-      "manifest": "2026-07-02/manifest.json",
-      "reports": {
-        "sector_concentration": {
-          "file": "sector_concentration.json",
-          "report": "sector_concentration",
-          "status": "ok",
-          "generated_at": "2026-07-02T20:32:19.908298+09:00",
-          "summary": {
-            "us_latest_date": "2026-07-01",
-            "korea_latest_date": "2026-07-02",
-            "status": "ok"
-          }
-        },
-        "us_market": {
-          "file": "us_market.json",
-          "report": "us_market",
-          "status": "ok",
-          "generated_at": "2026-07-02T06:30:35.379967+09:00",
-          "summary": {
-            "fixed_count": 10,
-            "top_traded_value_count": 11,
-            "target_session_date": "2026-07-01",
-            "market_date": "2026-07-01",
-            "status": "ok"
-          }
-        }
-      }
-    },
-    {
-      "date": "2026-07-01",
-      "manifest": "2026-07-01/manifest.json",
-      "reports": {
-        "sector_concentration": {
-          "file": "sector_concentration.json",
-          "report": "sector_concentration",
-          "status": "ok",
-          "generated_at": "2026-07-01T20:32:07.347349+09:00",
-          "summary": {
-            "us_latest_date": "2026-06-30",
-            "korea_latest_date": "2026-07-01",
-            "status": "ok"
-          }
-        },
-        "us_market": {
-          "file": "us_market.json",
-          "report": "us_market",
-          "status": "ok",
-          "generated_at": "2026-07-01T06:30:42.026434+09:00",
-          "summary": {
-            "fixed_count": 10,
-            "top_traded_value_count": 11,
-            "target_session_date": "2026-06-30",
-            "market_date": "2026-06-30",
-            "status": "ok"
-          }
-        }
-      }
-    },
-    {
-      "date": "2026-06-30",
-      "manifest": "2026-06-30/manifest.json",
-      "reports": {
-        "sector_concentration": {
-          "file": "sector_concentration.json",
-          "report": "sector_concentration",
-          "status": "ok",
-          "generated_at": "2026-06-30T20:32:13.602927+09:00",
-          "summary": {
-            "us_latest_date": "2026-06-29",
-            "korea_latest_date": "2026-06-30",
-            "status": "ok"
-          }
-        },
-        "us_market": {
-          "file": "us_market.json",
-          "report": "us_market",
-          "status": "ok",
-          "generated_at": "2026-06-30T06:30:47.866639+09:00",
-          "summary": {
-            "fixed_count": 10,
-            "top_traded_value_count": 11,
-            "target_session_date": "2026-06-29",
-            "market_date": "2026-06-29",
             "status": "ok"
           }
         }
