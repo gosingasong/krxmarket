@@ -1,15 +1,16 @@
 {
   "schema_version": 1,
   "date": "2026-09-10",
-  "generated_at": "2026-09-09T21:33:40.156653+00:00",
+  "generated_at": "2026-09-10T11:33:29.989053+00:00",
   "reports": {
     "sector_concentration": {
       "file": "sector_concentration.json",
       "report": "sector_concentration",
       "status": "ok",
-      "generated_at": "2026-09-10T06:33:40.155826+09:00",
+      "generated_at": "2026-09-10T20:33:29.988133+09:00",
       "summary": {
         "us_latest_date": "2026-09-09",
+        "korea_latest_date": "2026-09-10",
         "status": "ok"
       }
     },
