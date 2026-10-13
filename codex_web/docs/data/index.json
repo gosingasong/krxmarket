@@ -1,8 +1,37 @@
 {
   "schema_version": 1,
-  "generated_at": "2026-10-13T11:33:44.077131+00:00",
-  "latest_date": "2026-10-13",
+  "generated_at": "2026-10-13T21:34:25.557611+00:00",
+  "latest_date": "2026-10-14",
   "dates": [
+    {
+      "date": "2026-10-14",
+      "manifest": "2026-10-14/manifest.json",
+      "reports": {
+        "sector_concentration": {
+          "file": "sector_concentration.json",
+          "report": "sector_concentration",
+          "status": "ok",
+          "generated_at": "2026-10-14T06:34:25.552852+09:00",
+          "summary": {
+            "us_latest_date": "2026-10-13",
+            "status": "ok"
+          }
+        },
+        "us_market": {
+          "file": "us_market.json",
+          "report": "us_market",
+          "status": "ok",
+          "generated_at": "2026-10-14T06:30:59.434546+09:00",
+          "summary": {
+            "fixed_count": 10,
+            "top_traded_value_count": 11,
+            "target_session_date": "2026-10-13",
+            "market_date": "2026-10-13",
+            "status": "ok"
+          }
+        }
+      }
+    },
     {
       "date": "2026-10-13",
       "manifest": "2026-10-13/manifest.json",
@@ -1344,36 +1373,6 @@
             "top_traded_value_count": 11,
             "target_session_date": "2026-08-14",
             "market_date": "2026-08-14",
-            "status": "ok"
-          }
-        }
-      }
-    },
-    {
-      "date": "2026-08-14",
-      "manifest": "2026-08-14/manifest.json",
-      "reports": {
-        "sector_concentration": {
-          "file": "sector_concentration.json",
-          "report": "sector_concentration",
-          "status": "ok",
-          "generated_at": "2026-08-14T20:32:34.434100+09:00",
-          "summary": {
-            "us_latest_date": "2026-08-13",
-            "korea_latest_date": "2026-08-14",
-            "status": "ok"
-          }
-        },
-        "us_market": {
-          "file": "us_market.json",
-          "report": "us_market",
-          "status": "ok",
-          "generated_at": "2026-08-14T06:31:09.055000+09:00",
-          "summary": {
-            "fixed_count": 10,
-            "top_traded_value_count": 11,
-            "target_session_date": "2026-08-13",
-            "market_date": "2026-08-13",
             "status": "ok"
           }
         }
