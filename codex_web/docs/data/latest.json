@@ -1,15 +1,14 @@
 {
-  "date": "2026-10-15",
-  "manifest": "2026-10-15/manifest.json",
+  "date": "2026-10-16",
+  "manifest": "2026-10-16/manifest.json",
   "reports": {
     "sector_concentration": {
       "file": "sector_concentration.json",
       "report": "sector_concentration",
       "status": "ok",
-      "generated_at": "2026-10-15T20:33:50.754741+09:00",
+      "generated_at": "2026-10-16T06:34:25.496668+09:00",
       "summary": {
-        "us_latest_date": "2026-10-14",
-        "korea_latest_date": "2026-10-15",
+        "us_latest_date": "2026-10-15",
         "status": "ok"
       }
     },
@@ -17,12 +16,12 @@
       "file": "us_market.json",
       "report": "us_market",
       "status": "ok",
-      "generated_at": "2026-10-15T06:30:25.448932+09:00",
+      "generated_at": "2026-10-16T06:30:51.217739+09:00",
       "summary": {
         "fixed_count": 10,
         "top_traded_value_count": 11,
-        "target_session_date": "2026-10-14",
-        "market_date": "2026-10-14",
+        "target_session_date": "2026-10-15",
+        "market_date": "2026-10-15",
         "status": "ok"
       }
     }
