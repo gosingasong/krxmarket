@@ -1,0 +1,30 @@
+{
+  "schema_version": 1,
+  "date": "2026-10-31",
+  "generated_at": "2026-10-30T21:36:15.105829+00:00",
+  "reports": {
+    "sector_concentration": {
+      "file": "sector_concentration.json",
+      "report": "sector_concentration",
+      "status": "ok",
+      "generated_at": "2026-10-31T06:36:15.104007+09:00",
+      "summary": {
+        "us_latest_date": "2026-10-30",
+        "status": "ok"
+      }
+    },
+    "us_market": {
+      "file": "us_market.json",
+      "report": "us_market",
+      "status": "ok",
+      "generated_at": "2026-10-31T06:31:23.353991+09:00",
+      "summary": {
+        "fixed_count": 10,
+        "top_traded_value_count": 10,
+        "target_session_date": "2026-10-30",
+        "market_date": "2026-10-30",
+        "status": "ok"
+      }
+    }
+  }
+}
