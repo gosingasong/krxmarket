@@ -6,9 +6,10 @@
       "file": "sector_concentration.json",
       "report": "sector_concentration",
       "status": "ok",
-      "generated_at": "2026-10-30T06:34:25.815391+09:00",
+      "generated_at": "2026-10-30T20:35:30.697173+09:00",
       "summary": {
         "us_latest_date": "2026-10-29",
+        "korea_latest_date": "2026-10-30",
         "status": "ok"
       }
     },
