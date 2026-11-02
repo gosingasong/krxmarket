@@ -1,8 +1,24 @@
 {
   "schema_version": 1,
-  "generated_at": "2026-10-30T21:36:15.110990+00:00",
-  "latest_date": "2026-10-31",
+  "generated_at": "2026-11-02T11:37:12.195175+00:00",
+  "latest_date": "2026-11-02",
   "dates": [
+    {
+      "date": "2026-11-02",
+      "manifest": "2026-11-02/manifest.json",
+      "reports": {
+        "sector_concentration": {
+          "file": "sector_concentration.json",
+          "report": "sector_concentration",
+          "status": "ok",
+          "generated_at": "2026-11-02T20:37:12.180297+09:00",
+          "summary": {
+            "korea_latest_date": "2026-11-02",
+            "status": "ok"
+          }
+        }
+      }
+    },
     {
       "date": "2026-10-31",
       "manifest": "2026-10-31/manifest.json",
