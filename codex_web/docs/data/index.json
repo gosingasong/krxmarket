@@ -1,8 +1,37 @@
 {
   "schema_version": 1,
-  "generated_at": "2026-11-09T11:34:08.268462+00:00",
-  "latest_date": "2026-11-09",
+  "generated_at": "2026-11-09T21:34:24.506895+00:00",
+  "latest_date": "2026-11-10",
   "dates": [
+    {
+      "date": "2026-11-10",
+      "manifest": "2026-11-10/manifest.json",
+      "reports": {
+        "sector_concentration": {
+          "file": "sector_concentration.json",
+          "report": "sector_concentration",
+          "status": "ok",
+          "generated_at": "2026-11-10T06:34:24.501958+09:00",
+          "summary": {
+            "us_latest_date": "2026-11-09",
+            "status": "ok"
+          }
+        },
+        "us_market": {
+          "file": "us_market.json",
+          "report": "us_market",
+          "status": "ok",
+          "generated_at": "2026-11-10T06:30:39.326302+09:00",
+          "summary": {
+            "fixed_count": 10,
+            "top_traded_value_count": 10,
+            "target_session_date": "2026-11-09",
+            "market_date": "2026-11-09",
+            "status": "ok"
+          }
+        }
+      }
+    },
     {
       "date": "2026-11-09",
       "manifest": "2026-11-09/manifest.json",
@@ -1374,82 +1403,6 @@
             "top_traded_value_count": 11,
             "target_session_date": "2026-09-10",
             "market_date": "2026-09-10",
-            "status": "ok"
-          }
-        }
-      }
-    },
-    {
-      "date": "2026-09-10",
-      "manifest": "2026-09-10/manifest.json",
-      "reports": {
-        "sector_concentration": {
-          "file": "sector_concentration.json",
-          "report": "sector_concentration",
-          "status": "ok",
-          "generated_at": "2026-09-10T20:33:29.988133+09:00",
-          "summary": {
-            "us_latest_date": "2026-09-09",
-            "korea_latest_date": "2026-09-10",
-            "status": "ok"
-          }
-        },
-        "us_market": {
-          "file": "us_market.json",
-          "report": "us_market",
-          "status": "ok",
-          "generated_at": "2026-09-10T06:30:52.846176+09:00",
-          "summary": {
-            "fixed_count": 10,
-            "top_traded_value_count": 11,
-            "target_session_date": "2026-09-09",
-            "market_date": "2026-09-09",
-            "status": "ok"
-          }
-        }
-      }
-    },
-    {
-      "date": "2026-09-09",
-      "manifest": "2026-09-09/manifest.json",
-      "reports": {
-        "sector_concentration": {
-          "file": "sector_concentration.json",
-          "report": "sector_concentration",
-          "status": "ok",
-          "generated_at": "2026-09-09T20:33:00.393068+09:00",
-          "summary": {
-            "us_latest_date": "2026-09-08",
-            "korea_latest_date": "2026-09-09",
-            "status": "ok"
-          }
-        },
-        "us_market": {
-          "file": "us_market.json",
-          "report": "us_market",
-          "status": "ok",
-          "generated_at": "2026-09-09T06:30:24.772146+09:00",
-          "summary": {
-            "fixed_count": 10,
-            "top_traded_value_count": 11,
-            "target_session_date": "2026-09-08",
-            "market_date": "2026-09-08",
-            "status": "ok"
-          }
-        }
-      }
-    },
-    {
-      "date": "2026-09-08",
-      "manifest": "2026-09-08/manifest.json",
-      "reports": {
-        "sector_concentration": {
-          "file": "sector_concentration.json",
-          "report": "sector_concentration",
-          "status": "ok",
-          "generated_at": "2026-09-08T20:33:30.473939+09:00",
-          "summary": {
-            "korea_latest_date": "2026-09-08",
             "status": "ok"
           }
         }
