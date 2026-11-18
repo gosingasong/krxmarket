@@ -2,8 +2,8 @@
   "schema_version": 1,
   "report": "sector_concentration",
   "status": "ok",
-  "date": "2026-09-19",
-  "generated_at": "2026-09-19T06:33:50.845417+09:00",
+  "date": "2026-11-19",
+  "generated_at": "2026-11-19T06:34:34.243885+09:00",
   "source": {
     "module": "sector_concentration",
     "workbooks": "~/JS/sector-concentration"
@@ -11,11 +11,11 @@
   "data": {
     "us": {
       "image": "sector_concentration_us.png",
-      "latest_date": "2026-09-18",
-      "generated_at": "2026-09-19T06:33:50.845417+09:00"
+      "latest_date": "2026-11-18",
+      "generated_at": "2026-11-19T06:34:34.243885+09:00"
     }
   },
   "summary": {
-    "us_latest_date": "2026-09-18"
+    "us_latest_date": "2026-11-18"
   }
 }
